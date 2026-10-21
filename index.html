@@ -114,6 +114,8 @@ button.wide{width:100%;margin-top:22px;padding:11px}
 .shopcat:first-of-type{margin-top:0}
 .item{border:1px solid var(--line);background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .item.owned{border-color:#33402c}
+.item.equipped{border:2px solid var(--acc);padding:11px 13px;background:rgba(232,163,61,.08);box-shadow:0 0 0 1px rgba(232,163,61,.25),0 0 18px rgba(232,163,61,.18)}
+.item .eqtag{margin-left:8px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#14110c;background:var(--acc);padding:2px 6px;vertical-align:2px}
 .item .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .item .nm{font-weight:700}
 .item .pr{font-family:'JetBrains Mono',monospace;color:var(--acc);font-weight:700;white-space:nowrap}
@@ -303,7 +305,7 @@ button.wide{width:100%;margin-top:22px;padding:11px}
         <b>R</b><span>재장전</span><b>1 / 2 / Q</b><span>주 무기 / 보조 권총 전환</span>
         <b>Shift</b><span>달리기</span><b>Space</b><span>점프</span>
         <b>C (누르고 있기)</b><span>앉기 · 낮은 엄폐물 뒤에 숨기, 탄퍼짐 감소</span>
-        <b>E</b><span>부품 회수 · 탄약 보급 · 탈출</span><b>F / V</b><span>스킬 1 / 2 (상점에서 구매 · 장착)</span>
+        <b>E</b><span>탄약 보급 · 탈출 (부품은 밟으면 자동 회수)</span><b>F / V</b><span>스킬 1 / 2 (상점에서 구매 · 장착)</span>
         <b>G / T</b><span>투척물 던지기 / 종류 전환</span><b>H</b><span>응급 키트 · 회복 주사기</span><b>Esc</b><span>일시정지</span>
       </div>
       <div class="sens"><span>마우스 감도</span><input type="range" id="sens" min="0.3" max="2.5" step="0.05"><span class="mono" id="sensv"></span></div>
@@ -1915,7 +1917,7 @@ function updateEnemy(e, dt) {
   const lf = legFactor(e);
   // 기절 (센서 무력화 직후)
   if (e.stunT > 0) {
-    e.stunT -= dt; e.glow.material.opacity = 0;
+    e.stunT -= dt; e.glow.material.opacity = 0; if (e.laser) { e.laser.visible = false; e.aimT = 0; e.beeped = false; }
     if (e.empT > 0) { e.empT -= dt; if (Math.random() < 0.25) { e.parts.core.meshes[0].getWorldPosition(_v1); burstSparks(_v1, UPY, 2, 0x6ac8ff, 3); } }
     e.body.rotation.z = Math.sin(time * 28) * 0.05; e.body.rotation.x = -e.hitKick;
     animateLegs(e, 0, dt); return;
@@ -3256,15 +3258,29 @@ function spiderShell(e) {
   missiles.push({ mesh, marker, from, to, t: 0, T: 1.4 + from.distanceTo(to) / 40, h: 9 + from.distanceTo(to) * 0.15 });
   spawnFlash(from, 1, 0.08, 0xffb060); SFX.missile();
 }
+function spiderLandingPoint(e, target) {
+  // 착지 지점: 맵 경계 안 · 벽/기둥과 겹치지 않는 곳까지 출발점 쪽으로 당김. 경로가 막히면 도약 취소
+  const from = e.root.position, R = e.cfg.radius + 0.3;
+  const lim = (v, m) => clamp(v, -m + 3, m - 3);
+  const t = V3(lim(target.x, MAPB.x), 0, lim(target.z, MAPB.z));
+  const dir = t.clone().sub(from); dir.y = 0; const L = dir.length(); if (L < 1) return null; dir.divideScalar(L);
+  const free = (x, z) => !boxes.some(b => b.maxY > 1.2 && hitsBoxXZ(b, x, z, R));
+  for (let d = L - 1.5; d >= 6; d -= 0.5) {
+    const x = from.x + dir.x * d, z = from.z + dir.z * d;
+    if (!free(x, z)) continue;
+    _v1.set(from.x, 3, from.z); _v2.set(x, 3, z); if (segBlocked(_v1, _v2)) return null;
+    _v1.y = _v2.y = 1.6; if (segBlocked(_v1, _v2)) return null;
+    return V3(x, 0, z);
+  }
+  return null;
+}
 function spiderNext(e, dist, los) {
   const B = e.bs, legsOk = B.broken < 5;
   if (dist < 6.5 && B.cd.stomp <= 0) { B.state = 'stomp_wind'; B.t = B.phase2 ? 0.65 : 0.8; return; }
   if (legsOk && B.cd.lunge <= 0 && dist > 10 && dist < 28 && los) {
-    B.state = 'lunge_wind'; B.t = B.phase2 ? 0.75 : 0.95;
-    B.from = e.root.position.clone();
-    const tgt = V3(player.pos.x + player.vel.x * 0.3, 0, player.pos.z + player.vel.z * 0.3), dir = tgt.clone().sub(B.from); const L = dir.length();
-    B.to = B.from.clone().addScaledVector(dir, Math.max(0, (L - 1.5) / L));
-    return;
+    const land = spiderLandingPoint(e, V3(player.pos.x + player.vel.x * 0.3, 0, player.pos.z + player.vel.z * 0.3));
+    if (land) { B.state = 'lunge_wind'; B.t = B.phase2 ? 0.75 : 0.95; B.from = e.root.position.clone(); B.to = land; return; }
+    B.cd.lunge = 1.5;
   }
   if (spiderWorking(e, 'turret') && B.cd.mortar <= 0 && dist > 7) { B.state = 'mortar_wind'; B.t = 0.8; return; }
   B.state = 'walk'; B.t = rand(1.2, 2.2);
@@ -3311,7 +3327,7 @@ function updateSpider(e, dt) {
     case 'lunge_wind': {
       Htarget = 1.6; move = 0; targetYaw = Math.atan2(B.to.x - pos.x, B.to.z - pos.z); turn = 4;
       mk2.position.set(B.to.x, 0.05, B.to.z); mk2.scale.setScalar(1.5); mk2.material.opacity = 0.4 + 0.4 * Math.sin(time * 30);
-      if (B.t <= 0) { B.state = 'lunge'; B.lt = 0; B.T = 0.55 + B.from.distanceTo(B.to) / 40; SFX.spider(); }
+      if (B.t <= 0) { B.state = 'lunge'; B.lt = 0; B.from = pos.clone(); B.T = 0.55 + B.from.distanceTo(B.to) / 40; SFX.spider(); }
       break;
     }
     case 'lunge': {
@@ -3748,6 +3764,13 @@ function createLoot(p) {
   loots.push({ p, obj: p.group, ring, beam, x: c.x, y: ly, z: c.z, cond, state: p.state, r: pr, rs: pr / 2.3,
     name: `${p.enemy.cfg.name} ${p.name}`, base: Math.round(p.val * run.mission.partMult), val: partValue(p, cond) });
 }
+// 자동 회수: 전리품 위를 지나가기만 하면 줍는다
+function autoPickup() {
+  for (let i = loots.length - 1; i >= 0; i--) {
+    const l = loots[i];
+    if (Math.hypot(l.x - player.pos.x, l.z - player.pos.z) <= l.r && Math.abs(l.y - player.pos.y) <= 1.6) pickup(l);
+  }
+}
 function nearestLoot() {
   let best = null, bs = -1e9;
   const fwd = camera.getWorldDirection(_v1); fwd.y = 0; fwd.normalize();
@@ -3881,7 +3904,7 @@ function updatePlayer(dt) {
     else if (!firedThisPress && fireCd <= 0) { if (tryFire() || curWeapon().mag <= 0) firedThisPress = true; }
   }
   // 조기 탈출: 목표 미완료 시 E를 1.5초 누르고 있어야 함 (출발 지점에서의 실수 방지)
-  if (keys.KeyE && !run.objDone && inExtraction() && !nearestLoot() && !nearestCrate()) {
+  if (keys.KeyE && !run.objDone && inExtraction() && !nearestCrate()) {
     run.exHold = (run.exHold || 0) + dt;
     if (run.exHold >= 1.5) { run.exHold = 0; endMission('extract'); return; }
   } else run.exHold = 0;
@@ -4004,9 +4027,7 @@ function updateHUD(dt) {
   setText($('lootval'), fmt(lv * (1 + run.salvageBonus)) + ' CR'); setText($('lootcnt'), `(${run.loot.length}개)`);
   // 상호작용 안내
   const pr = $('prompt'); let msg = '';
-  const l = nearestLoot();
-  if (l) msg = `<b>[E]</b>회수 · ${l.name} · <span class="${l.state === 'intact' ? 'ok' : 'acc'}">${STATE_KO[l.state]} ${Math.round(l.cond * 100)}%</span> · 예상 <span class="acc mono">${fmt(l.val * (1 + run.salvageBonus))} CR</span>`;
-  else if (nearestCrate()) msg = `<b>[E]</b>탄약 보급 · ${WEAPONS[run.ws[0].id].name}`;
+  if (nearestCrate()) msg = `<b>[E]</b>탄약 보급 · ${WEAPONS[run.ws[0].id].name}`;
   else if (inExtraction()) {
     if (run.objDone) msg = `<b>[E]</b>탈출 및 정산`;
     else if (run.exHold > 0) msg = `<b>[E]</b><span class="bad">조기 탈출 중 ${Math.round(run.exHold / 1.5 * 100)}% · 계약 보상 미지급</span>`;
@@ -4245,7 +4266,8 @@ function renderHub() {
           (need > 1 ? `<button data-fill="${it.id}" ${save.credits >= fillCost ? '' : 'disabled'}>가득 채우기 ${fmt(fillCost)}</button>` : '');
     }
     const ownedCls = (it.kind === 'cons' || it.kind === 'mod') ? '' : (owned ? 'owned' : '');
-    return `<div class="item ${ownedCls}"><div class="hd"><span class="nm">${name}</span><span class="pr">${priceTxt}</span></div>
+    const eqCls = it.kind === 'weapon' && save.equipped === it.id ? ' equipped' : '';
+    return `<div class="item ${ownedCls}${eqCls}"><div class="hd"><span class="nm">${name}${eqCls ? '<span class="eqtag">장착 중</span>' : ''}</span><span class="pr">${priceTxt}</span></div>
       <div class="ds">${d.desc}</div>${cmp ? `<div class="cmp">${cmp}</div>` : ''}<div class="act">${act}</div></div>`;
   };
   const tabs = SHOP_CATS.map(c => `<button class="tab ${c === shopTab ? 'sel' : ''}" data-tab="${c}">${c} <span class="dim mono">${SHOP.filter(x => x.cat === c).length}</span></button>`).join('');
@@ -4300,7 +4322,7 @@ function renderHub() {
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>설정 · 조작법</h2></header><div class="body">
       <div class="sens" style="margin-top:0"><span>마우스 감도</span><input type="range" id="hsens" min="0.3" max="2.5" step="0.05" value="${save.sens}"><span class="mono" id="hsensv">${(+save.sens).toFixed(2)}</span></div>
       <div class="keys" style="margin-top:16px"><b>WASD</b><span>이동 (Shift 달리기 · Space 점프 · C 앉기)</span><b>마우스</b><span>좌클릭 사격 · 우클릭 정조준</span>
-        <b>R</b><span>재장전</span><b>1 2 Q</b><span>무기 전환</span><b>E</b><span>회수 · 보급 · 탈출</span>
+        <b>R</b><span>재장전</span><b>1 2 Q</b><span>무기 전환</span><b>E</b><span>보급 · 탈출 (부품 자동 회수)</span>
         <b>F / V</b><span>스킬</span><b>G / T</b><span>투척 / 종류 전환</span><b>H</b><span>응급 키트 · 주사기</span><b>Esc</b><span>일시정지</span></div>
       <div class="dim" style="font-size:12.5px;margin-top:16px;line-height:1.6">무장을 무력화하면 분리되어 온전히 회수됩니다. 무력화된 부품을 더 쏘면 파괴되어 팔 수 없습니다.</div>
       </div><div class="foot"><button class="danger" id="reset">저장 데이터 초기화</button><button class="primary" data-close>닫기</button></div></div></div>`;
@@ -4358,6 +4380,7 @@ function update(dt) {
   if (state === 'hub') updateHub3D(dt);
   if (active()) {
     updatePlayer(dt);
+    if (state === 'mission' && player.hp > 0) autoPickup();
     if (state === 'mission') achTick(dt);
     // 전진 권한: 경계 중이고 무장한 적 가운데 가장 가까운 2기만 플레이어 쪽으로 밀고 들어옴
     const cand = enemies.filter(e => !e.dead && !e.boss && e.alert && e.canShoot);
