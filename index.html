@@ -73,6 +73,14 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .opr{text-align:right;color:var(--acc);font-size:13px}
 .opd{padding:10px 12px 14px 76px;font-size:13px;line-height:1.6;color:#cfc9be;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(232,163,61,.05)}
 .opd .dim{font-size:12px;margin-top:4px}
+.hardtag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#c8463a;padding:1px 5px;margin-left:6px;vertical-align:2px}
+.diffsel{display:flex;gap:6px;margin-top:18px}
+.diffsel button{flex:1;padding:9px 10px;font-size:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#cfc9be}
+.diffsel button span{font-size:11px;opacity:.7;margin-left:4px}
+.diffsel button.sel{border-color:var(--acc);color:#efe9de;background:rgba(232,163,61,.12)}
+.diffsel button.hard.sel{border-color:#e05a47;background:rgba(224,90,71,.14);color:#ffb3a6}
+.diffsel button:disabled{opacity:.35;cursor:not-allowed}
+.deploy.hard{background:#c8463a;color:#fff}
 .deploy{width:100%;margin-top:22px;padding:16px;font-size:18px;letter-spacing:.3em;display:flex;justify-content:space-between;align-items:center}
 .deploy span{font-size:11px;letter-spacing:.1em;opacity:.6}
 .target{position:absolute;right:clamp(16px,4vw,56px);top:clamp(24px,7vh,72px);text-align:right;animation:hin .6s ease-out both}
@@ -576,7 +584,7 @@ const MISSIONS = {
 // =====================================================================
 const SAVE_KEY = 'margin_save_v1';
 function defaultSave() {
-  return { credits: 2000, weapons: { pistol: true }, utils: {}, mods: { dmg: 0, recoil: 0, reload: 0, mag: 0, move: 0 }, skills: {}, slots: ['', ''], inv: { emp: 0, frag: 0, stim: 0, ammo: 0 }, grenadeSel: 'emp', ach: { done: {}, c: {} }, equipped: 'pistol', armor: 0, salvage: 0,
+  return { credits: 2000, weapons: { pistol: true }, utils: {}, mods: { dmg: 0, recoil: 0, reload: 0, mag: 0, move: 0 }, skills: {}, slots: ['', ''], inv: { emp: 0, frag: 0, stim: 0, ammo: 0 }, grenadeSel: 'emp', hardSel: false, ach: { done: {}, c: {} }, equipped: 'pistol', armor: 0, salvage: 0,
     unlocked: { A: true, B: true, C: true, D: true, E: true, F: true }, kills: 0, records: {}, deaths: 0, totalEarned: 0, sens: 1,
     stats: { A: { runs: 0, clears: 0, best: 0 }, B: { runs: 0, clears: 0, best: 0 }, C: { runs: 0, clears: 0, best: 0 }, D: { runs: 0, clears: 0, best: 0 }, E: { runs: 0, clears: 0, best: 0 }, F: { runs: 0, clears: 0, best: 0 } } };
 }
@@ -1320,13 +1328,16 @@ function spawnEnemy(type, x, z, yaw, opts = {}) {
   return e;
 }
 
-function startMission(id) {
+function startMission(id, hardOverride) {
   const ms = MISSIONS[id];
   if (!ms || !save.unlocked[id]) return;
   initAudio();
   clearWorld();
   const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry })[id]();
   MAPB = spawn.bounds || { x: 30, z: 30 };
+  HARD = hardOverride !== undefined ? !!hardOverride : (!!save.hardSel && hardUnlocked(id));
+  if (HARD && !ms.boss) hardExtras(id);
+  for (const e of enemies) applyHard(e);
   if (coopOn()) for (const e of enemies) if (e.boss) for (const p of Object.values(e.parts)) { p.maxHp *= 1.6; p.hp = p.maxHp; p.brkMax *= 1.6; p.brk = p.brkMax; }
   const arm = ARMORS[save.armor];
   player.pos.copy(spawn.spawn); player.vel.set(0, 0, 0); player.vy = 0; player.onGround = true;
@@ -1339,7 +1350,7 @@ function startMission(id) {
   run = { mission: ms, wst, ws: ids.map(w => ({ id: w, mag: wst[w].mag, reserve: maxReserve(w) })), cur: 0, medkits: save.utils.medkit ? 2 : 0,
     skillCd: [0, 0], shield: 0, shieldT: 0, nanoT: 0, ocT: 0, focusT: 0, dashT: 0, iframeT: 0, burstLeft: 0, burstT: 0, throwCd: 0,
     reloadT: 0, switchT: 0, loot: [], kills: 0, killReward: 0, killsByType: {}, total: enemies.length, objDone: false,
-    coop: coopOn(), shots: 0, hitsN: 0, shotsHit: 0, startT: time, used: {}, bossKillT: 0, salvageBonus: SALVAGES[save.salvage].bonus, boss: enemies.find(e => e.boss) || null };
+    hard: HARD, coop: coopOn(), shots: 0, hitsN: 0, shotsHit: 0, startT: time, used: {}, bossKillT: 0, salvageBonus: SALVAGES[save.salvage].bonus, boss: enemies.find(e => e.boss) || null };
   ads = 0; fireCd = 0; bloom = 0; recoil.cur = recoil.target = 0; vigT = 0; earlyConfirmT = 0; dmgLog = {};
   if (coopOn()) {
     const off = NET.role === 'guest' ? 1.6 : -1.6;
@@ -1351,7 +1362,7 @@ function startMission(id) {
   save.stats[id].runs++; writeSave();
   state = 'mission';
   $('hub').classList.add('hidden'); $('result').classList.add('hidden'); $('hud').classList.remove('hidden');
-  setText($('objcode'), ms.code); setText($('objname'), ms.name); setText($('armorname'), arm.name);
+  setText($('objcode'), ms.code + (HARD ? ' · 하드' : '')); $('objcode').classList.toggle('bad', HARD); setText($('objname'), ms.name); setText($('armorname'), arm.name);
   addFeed(ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : ms.relays ? '작전 개시 · 중계탑 3기를 무력화하고 탈출 지점으로 귀환' : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');
   if (!TEST) { showPause(true); lockPointer(); }
 }
@@ -1724,7 +1735,7 @@ function conditionOf(p) {
   const tot = p.maxHp + p.brkMax; const lost = (p.maxHp - p.hp) + (p.brkMax - p.brk);
   return clamp(1 - lost / tot, 0, 1);
 }
-function partValue(p, cond) { return Math.round(p.val * run.mission.partMult * (0.3 + 0.7 * cond)); }
+function partValue(p, cond) { return Math.round(p.val * run.mission.partMult * (run.hard ? HARD_MUL.parts : 1) * (0.3 + 0.7 * cond)); }
 
 function hitPart(p, mesh, point, normal, w, fall = 1, pierce = false) {
   const e = p.enemy; if (e.dead || !p.attached) return null;
@@ -1911,6 +1922,8 @@ function updateProjectiles(dt) {
 
 function updateEnemy(e, dt) {
   if (e.dead) return;
+  if (!e.hardDone) applyHard(e);
+  if (HARD && e.boss && e.bs && e.bs.cd && !isGuest()) for (const k in e.bs.cd) e.bs.cd[k] -= dt * 0.25;
   if (isGuest()) { puppetUpdate(e, dt); return; }
   tg = pickTarget(e, dt);
   if (e.dragon) { updateDragon(e, dt); return; }
@@ -2175,7 +2188,7 @@ function bossNext(e, dist, yawErr) {
   const los = !segBlocked(_v1, _v2);
   if (dist < 6.5 * S && front && bossWorking(e, 'jaw')) { B.state = 'bite'; B.t = B.phase2 ? 0.55 : 0.7; return; }
   if (dist < 8.5 * S && !front && bossWorking(e, 'tail') && B.cd.tail <= 0) { B.state = 'tail'; B.t = 0.8; B.cd.tail = 4; B.spinDir = yawErr > 0 ? -1 : 1; return; }
-  if (canCharge && B.cd.charge <= 0 && dist > 9 * S && los) { B.state = 'charge_wind'; B.t = B.phase2 ? 0.85 : 1.15; B.cd.charge = B.phase2 ? 7 : 10; return; }
+  if (canCharge && B.cd.charge <= 0 && dist > 9 * S && los) { B.state = 'charge_wind'; B.t = B.phase2 ? 0.85 : 1.15; B.cd.charge = B.phase2 ? 7 : 10; B.secondCharge = false; return; }
   if (bossWorking(e, 'head') && B.cd.laser <= 0 && dist > 9 && dist < 55 && los) {
     B.state = 'laser_wind'; B.t = B.phase2 ? 0.8 : 1.1; B.cd.laser = B.phase2 ? 7 : 9; B.laserAcc = 0; return;
   }
@@ -2312,7 +2325,7 @@ function updateBoss(e, dt) {
       } else { pos.x = nx; pos.z = nz; }
       if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; hurtTg(38, pos, 'charge'); knockTg(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
       B.moveSpeed = 15;
-      if (B.state === 'charge' && B.t <= 0) { B.state = 'recover'; B.t = 0.9 * REC; }
+      if (B.state === 'charge' && B.t <= 0) { if (HARD && !B.secondCharge) { B.secondCharge = true; B.state = 'charge_wind'; B.t = 0.6; addFeed('REX-09 연속 돌진', 'k'); } else { B.state = 'recover'; B.t = 0.9 * REC; } }
       break;
     }
     case 'laser_wind': {
@@ -2678,7 +2691,7 @@ function updateDragon(e, dt) {
   if (e.alert && !B.started) { B.started = true; B.engageT = time; SFX.dragonRoar(); addFeed('청룡 기동 · 최종 목표 교전 개시', 'k'); }
   // 2페이즈
   const nodeHp = ['n1', 'n2', 'n3'].reduce((a, id) => a + (P[id].state === 'disabled' || P[id].state === 'destroyed' || !P[id].attached ? 0 : P[id].hp), 0);
-  if (!B.phase2 && B.started && (P.core.hp < P.core.maxHp * 0.55 || nodeHp < 3 * cfg.parts.n1.hp * 0.55)) {
+  if (!B.phase2 && B.started && (P.core.hp < P.core.maxHp * 0.55 || nodeHp < 3 * P.n1.maxHp * 0.55)) {
     B.phase2 = true; SFX.dragonRoar(); addFeed('청룡 폭주 · 비행 속도와 낙뢰 강화 · 정찰형 증원', 'k');
     for (const [x, z] of [[-34, -34], [34, -34]]) { const s2 = spawnEnemy('scout', x, z, 0); s2.pendingAlert = 0.8; s2.home.set(x * 0.5, 0, z * 0.5); }
   }
@@ -2709,7 +2722,7 @@ function updateDragon(e, dt) {
     if (s === 'breath') { B.state = 'breath_wind'; B.t = 1.0; }
     else if (s === 'storm') { B.state = 'storm_wind'; B.t = 0.9; }
     else if (s === 'barrage') { B.state = 'barrage_wind'; B.t = 0.9; B.volley = 0; SFX.shock(); }
-    else { B.state = 'dive_wind'; B.t = 1.3; }
+    else { B.state = 'dive_wind'; B.t = 1.3; B.secondDive = false; }
   };
   switch (B.state) {
     case 'cruise': {
@@ -2800,7 +2813,7 @@ function updateDragon(e, dt) {
     case 'climb':
       T = hp.clone().add(e.headDir.clone().setY(0).normalize().multiplyScalar(8)); T.y = 14; spd = 12; turn = 1.8;
       if (Math.hypot(T.x, T.z) > 28) T.multiplyScalar(0.7);
-      if (B.t <= 0) { B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.dive = B.phase2 ? 5 : 7; B.ang = Math.atan2(hp.z, hp.x) - 0.35; }
+      if (B.t <= 0) { if (HARD && !B.secondDive && B.started) { B.secondDive = true; B.state = 'dive_wind'; B.t = 0.9; addFeed('청룡 연속 강하', 'k'); } else { B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.dive = B.phase2 ? 5 : 7; B.ang = Math.atan2(hp.z, hp.x) - 0.35; } }
       break;
     case 'downed':
       T = hp.clone().add(e.headDir.clone().setY(0).normalize().multiplyScalar(5)); T.y = 1.1; spd = 5; turn = 0.6;
@@ -3284,11 +3297,11 @@ function spiderLegLost(e, p) {
     addFeed(B.broken >= 6 ? 'ARACHNE 완전 주저앉음 · 동력로 상시 노출' : 'ARACHNE 주저앉음 · 동력로 노출', 'x'); popup('주저앉음 · 동력로 노출', 'weak');
   }
 }
-function spiderShell(e) {
+function spiderShell(e, fixedTo) {
   const tu = e.parts.turret; tu.group.updateMatrixWorld(true);
   const from = e.tubes.getWorldPosition(V3()); from.y += 0.6;
   const sp = sensorMult(e) > 2 ? 6 : 1.8 + (e.bs.volley || 0) * 0.45;
-  const to = V3(tg.pos.x + tg.vel.x * 0.8 + rand(-sp, sp), tg.onGround ? tg.pos.y + 0.03 : 0.03, tg.pos.z + tg.vel.z * 0.8 + rand(-sp, sp));
+  const to = fixedTo || V3(tg.pos.x + tg.vel.x * 0.8 + rand(-sp, sp), tg.onGround ? tg.pos.y + 0.03 : 0.03, tg.pos.z + tg.vel.z * 0.8 + rand(-sp, sp));
   const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffb04a }));
   mesh.scale.set(0.2, 0.2, 0.32); mesh.position.copy(from); world.add(mesh);
   const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
@@ -3393,7 +3406,8 @@ function updateSpider(e, dt) {
     }
     case 'mortar': {
       move = B.broken >= 6 ? 0 : 1.2 * lf; B.fireT -= dt;
-      if (B.fireT <= 0 && B.shots > 0) { B.fireT = 0.26; B.shots--; B.volley++; spiderShell(e); }
+      if (B.fireT <= 0 && B.shots > 0) { B.fireT = 0.26; B.shots--; B.volley++; spiderShell(e);
+        if (HARD && B.volley === 1) { for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + Math.random(); spiderShell(e, V3(tg.pos.x + Math.cos(a) * 5, 0.03, tg.pos.z + Math.sin(a) * 5)); } addFeed('ARACHNE 포위 포격', 'k'); } }
       if (B.shots <= 0 && B.fireT <= 0) { e.tubes.rotation.x = 0; B.cd.mortar = B.phase2 ? 4 : 5.5; B.state = B.broken >= 6 ? 'collapse' : 'walk'; B.t = B.broken >= 6 ? Infinity : rand(0.8, 1.4); }
       break;
     }
@@ -3532,7 +3546,8 @@ function coopLost() {
 }
 function coopLaunch(m) {
   if (NET.role !== 'host' || NET.status !== 'connected' || !COOP_MISSIONS.includes(m)) return;
-  NET.inGame = true; coopSend({ t: 'start', m }); selectedMission = m; startMission(m);
+  const h = !!save.hardSel && hardUnlocked(m);
+  NET.inGame = true; coopSend({ t: 'start', m, h }); selectedMission = m; startMission(m, h);
 }
 
 // ---------------- 원격 플레이어 (모습 + 판정용 프록시) ----------------
@@ -3686,7 +3701,7 @@ function coopRecv(m) {
   switch (m.t) {
     case 'hello': NET.partner = m.b; if (m.b !== COOP_BUILD) NET.err = '두 사람의 게임 버전이 다릅니다. 둘 다 새로고침해 주세요.'; if (state === 'hub') renderHub(); break;
     case 'bye': coopLost(); break;
-    case 'start': if (NET.role === 'guest') { NET.inGame = true; selectedMission = m.m; if (state === 'mission') { run = null; } startMission(m.m); } break;
+    case 'start': if (NET.role === 'guest') { NET.inGame = true; selectedMission = m.m; if (state === 'mission') { run = null; } startMission(m.m, !!m.h); } break;
     case 'snap': if (isGuest() && state === 'mission') coopApplySnap(m); break;
     case 'in': if (isHost() && state === 'mission') coopApplyInput(m); break;
   }
@@ -3973,7 +3988,7 @@ function coopModalHtml() {
       <div class="dim" style="font-size:13px;line-height:1.6">친구가 같은 주소에서 <b>협동 → 참가하기</b>에 이 코드를 입력하면 연결됩니다.</div><div style="margin-top:16px"><button id="coleave">방 닫기</button></div>`;
   else if (st === 'connected') body = NET.role === 'host'
     ? `<div class="ok" style="font-size:15px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">작전을 고르면 둘이 함께 들어갑니다. 협동에서는 보스의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
-       <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">${COOP_MISSIONS.map(m => `<button class="primary" data-colaunch="${m}">협동 출격 · ${MISSIONS[m].code} ${MISSIONS[m].name}</button>`).join('')}</div>
+       <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">${COOP_MISSIONS.map(m => `<button class="primary" data-colaunch="${m}">협동 출격 · ${MISSIONS[m].code} ${MISSIONS[m].name}${save.hardSel && hardUnlocked(m) ? ' · 하드' : ''}</button>`).join('')}</div>
        <div style="margin-top:12px"><button id="coleave">연결 끊기</button></div>`
     : `<div class="ok" style="font-size:15px">방 <span class="mono">${NET.code}</span> 접속됨</div><div class="dim" style="font-size:13px;margin-top:8px">방장이 출격하면 자동으로 함께 작전에 들어갑니다. 그동안 상점에서 장비를 정비해도 됩니다.</div><div style="margin-top:16px"><button id="coleave">나가기</button></div>`;
   return `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>협동</h2><span class="lbl">2인 · 보스 작전</span></header><div class="body">${body}${err}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
@@ -3985,6 +4000,26 @@ function coopBindModal(H) {
   if (b('cocode')) b('cocode').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); coopJoin(e.target.value); } };
   if (b('coleave')) b('coleave').onclick = () => { coopLeave(); NET.err = ''; renderHub(); };
   H.querySelectorAll('[data-colaunch]').forEach(x => x.onclick = () => coopLaunch(x.dataset.colaunch));
+}
+// =====================================================================
+//  하드 모드
+// =====================================================================
+let HARD = false;
+const HARD_MUL = { hp: 1.4, dmg: 1.3, contract: 2, parts: 1.5, kill: 1.5 };
+function hardUnlocked(id) { return !!(save.stats[id] && save.stats[id].clears > 0); }
+function applyHard(e) {
+  e.hardDone = true;
+  if (!HARD) return;
+  for (const p of Object.values(e.parts)) { p.maxHp *= HARD_MUL.hp; p.hp *= HARD_MUL.hp; p.brkMax *= HARD_MUL.hp; p.brk *= HARD_MUL.hp; }
+  const c = e.cfg;
+  e.cfg = Object.assign({}, c, { killReward: Math.round(c.killReward * HARD_MUL.kill),
+    cooldown: c.cooldown ? c.cooldown * 0.75 : c.cooldown, spread: c.spread ? c.spread * 0.7 : c.spread, reaction: c.reaction ? c.reaction * 0.6 : c.reaction,
+    detect: c.detect ? c.detect * 1.2 : c.detect, speed: c.speed ? c.speed * 1.1 : c.speed, aimTime: c.aimTime ? c.aimTime * 0.8 : c.aimTime });
+}
+function hardExtras(id) {
+  if (id === 'A') { spawnEnemy('combat', -6, -18, 0.2); spawnEnemy('combat', 20, 0, -0.8); spawnDrone(-14, -14, 4.6); }
+  else if (id === 'B') { spawnEnemy('heavy', 0, -18, 0, { guard: true }); spawnDrone(16, -14, 3.8); spawnEnemy('combat', -26, 2, 0.5); }
+  else if (id === 'E') { spawnEnemy('combat', -20, 4, 0.3, { guard: true }); spawnEnemy('heavy', 20, 6, -0.3, { guard: true }); spawnDrone(0, -6, 4.6); for (const e of enemies) if (e.relay) e.spawnLeft = 6; }
 }
 // =====================================================================
 //  업적
@@ -4027,6 +4062,11 @@ const ACH = [
   { id: 'drone30', cat: '전투', name: '대공 사격', desc: '드론형을 30기 격추한다.', cr: 300, prog: () => [save.ach.c.drones || 0, 30] },
   { id: 'counterSnipe', cat: '전투', name: '역저격', desc: '조준선을 겨누고 있는 저격형의 센서를 부숴 저격을 끊는다.', cr: 250 },
   { id: 'relayFast', cat: '전투', name: '정전 사고', desc: '변전소에서 출격 90초 안에 중계탑 3기를 모두 무력화한다.', cr: 400 },
+  { id: 'hardFirst', cat: '보스', name: '지옥의 문턱', desc: '하드 모드 작전을 처음으로 완수한다.', cr: 500 },
+  { id: 'hardRex', cat: '보스', name: '멸종 3회차', desc: '하드 모드로 REX-09를 격파한다.', cr: 1500 },
+  { id: 'hardSpider', cat: '보스', name: '독거미 사냥꾼', desc: '하드 모드로 ARACHNE를 격파한다.', cr: 1800 },
+  { id: 'hardDragon', cat: '보스', name: '용의 비늘을 벗기다', desc: '하드 모드로 청룡을 격파한다.', cr: 2400 },
+  { id: 'hardAll', cat: '보스', name: '모든 작전 · 하드', desc: '여섯 작전을 모두 하드 모드로 완수한다.', cr: 4000, prog: () => [Object.values(MISSIONS).filter(m => save.stats[m.id] && save.stats[m.id].hard).length, Object.keys(MISSIONS).length] },
   { id: 'shop30', cat: '성장', name: '쇼핑 중독', desc: '상점에서 30번 구매한다.', cr: 250, prog: () => [save.ach.c.buys || 0, 30] },
   { id: 'allguns', cat: '성장', name: '무기고', desc: '모든 무기를 보유한다.', cr: 900, prog: () => [Object.keys(WEAPONS).filter(k => save.weapons[k]).length, Object.keys(WEAPONS).length] },
   { id: 'maxmods', cat: '성장', name: '풀 개조', desc: '무기 개조를 모든 단계까지 마친다.', cr: 900, prog: () => [Object.values(MODS).reduce((a, m) => a + save.mods[m.id], 0), Object.values(MODS).reduce((a, m) => a + m.prices.length, 0)] },
@@ -4051,6 +4091,7 @@ const ACH = [
   { id: 'dodge', cat: '기상천외', hidden: true, hint: '종이 한 장.', name: '종이 한 장 차이', desc: '대시 무적 시간으로 보스의 공격을 흘려 낸다.', cr: 200 },
   { id: 'crushed', cat: '기상천외', hidden: true, hint: '하늘에서 무언가 떨어진다.', name: '추락 주의', desc: '격추한 드론의 잔해에 깔린다.', cr: 150 },
   { id: 'underSpider', cat: '기상천외', hidden: true, hint: '가장 안전한 곳은 어디일까.', name: '등잔 밑', desc: 'ARACHNE의 몸 아래에서 10초 동안 버틴다.', cr: 250 },
+  { id: 'hardPistol', cat: '기상천외', hidden: true, hint: '하드 모드에서도 그 권총을?', name: '광기의 사수', desc: '하드 모드 보스를 혼자서 기본 권총만으로 격파한다.', cr: 3000 },
   { id: 'tank300', cat: '기상천외', hidden: true, hint: '아프지만 괜찮아.', name: '인간 방패', desc: '한 임무에서 피해를 300 이상 받고도 살아서 탈출한다.', cr: 250 },
 ];
 const ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -4152,6 +4193,8 @@ function achEvent(type, d = {}) {
         if (!multi && run.shots >= 20 && run.shotsHit >= run.shots) achUnlock('acc100');
         if (run.shots >= 300 && run.shotsHit / run.shots <= 0.05) achUnlock('miss95');
         if (A.dmg >= 300) achUnlock('tank300');
+        if (run.objDone && run.hard) { achUnlock('hardFirst'); if (run.mission.boss) achUnlock({ C: 'hardRex', F: 'hardSpider', D: 'hardDragon' }[run.mission.id]);
+          if (Object.values(MISSIONS).every(m => save.stats[m.id] && save.stats[m.id].hard)) achUnlock('hardAll'); if (run.mission.boss && run.pistolOnly && !run.coop) achUnlock('hardPistol'); }
         if (run.objDone && run.mission.boss && run.pistolOnly && !run.coop) achUnlock({ C: 'rexPistol', D: 'dragonPistol', F: 'spiderPistol' }[run.mission.id]);
       }
       if (k === 'dead') {
@@ -4321,7 +4364,7 @@ function createLoot(p) {
   world.add(ring, beam);
   p.flash = 0; updatePartVisual(p);
   loots.push({ p, obj: p.group, ring, beam, x: c.x, y: ly, z: c.z, cond, state: p.state, r: pr, rs: pr / 2.3,
-    name: `${p.enemy.cfg.name} ${p.name}`, base: Math.round(p.val * run.mission.partMult), val: partValue(p, cond) });
+    name: `${p.enemy.cfg.name} ${p.name}`, base: Math.round(p.val * run.mission.partMult * (run.hard ? HARD_MUL.parts : 1)), val: partValue(p, cond) });
   if (isHost()) { const L = loots[loots.length - 1]; L.lid = ++NET.lid; const q = p.group.quaternion;
     coopEv({ t: 'loot', lid: L.lid, i: eIdx(p.enemy), pid: p.id, x: L.x, y: L.y, z: L.z, r: L.r, cond: L.cond, state: L.state, name: L.name, base: L.base, val: L.val, gp: v3a(p.group.position), gq: [q.x, q.y, q.z, q.w] }); }
 }
@@ -4383,7 +4426,7 @@ let dmgLog = {};
 function damagePlayer(dmg, from, src = 'etc') {
   if (state !== 'mission' || godMode || player.downed) return;
   if (run.iframeT > 0) { achEvent('iframe', { src }); return; }
-  let d = dmg * (1 - player.dr);
+  let d = dmg * (1 - player.dr) * (HARD && src !== 'self' ? HARD_MUL.dmg : 1);
   if (run.shield > 0) { const ab = Math.min(run.shield, d); run.shield -= ab; d -= ab; if (d <= 0) { SFX.hit('armor'); return; } }
   dmgLog[src] = (dmgLog[src] || 0) + d;
   achEvent('hurt', { d, src });
@@ -4437,7 +4480,7 @@ function updatePlayer(dt) {
   if (player.pos.y <= g) { player.pos.y = g; player.vy = 0; player.onGround = true; } else player.onGround = false;
   // 체력 재생
   const rg = save.utils.regen;
-  if (time - player.lastHurt > (rg ? 3 : 5) && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + (rg ? 10 : 5) * dt);
+  if (time - player.lastHurt > (rg ? 3 : 5) && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + (rg ? 10 : 5) * (HARD ? 0.5 : 1) * dt);
   for (let i = 0; i < 2; i++) run.skillCd[i] = Math.max(0, run.skillCd[i] - dt);
   run.iframeT = Math.max(0, run.iframeT - dt); run.ocT = Math.max(0, run.ocT - dt); run.focusT = Math.max(0, run.focusT - dt); run.throwCd = Math.max(0, run.throwCd - dt);
   if (run.shieldT > 0) { run.shieldT -= dt; if (run.shieldT <= 0) run.shield = 0; }
@@ -4679,7 +4722,7 @@ function endMission(kind) {
   save.kills += run.kills;
   let html;
   if (kind === 'extract') {
-    const contract = run.objDone ? ms.contract : 0;
+    const contract = run.objDone ? ms.contract * (run.hard ? HARD_MUL.contract : 1) : 0;
     const partsBase = run.loot.reduce((a, l) => a + l.base, 0);
     const partsVal = run.loot.reduce((a, l) => a + l.val, 0);
     const bonus = Math.round(partsVal * run.salvageBonus);
@@ -4687,7 +4730,7 @@ function endMission(kind) {
     save.credits += total; save.totalEarned += total;
     const newly = [];
     if (run.objDone) {
-      save.stats[id].clears++;
+      save.stats[id].clears++; if (run.hard) save.stats[id].hard = (save.stats[id].hard || 0) + 1;
       for (const m of Object.values(MISSIONS)) if (m.req === id && !save.unlocked[m.id]) { save.unlocked[m.id] = true; newly.push(m); }
     }
     save.stats[id].best = Math.max(save.stats[id].best, total);
@@ -4710,11 +4753,11 @@ function endMission(kind) {
       <td class="n">${fmt(l.base)}</td><td class="n bad">${l.base - l.val ? '-' + fmt(l.base - l.val) : '0'}</td><td class="n">${fmt(l.val)}</td></tr>`).join('')
       : `<tr><td colspan="5" class="dim">회수한 부품 없음</td></tr>`;
     const kb = Object.entries(run.killsByType).map(([t, n]) => `${ETYPES[t].name} ${n}`).join(' · ') || '없음';
-    html = `<header><h2>${run.objDone ? '임무 완료 · 정산' : '조기 탈출 · 정산'}</h2><span class="lbl">${ms.code} ${ms.name}${run.coop ? ' · 협동' : ''}</span></header>
+    html = `<header><h2>${run.objDone ? '임무 완료 · 정산' : '조기 탈출 · 정산'}</h2><span class="lbl">${ms.code} ${ms.name}${run.hard ? ' · 하드' : ''}${run.coop ? ' · 협동' : ''}</span></header>
       <div class="body">
         <table class="tbl"><tr><th>회수 부품</th><th>상태</th><th class="n">기준가</th><th class="n">파손 감가</th><th class="n">판매가</th></tr>${rows}</table>
         <div class="sum">
-          <span>기본 계약 보상 ${run.objDone ? '' : '<span class="dim">(목표 미완료)</span>'}</span><span>${fmt(contract)}</span>
+          <span>기본 계약 보상 ${run.objDone ? (run.hard ? '<span class="bad">(하드 ×2)</span>' : '') : '<span class="dim">(목표 미완료)</span>'}</span><span>${fmt(contract)}</span>
           <span>처치 보상 <span class="dim">(${kb})</span></span><span>${fmt(run.killReward)}</span>
           <span>회수 부품 판매액 <span class="dim">(기준가 ${fmt(partsBase)})</span></span><span>${fmt(partsVal)}</span>
           <span>파손에 따른 가치 감소</span><span class="bad">-${fmt(partsBase - partsVal)}</span>
@@ -4734,12 +4777,12 @@ function endMission(kind) {
     achEvent('end', { kind });
     writeSave();
     const lost = run.loot.reduce((a, l) => a + l.val, 0);
-    html = `<header><h2 class="bad">${kind === 'dead' ? '작전 실패 · 사망' : '임무 포기'}</h2><span class="lbl">${ms.code} ${ms.name}</span></header>
+    html = `<header><h2 class="bad">${kind === 'dead' ? '작전 실패 · 사망' : '임무 포기'}</h2><span class="lbl">${ms.code} ${ms.name}${run.hard ? ' · 하드' : ''}</span></header>
       <div class="body">
         <div class="sum">
           <span>잃은 미정산 부품 <span class="dim">(${run.loot.length}개)</span></span><span class="bad">-${fmt(lost)}</span>
           <span>잃은 처치 보상</span><span class="bad">-${fmt(run.killReward)}</span>
-          <span>잃은 계약 보상</span><span class="bad">-${fmt(ms.contract)}</span>
+          <span>잃은 계약 보상</span><span class="bad">-${fmt(ms.contract * (run.hard ? HARD_MUL.contract : 1))}</span>
           <span class="tot">보유 자금 (유지)</span><span class="tot">${fmt(save.credits)} CR</span>
         </div>
         <div class="dim" style="font-size:12px;margin-top:12px">구매한 장비와 기존 자금은 유지됩니다.</div>
@@ -4854,7 +4897,7 @@ function renderHub() {
       <div class="bar"><i style="width:${clamp(save.credits / itemPrice(goal) * 100, 0, 100)}%"></i></div>
       <div class="dim mono" style="font-size:11.5px;margin-top:6px">${save.credits >= itemPrice(goal) ? '<span class="ok">구매 가능</span>' : fmt(itemPrice(goal) - save.credits) + ' CR 부족'}</div></div>` : '';
   const opRows = Object.values(MISSIONS).map(m => `<div class="op ${selectedMission === m.id ? 'sel' : ''} ${m.boss ? 'boss' : ''}" data-mis="${m.id}">
-      <span class="opc mono">${m.code}</span><span class="opn">${m.name}</span>
+      <span class="opc mono">${m.code}</span><span class="opn">${m.name}${save.stats[m.id] && save.stats[m.id].hard ? ' <span class="hardtag">H</span>' : ''}</span>
       <span class="pips">${[1, 2, 3].map(i => `<i class="${i <= DIFF[m.diff] ? 'on' : ''}"></i>`).join('')}</span><span class="opr mono">${fmt(m.contract)}</span></div>
       ${selectedMission === m.id ? `<div class="opd">${m.desc}<div class="dim">권장 · ${m.rec}</div></div>` : ''}`).join('');
   const mainView = `<div class="hubhome">
@@ -4862,7 +4905,9 @@ function renderHub() {
         <div class="logo">MARGIN<small>기계 부품 회수 계약 · 용병 거점</small></div>
         <div class="lbl" style="margin:34px 0 10px">작전 선택</div>
         <div class="ops">${opRows}</div>
-        <button class="primary deploy" id="deploy">출격 <span class="mono">ENTER</span></button>
+        <div class="diffsel"><button data-diff="0" class="${!save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${save.hardSel ? 'sel' : ''}" ${hardUnlocked(selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
+        ${!hardUnlocked(selectedMission) ? '<div class="dim" style="font-size:12px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}
+        <button class="primary deploy ${save.hardSel && hardUnlocked(selectedMission) ? 'hard' : ''}" id="deploy">${save.hardSel && hardUnlocked(selectedMission) ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
       </div>
       <div class="target ${sm.boss ? 'boss' : ''}"><div class="lbl">작전 목표 · ${sm.code}</div><div class="tname">${sm.target[0]}</div><div class="tsub">${sm.target[1]}</div></div>
       <div class="hload">
@@ -4878,7 +4923,7 @@ function renderHub() {
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(460px,94vw)"><header><h2>기록</h2></header><div class="body">
       <div class="rec"><span>누적 처치</span><span>${fmt(save.kills)}</span><span>누적 수익</span><span>${fmt(save.totalEarned)} CR</span><span>사망</span><span>${save.deaths}</span>
       ${[['', 'REX-09'], ['F', 'ARACHNE'], ['D', '청룡']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${save.records['bossTime' + k] ? save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
-      <div class="rec" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">${Object.values(MISSIONS).map(m => `<span>${m.code} ${m.name}</span><span>${save.stats[m.id].clears} / ${save.stats[m.id].runs} · 최고 ${fmt(save.stats[m.id].best)}</span>`).join('')}</div>
+      <div class="rec" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">${Object.values(MISSIONS).map(m => `<span>${m.code} ${m.name}</span><span>${save.stats[m.id].clears} / ${save.stats[m.id].runs}${save.stats[m.id].hard ? ` · 하드 ${save.stats[m.id].hard}` : ''} · 최고 ${fmt(save.stats[m.id].best)}</span>`).join('')}</div>
       </div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
   } else if (hubModal === 'ach') {
     const got = Object.keys(save.ach.done).length, earned = ACH.filter(a => achGot(a.id)).reduce((t, a) => t + a.cr, 0);
@@ -4927,6 +4972,7 @@ function renderHub() {
   H.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { hubModal = ''; renderHub(); });
   if ($('hmodal')) $('hmodal').onclick = e => { if (e.target.id === 'hmodal') { hubModal = ''; renderHub(); } };
   if ($('deploy')) $('deploy').onclick = () => startMission(selectedMission);
+  H.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { save.hardSel = b.dataset.diff === '1'; writeSave(); SFX.ui(); renderHub(); });
   if ($('hsens')) $('hsens').oninput = e => { save.sens = +e.target.value; setText($('hsensv'), save.sens.toFixed(2)); $('sens').value = save.sens; setText($('sensv'), save.sens.toFixed(2)); writeSave(); };
   if ($('reset')) $('reset').onclick = () => { if (confirm('저장 데이터를 모두 삭제하고 새 게임을 시작할까요?')) { save = defaultSave(); writeSave(); selectedMission = 'A'; hubModal = ''; hubView = 'main'; renderHub(); } };
 }
@@ -5127,7 +5173,7 @@ loop();
 if (TEST) {
   window.__M = {
     get save() { return save; }, get run() { return run; }, get enemies() { return enemies; }, get loots() { return loots; },
-    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, NET, coopHost, coopJoin, coopLaunch, coopLeave, isHost, isGuest, spawnDrone, spiderExposed, get MAPB() { return MAPB; }, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
+    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, get HARD() { return HARD; }, hardUnlocked, NET, coopHost, coopJoin, coopLaunch, coopLeave, isHost, isGuest, spawnDrone, spiderExposed, get MAPB() { return MAPB; }, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
     player, camera, THREE, startMission, endMission, buy, interact, goHub, update, render, tryFire, fireRay, switchWeapon,
     setMouse(v) { mouseDown = v; firedThisPress = false; }, setGod(v) { godMode = v; }, setAds(v) { rightDown = v; }, keys,
     aimAt(v) { camera.position.set(player.pos.x, player.pos.y + player.eye, player.pos.z); camera.lookAt(v); camera.updateMatrixWorld(); recoil.cur = recoil.target = 0; },
