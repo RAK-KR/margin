@@ -267,6 +267,7 @@ button.wide{width:100%;margin-top:22px;padding:11px}
     <div class="lbl" id="objcode">OP</div>
     <div class="m" id="objname"></div>
     <div class="o" id="objtxt"></div>
+    <div class="o hidden" id="coopinfo"></div>
     <div class="l"><span id="extdir"></span><span id="exttxt"></span></div>
     <div class="l">미정산 전리품 <b class="acc mono" id="lootval">0</b> <span class="dim" id="lootcnt"></span></div>
   </div>
@@ -501,7 +502,7 @@ ETYPES.rex = { name: 'REX-09', speed: 4.6, turn: 1.25, radius: 3.7, detect: 40, 
     podR: { hp: 180, brk: 120, val: 450 }, arms: { hp: 120, brk: 80, val: 250 }, tail: { hp: 420, brk: 260, val: 900 },
     legL: { hp: 1000, brk: 550, val: 600 }, legR: { hp: 1000, brk: 550, val: 600 }, core: { hp: 1800, val: 2200 },
     chest: { hp: 650, val: 300 }, hatch: { hp: 400, val: 200 }, reactor: { hp: 1550, brk: 700, val: 1800 } } };
-ETYPES.dragon = { name: '청룡', title: '청룡 · 기계 용', radius: 1.4, scale: 1, killReward: 800, detect: 80, leash: 99, reaction: 0,
+ETYPES.dragon = { name: '청룡', title: '청룡 · 기계 용', radius: 1.4, scale: 1, killReward: 900, detect: 80, leash: 99, reaction: 0,
   parts: { head: { hp: 750, brk: 450, val: 700 }, jaw: { hp: 360, brk: 220, val: 650 }, hornL: { hp: 170, brk: 110, val: 380 }, hornR: { hp: 170, brk: 110, val: 380 },
     pearl: { hp: 850, brk: 420, val: 2400 }, clawF: { hp: 300, brk: 200, val: 520 }, clawB: { hp: 300, brk: 200, val: 520 },
     n1: { hp: 1650, brk: 560, val: 900 }, n2: { hp: 1650, brk: 560, val: 900 }, n3: { hp: 1650, brk: 560, val: 900 },
@@ -537,7 +538,7 @@ ETYPES.sniper = { name: '저격형', speed: 1.4, turn: 2.4, radius: 0.48, detect
     legL: { hp: 40, brk: 28, val: 30 }, legR: { hp: 40, brk: 28, val: 30 }, power: { hp: 30, brk: 22, val: 60 } } };
 ETYPES.relay = { name: '중계탑', radius: 1.2, scale: 1, killReward: 150, detect: 0, leash: 0, reaction: 0,
   parts: { armor: { hp: 260, val: 40 }, core: { hp: 320, val: 160 }, power: { hp: 140, brk: 100, val: 220 } } };
-ETYPES.spider = { name: 'ARACHNE', title: 'ARACHNE · 거미 전차', radius: 2.4, scale: 1, killReward: 700, detect: 60, leash: 99, reaction: 0,
+ETYPES.spider = { name: 'ARACHNE', title: 'ARACHNE · 거미 전차', radius: 2.4, scale: 1, killReward: 650, detect: 60, leash: 99, reaction: 0,
   parts: { head: { hp: 420, brk: 260, val: 260 }, turret: { hp: 520, brk: 320, val: 380 }, bay: { hp: 380, brk: 240, val: 300 },
     sl1: { hp: 620, brk: 420, val: 200 }, sl2: { hp: 620, brk: 420, val: 200 }, sl3: { hp: 620, brk: 420, val: 200 },
     sl4: { hp: 620, brk: 420, val: 200 }, sl5: { hp: 620, brk: 420, val: 200 }, sl6: { hp: 620, brk: 420, val: 200 },
@@ -561,12 +562,12 @@ const MISSIONS = {
     enemies: '중계탑 3 · 저격형 2 · 전투형 3 · 드론형', rec: '정밀 소총 또는 카빈 · EMP', target: ['중계탑 3기', '변전소 · 위협 등급 높음'] },
   C: { id: 'C', code: 'OP-X', name: '최종 작전 · 렉스 사냥', diff: '최상', contract: 2500, partMult: 1.0, req: 'B', boss: true,
     desc: '폐 조선소의 대형 기계 티라노. 돌진을 기둥에 박게 하거나 두 다리를 무너뜨려 등 뒤 동력로를 노출시켜라.', enemies: 'REX-09 기계 티라노 (+ 정찰형 증원)', rec: '상위 무기 · 방어복 Mk.II (숙련자는 기본 권총으로도 가능)', target: ['REX-09', '기계 티라노 · 위협 등급 최상'] },
-  D: { id: 'D', code: 'OP-Z', name: '최종 작전 II · 청룡 격추', diff: '최상', contract: 3000, partMult: 1.0, boss: true,
-    desc: '산정 폐사원 상공을 도는 기계 용. 여의주를 깨거나 앞발째 떨어뜨려 보호막을 벗기고, 몸통의 동력 마디 세 곳을 모두 정지시켜라.',
-    enemies: '청룡 (공중)', rec: '연사 · 관통 무기, EMP (숙련자는 기본 권총으로도 가능)', target: ['청룡', '기계 용 · 위협 등급 최상'] },
-  F: { id: 'F', code: 'OP-S', name: '최종 작전 III · 거미 전차', diff: '최상', contract: 3200, partMult: 1.0, boss: true,
+  F: { id: 'F', code: 'OP-S', name: '최종 작전 II · 거미 전차', diff: '최상', contract: 2800, partMult: 1.0, boss: true,
     desc: '폐 채석장을 배회하는 6족 보행 전차. 다리를 부숴 주저앉히면 복부 뒤쪽 아래의 동력로가 드러난다. 도약 착지 직후에도 냉각구가 잠깐 열린다.',
     enemies: 'ARACHNE 거미 전차 (+ 드론 사출)', rec: '고화력 · 관통 무기, EMP (숙련자는 기본 권총으로도 가능)', target: ['ARACHNE', '거미 전차 · 위협 등급 최상'] },
+  D: { id: 'D', code: 'OP-Z', name: '최종 작전 III · 청룡 격추', diff: '최상', contract: 3400, partMult: 1.0, boss: true,
+    desc: '산정 폐사원 상공을 도는 기계 용. 여의주를 깨거나 앞발째 떨어뜨려 보호막을 벗기고, 몸통의 동력 마디 세 곳을 모두 정지시켜라.',
+    enemies: '청룡 (공중)', rec: '연사 · 관통 무기, EMP (숙련자는 기본 권총으로도 가능)', target: ['청룡', '기계 용 · 위협 등급 최상'] },
 };
 
 // =====================================================================
@@ -1174,6 +1175,7 @@ function curW() { return W(curWeapon().id); }
 function clearWorld() {
   world.traverse(o => { if (o.geometry && o.geometry !== projGeo) o.geometry.dispose(); });
   scene.remove(world); world = new THREE.Group(); scene.add(world);
+  NET.av = null;
   boxes = []; hittables = []; enemies = []; loots = []; fallers = []; crates = []; extraction = null; missiles = []; shocks = []; throwables = []; fadeRings = []; bolts = [];
   clearFX();
 }
@@ -1313,6 +1315,7 @@ function spawnEnemy(type, x, z, yaw, opts = {}) {
   r.root.position.set(x, 0, z); r.root.rotation.y = yaw;
   world.add(r.root); enemies.push(e);
   if (cfg.sniper) addSniperLaser(e);
+  if (isHost() && state === 'mission') coopEv({ t: 'spawn', i: enemies.length - 1, k: type, x, z, r: yaw });
   return e;
 }
 
@@ -1323,9 +1326,10 @@ function startMission(id) {
   clearWorld();
   const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry })[id]();
   MAPB = spawn.bounds || { x: 30, z: 30 };
+  if (coopOn()) for (const e of enemies) if (e.boss) for (const p of Object.values(e.parts)) { p.maxHp *= 1.6; p.hp = p.maxHp; p.brkMax *= 1.6; p.brk = p.brkMax; }
   const arm = ARMORS[save.armor];
   player.pos.copy(spawn.spawn); player.vel.set(0, 0, 0); player.vy = 0; player.onGround = true;
-  player.maxHp = arm.hp; player.hp = arm.hp; player.dr = arm.dr; player.lastHurt = -99; player.crouch = 0; player.eye = EYE; player.height = P_HEIGHT;
+  player.maxHp = arm.hp; player.hp = arm.hp; player.dr = arm.dr; player.lastHurt = -99; player.downed = false; player.out = false; player.crouch = 0; player.eye = EYE; player.height = P_HEIGHT;
   camera.position.set(player.pos.x, EYE, player.pos.z);
   camera.quaternion.setFromEuler(new THREE.Euler(0, spawn.yaw, 0, 'YXZ'));
   const ids = save.equipped !== 'pistol' ? [save.equipped, 'pistol'] : ['pistol'];
@@ -1334,8 +1338,14 @@ function startMission(id) {
   run = { mission: ms, wst, ws: ids.map(w => ({ id: w, mag: wst[w].mag, reserve: maxReserve(w) })), cur: 0, medkits: save.utils.medkit ? 2 : 0,
     skillCd: [0, 0], shield: 0, shieldT: 0, nanoT: 0, ocT: 0, focusT: 0, dashT: 0, iframeT: 0, burstLeft: 0, burstT: 0, throwCd: 0,
     reloadT: 0, switchT: 0, loot: [], kills: 0, killReward: 0, killsByType: {}, total: enemies.length, objDone: false,
-    shots: 0, hitsN: 0, shotsHit: 0, startT: time, used: {}, bossKillT: 0, salvageBonus: SALVAGES[save.salvage].bonus, boss: enemies.find(e => e.boss) || null };
+    coop: coopOn(), shots: 0, hitsN: 0, shotsHit: 0, startT: time, used: {}, bossKillT: 0, salvageBonus: SALVAGES[save.salvage].bonus, boss: enemies.find(e => e.boss) || null };
   ads = 0; fireCd = 0; bloom = 0; recoil.cur = recoil.target = 0; vigT = 0; earlyConfirmT = 0; dmgLog = {};
+  if (coopOn()) {
+    const off = NET.role === 'guest' ? 1.6 : -1.6;
+    player.pos.x += off; camera.position.set(player.pos.x, EYE, player.pos.z);
+    NET.rp = makeRemote(); NET.rp.tpos.set(player.pos.x - off * 2, 0, player.pos.z); NET.rp.pos.copy(NET.rp.tpos);
+    NET.av = buildAvatar(); NET.av.g.position.copy(NET.rp.pos); NET.evq = []; NET.outq = []; NET.sendT = 0; NET.fullT = 0; NET.lid = 0; NET.revT = 0;
+  }
   showGun(); $('feed').innerHTML = '';
   save.stats[id].runs++; writeSave();
   state = 'mission';
@@ -1408,7 +1418,7 @@ document.addEventListener('mousemove', e => { if (controls.isLocked) { mouseDX +
 //  사격
 // =====================================================================
 function useMedkit() {
-  if (!run || player.hp >= player.maxHp) return;
+  if (!run || player.downed || player.hp >= player.maxHp) return;
   if (run.medkits > 0) {
     run.medkits--; player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.6);
     SFX.pickup(); addFeed(`응급 키트 사용 · 남은 ${run.medkits}회`, 'p');
@@ -1426,8 +1436,10 @@ function launchThrowable(type, from, vel, impact, ex) {
   if (type === 'gl') m.scale.set(0.8, 0.8, 1.6);
   m.position.copy(from); world.add(m);
   throwables.push({ type, mesh: m, vel: vel.clone(), fuse: impact ? 5 : 1.5, impact, prev: from.clone(), ex });
+  if (!NET.remoteShot) { const ne = { t: 'nade', k: type, f: v3a(from), v: v3a(vel), imp: impact ? 1 : 0, ex }; if (isHost()) coopEv(ne); else if (isGuest()) coopOut(ne); }
 }
 function throwGrenade() {
+  if (player.downed) return;
   if (run.throwCd > 0) return;
   let type = save.grenadeSel;
   if (!(save.inv[type] > 0)) { type = GRENADES.find(g => save.inv[g] > 0); if (!type) { SFX.empty(); popup('투척물 없음', 'dim'); return; } save.grenadeSel = type; }
@@ -1468,7 +1480,7 @@ function updateThrowables(dt) {
     t.mesh.rotation.x += dt * 8;
     if (t.type === 'emp' && Math.random() < 0.35) spawnSpark(p, UPY, 0x6ac8ff, 1.5, 0.2);
     if (t.type === 'gl' && Math.random() < 0.7) spawnSpark(p, _tv.clone().negate(), 0xffa050, 2, 0.15);
-    if (boom) { world.remove(t.mesh); throwables.splice(i, 1); detonate(t, p.clone()); }
+    if (boom) { world.remove(t.mesh); throwables.splice(i, 1); if (!isGuest()) detonate(t, p.clone()); }
   }
 }
 function detonate(t, pos) {
@@ -1477,6 +1489,8 @@ function detonate(t, pos) {
   else if (t.type === 'emp') empAt(pos, 7);
 }
 function explodeAt(pos, R, dmg, src = 'frag') {
+  coopEv({ t: 'boom', p: v3a(pos), R });
+  if (isHost() && NET.rp && !NET.rp.dn && !NET.rp.out) { const rd = Math.hypot(NET.rp.pos.x - pos.x, NET.rp.pos.z - pos.z); if (rd < R) hurtTarget(NET.rp, dmg * 0.3 * (1 - rd / R), pos, 'self'); }
   const dpl = pos.distanceTo(_ex.set(player.pos.x, player.pos.y + 1, player.pos.z));
   SFX.explode(dpl); spawnFlash(pos, R * 1.1, 0.22, 0xffa050); burstSparks(pos, UPY, 26, 0xffa040, 9); spawnDebris(pos, 0x3a3630, 5, 5);
   blastLight.position.copy(pos); blastLight.intensity = 80; shake = Math.max(shake, dpl < 12 ? 0.02 : 0.006);
@@ -1501,6 +1515,7 @@ function explodeAt(pos, R, dmg, src = 'frag') {
   if (pd < R && Math.abs(player.pos.y + 0.8 - pos.y) < R) damagePlayer(dmg * 0.3 * (1 - pd / R), pos, 'self');
 }
 function empAt(pos, R) {
+  coopEv({ t: 'empfx', p: v3a(pos), R });
   SFX.emp(); spawnFlash(pos, R * 1.3, 0.3, 0x6ac8ff); burstSparks(pos, UPY, 30, 0x6ac8ff, 8);
   const ring = new THREE.Mesh(shockGeo, new THREE.MeshBasicMaterial({ color: 0x6ac8ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
   ring.rotation.x = -Math.PI / 2; ring.position.set(pos.x, Math.max(0.15, pos.y), pos.z); world.add(ring);
@@ -1547,6 +1562,7 @@ function updateFadeRings(dt) {
 }
 // ---------- 스킬 ----------
 function useSkill(slot) {
+  if (player.downed) return;
   const id = save.slots[slot]; if (!id || !save.skills[id]) return;
   if (run.skillCd[slot] > 0) { SFX.empty(); return; }
   const sk = SKILLS[id];
@@ -1558,7 +1574,7 @@ function useSkill(slot) {
   } else if (id === 'nano') run.nanoT = 3;
   else if (id === 'shield') { run.shield = 80; run.shieldT = 6; }
   else if (id === 'overclock') run.ocT = 8;
-  else if (id === 'focus') { run.focusT = 4; achEvent('focus'); }
+  else if (id === 'focus') { run.focusT = 4; achEvent('focus'); coopOut({ t: 'focus' }); }
   run.skillCd[slot] = sk.cd; SFX.skill(id); addFeed(`스킬 · ${sk.name}`, 'p');
 }
 
@@ -1590,6 +1606,7 @@ function muzzleWorld(out) {
   return out.applyMatrix4(camera.matrixWorld);
 }
 function tryFire() {
+  if (player.downed) return false;
   const ws = curWeapon(), w = W(ws.id);
   if (run.switchT > 0 || run.reloadT > 0 || fireCd > 0 || run.burstLeft > 0) return false;
   if (ws.mag <= 0) { SFX.empty(); fireCd = 0.25; if (ws.reserve > 0) startReload(); return false; }
@@ -1612,11 +1629,13 @@ function shootOnce() {
     const ad = dir.clone(); const r0 = Math.tan(spread) * Math.sqrt(Math.random()), t0 = Math.random() * Math.PI * 2;
     ad.addScaledVector(right, r0 * Math.cos(t0)).addScaledVector(up, r0 * Math.sin(t0)).normalize();
     launchThrowable('gl', camera.getWorldPosition(V3()).addScaledVector(ad, 0.5), ad.multiplyScalar(w.projSpeed), true, w.explosive);
-  } else for (let pi = 0, any = false; pi < (w.pellets || 1); pi++) {
+  } else for (let pi = 0, any = false, sd = [], sp2 = []; pi < (w.pellets || 1); pi++) {
     const sp = spread + (w.pelletSpread || 0);
     const r = Math.tan(sp) * Math.sqrt(Math.random()), th = Math.random() * Math.PI * 2;
     const d = dir.clone().addScaledVector(right, r * Math.cos(th)).addScaledVector(up, r * Math.sin(th)).normalize();
     const result = fireRay(origin, d, w);
+    sd.push(v3a(d)); sp2.push(v3a(result.point));
+    if (pi === (w.pellets || 1) - 1) { if (isGuest()) coopOut({ t: 'shot', o: v3a(origin), d: sd, oc: run.ocT > 0 ? 1 : 0, w: { id: w.id || ws.id, dmg: w.dmg, precisionMult: w.precisionMult, armorMult: w.armorMult, range: w.range, pierce: w.pierce, falloff: w.falloff } }); else coopHostShotFx(sp2); }
     if (result.part && !any) { any = true; run.shotsHit++; }
     spawnTracer(mz, result.point, w.pierce ? 0x8ad8ff : big ? 0xffe4b0 : 0xffd28a, w.scope || w.pierce ? 0.14 : 0.06);
   }
@@ -1634,6 +1653,7 @@ function shootOnce() {
 }
 // 레이캐스트 판정: 가장 먼저 맞은 메시가 곧 피격 부위
 function fireRay(origin, dir, w) {
+  if (isGuest()) return guestRay(origin, dir, w);
   raycaster.set(origin, dir); raycaster.far = w.range; raycaster.near = 0.05;
   const hits = raycaster.intersectObjects(hittables, false);
   if (!hits.length) return { point: origin.clone().addScaledVector(dir, w.range), part: null };
@@ -1681,6 +1701,7 @@ function computeDamage(p, mesh, w, pierce) {
 }
 // 반환: 'damaged' | 'disabled' | 'destroyed' | 'hit'
 function damagePart(p, d) {
+  p.nd = 1;
   if (p.type === 'core' || p.type === 'armor') {
     p.hp -= d; if (p.hp <= 0) { p.hp = 0; p.state = 'destroyed'; return 'destroyed'; }
     p.state = 'damaged'; return 'damaged';
@@ -1707,7 +1728,8 @@ function partValue(p, cond) { return Math.round(p.val * run.mission.partMult * (
 function hitPart(p, mesh, point, normal, w, fall = 1, pierce = false) {
   const e = p.enemy; if (e.dead || !p.attached) return null;
   e.lastHit = w.id || 'gun';
-  const cd = computeDamage(p, mesh, w, pierce), d = cd.d * fall * (run.ocT > 0 ? 1.4 : 1), precise = cd.precise, shielded = cd.shielded;
+  const cd = computeDamage(p, mesh, w, pierce), d = cd.d * fall * ((NET.remoteShot ? NET.remoteOc : run.ocT > 0) ? 1.4 : 1), precise = cd.precise, shielded = cd.shielded;
+  e.aggro = e.aggro || {}; e.aggro[NET.remoteShot ? 'r' : 'l'] = (e.aggro[NET.remoteShot ? 'r' : 'l'] || 0) + d;
   const ev = damagePart(p, d);
   run.hitsN++;
   // 피격 이펙트 (실제 피격 지점)
@@ -1719,10 +1741,10 @@ function hitPart(p, mesh, point, normal, w, fall = 1, pierce = false) {
   if (ev === 'disabled' || ev === 'destroyed') kind = 'kill';
   else if (precise) kind = 'weak';
   else if (armorish) kind = 'armor';
-  showHitmarker(kind); SFX.hit(kind);
-  if (precise && ev !== 'disabled' && ev !== 'destroyed') popup(mesh.userData.sub ? `약점 · ${mesh.userData.sub}` : '약점', 'weak');
+  if (!NET.remoteShot) { showHitmarker(kind); SFX.hit(kind); }
+  if (NET.remoteShot) { } else if (precise && ev !== 'disabled' && ev !== 'destroyed') popup(mesh.userData.sub ? `약점 · ${mesh.userData.sub}` : '약점', 'weak');
   else if (shielded && ev === 'damaged') popup(p.coverHit ? (e.spider ? '동력로 차폐 · 다리를 부숴 주저앉혀라' : '마디 덮개 닫힘 · 공격 중에 노려라') : p.protectedBy.includes('pearl') ? '여의주 보호막 · 피해 감소' : '장갑 차폐 · 피해 감소', 'dim');
-  if (!e.alert) { alertEnemy(e); e.lastSeen.copy(player.pos); }
+  if (!e.alert) { alertEnemy(e); e.lastSeen.copy(NET.remoteShot && NET.rp ? NET.rp.pos : player.pos); }
   e.hitKick = Math.min(0.25, e.hitKick + 0.08);
   handlePartEvent(p, ev);
   return { ev, d, precise, shielded };
@@ -1796,6 +1818,7 @@ function sensorMult(e) {
   return 1;
 }
 function shatter(p) {
+  if (p.attached) coopEv({ t: 'sh', i: eIdx(p.enemy), pid: p.id });
   for (const c of p.children) if (c.attached) shatter(c);
   p.attached = false; p.state = 'destroyed';
   removeHittables(p.meshes);
@@ -1808,6 +1831,7 @@ function shatter(p) {
   if (p.group.parent) p.group.parent.remove(p.group);
 }
 function detachPart(p, vel, asLoot) {
+  coopEv({ t: 'det', i: eIdx(p.enemy), pid: p.id, v: v3a(vel) });
   for (const c of p.children) if (c.attached && asLoot) detachPart(c, vel.clone().add(V3(rand(-1, 1), 0.5, rand(-1, 1))), true);
   p.attached = false;
   removeHittables(p.meshes);
@@ -1832,16 +1856,16 @@ function enemySees(e, dx, dz, dist) {
     if (ang > (sensorBroken ? 0.6 : 1.05)) return false;
   }
   _v1.set(e.root.position.x, e.root.position.y + e.eyeY, e.root.position.z);
-  _v2.set(player.pos.x, player.pos.y + player.eye - 0.1, player.pos.z);
+  _v2.set(tg.pos.x, tg.pos.y + tg.eye - 0.1, tg.pos.z);
   return !segBlocked(_v1, _v2);
 }
 function enemyFire(e, dist, aimAt = null, spMul = 1) {
   const cfg = e.cfg;
   e.root.updateMatrixWorld(true);
   const m = e.muzzle.getWorldPosition(V3());
-  const target = aimAt || V3(player.pos.x, player.pos.y + lerp(1.15, 0.75, player.crouch), player.pos.z);
+  const target = aimAt || V3(tg.pos.x, tg.pos.y + lerp(1.15, 0.75, tg.crouch), tg.pos.z);
   const dir = target.sub(m).normalize();
-  const sp = cfg.spread * spMul * (aimAt ? 1 : sensorMult(e) * (player.hspeed > 3.5 ? 1.35 : 1));
+  const sp = cfg.spread * spMul * (aimAt ? 1 : sensorMult(e) * (tg.hspeed > 3.5 ? 1.35 : 1));
   dir.add(V3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(sp)).normalize();
   const pr = poolGet(FX.projs, 80, () => {
     const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
@@ -1853,6 +1877,7 @@ function enemyFire(e, dist, aimAt = null, spMul = 1) {
   pr.mesh.scale.set(cfg.projSize, cfg.projSize, cfg.projSize * 3.5);
   pr.mesh.lookAt(_v1.copy(m).add(dir));
   spawnFlash(m, e.type === 'heavy' || e.type === 'sniper' ? 0.7 : 0.4, 0.06, cfg.projColor);
+  coopEv({ t: 'eshot', f: v3a(m), d: v3a(dir), s: cfg.projSpeed, c: cfg.projColor, z: cfg.projSize, k: e.type });
   SFX.eshot(e.type, dist);
 }
 function updateProjectiles(dt) {
@@ -1863,12 +1888,12 @@ function updateProjectiles(dt) {
     pr.mesh.position.addScaledVector(pr.vel, dt);
     const p = pr.mesh.position;
     // 플레이어 판정 (구간 샘플링)
-    let hitP = false;
-    const ns = Math.max(4, Math.ceil(pr.prev.distanceTo(p) / 0.25));
-    for (let k = 1; k <= ns; k++) {
+    let hitP = null;
+    const ns = Math.max(4, Math.ceil(pr.prev.distanceTo(p) / 0.25)), tl = isGuest() ? [] : dmgTargets();
+    for (let k = 1; k <= ns && !hitP; k++) {
       _v1.lerpVectors(pr.prev, p, k / ns);
-      const dx = _v1.x - player.pos.x, dz = _v1.z - player.pos.z;
-      if (dx * dx + dz * dz < 0.42 * 0.42 && _v1.y > player.pos.y + 0.05 && _v1.y < player.pos.y + player.height + 0.05) { hitP = true; break; }
+      for (const T of tl) { const dx = _v1.x - T.pos.x, dz = _v1.z - T.pos.z;
+        if (dx * dx + dz * dz < 0.42 * 0.42 && _v1.y > T.pos.y + 0.05 && _v1.y < T.pos.y + T.height + 0.05) { hitP = T; break; } }
     }
     // 벽 판정
     _v2.subVectors(p, pr.prev); const len = _v2.length(); _v2.divideScalar(len || 1);
@@ -1878,13 +1903,15 @@ function updateProjectiles(dt) {
       burstSparks(_v3, _v2.clone().negate(), 4, pr.mesh.material.color.getHex(), 3); spawnFlash(_v3, 0.3, 0.05, pr.mesh.material.color.getHex());
       pr.alive = false; pr.mesh.visible = false; continue;
     }
-    if (hitP) { damagePlayer(pr.dmg, pr.prev, 'gun'); pr.alive = false; pr.mesh.visible = false; continue; }
+    if (hitP) { hurtTarget(hitP, pr.dmg, pr.prev, 'gun'); pr.alive = false; pr.mesh.visible = false; continue; }
     if (p.y < 0) { pr.alive = false; pr.mesh.visible = false; }
   }
 }
 
 function updateEnemy(e, dt) {
   if (e.dead) return;
+  if (isGuest()) { puppetUpdate(e, dt); return; }
+  tg = pickTarget(e, dt);
   if (e.dragon) { updateDragon(e, dt); return; }
   if (e.spider) { updateSpider(e, dt); return; }
   if (e.boss) { updateBoss(e, dt); return; }
@@ -1903,14 +1930,14 @@ function updateEnemy(e, dt) {
       }
     }
   }
-  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; alertEnemy(e); e.lastSeen.copy(player.pos); } }
-  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; alertEnemy(e); e.lastSeen.copy(tg.pos); } }
+  const dx = tg.pos.x - pos.x, dz = tg.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
   e.losT -= dt;
   if (e.losT <= 0) {
     e.losT = rand(0.09, 0.16);
     const was = e.canSee;
     e.canSee = enemySees(e, dx, dz, dist);
-    if (e.canSee) { if (!e.alert) alertEnemy(e); e.lastSeen.copy(player.pos); e.lostT = 0; if (!was) e.fireCd = Math.max(e.fireCd, 0.35); }
+    if (e.canSee) { if (!e.alert) alertEnemy(e); e.lastSeen.copy(tg.pos); e.lostT = 0; if (!was) e.fireCd = Math.max(e.fireCd, 0.35); }
   }
   if (e.alert && !e.canSee) { e.lostT += dt; if (e.lostT > 7) { e.alert = false; e.lostT = 0; e.patrolT = 0; e.burstLeft = 0; } }
   e.hitKick = Math.max(0, e.hitKick - dt * 1.2);
@@ -1983,7 +2010,7 @@ function updateEnemy(e, dt) {
   const wp = e.parts.weapon;
   if (e.alert && e.canSee && e.canShoot) {
     const yawErr = Math.abs(angDiff(Math.atan2(dx, dz), e.yaw));
-    const dy = (player.pos.y + 1.15) - (e.coreY + 0.2);
+    const dy = (tg.pos.y + 1.15) - (e.coreY + 0.2);
     if (wp.attached) wp.group.rotation.x = lerp(wp.group.rotation.x, -Math.atan2(dy, dist), 0.15);
     if (e.burstLeft > 0) {
       e.burstT -= dt;
@@ -2143,7 +2170,7 @@ function bossNext(e, dist, yawErr) {
   const B = e.bs, front = Math.abs(yawErr) < 0.6, S = e.cfg.scale;
   const pods = ['podL', 'podR'].filter(id => bossWorking(e, id)).length;
   const canCharge = !B.crawl && legFactor(e) > 0;
-  _v1.set(e.root.position.x, 4.5 * S, e.root.position.z); _v2.set(player.pos.x, player.pos.y + player.eye, player.pos.z);
+  _v1.set(e.root.position.x, 4.5 * S, e.root.position.z); _v2.set(tg.pos.x, tg.pos.y + tg.eye, tg.pos.z);
   const los = !segBlocked(_v1, _v2);
   if (dist < 6.5 * S && front && bossWorking(e, 'jaw')) { B.state = 'bite'; B.t = B.phase2 ? 0.55 : 0.7; return; }
   if (dist < 8.5 * S && !front && bossWorking(e, 'tail') && B.cd.tail <= 0) { B.state = 'tail'; B.t = 0.8; B.cd.tail = 4; B.spinDir = yawErr > 0 ? -1 : 1; return; }
@@ -2163,12 +2190,13 @@ function bossFireMissile(e) {
   pod.group.updateMatrixWorld(true);
   const from = pod.group.getWorldPosition(V3()); from.y += 0.4;
   const sp = sensorMult(e) > 2 ? 5 : 2.4;
-  const to = V3(player.pos.x + player.vel.x * 0.7 + rand(-sp, sp), player.onGround ? player.pos.y + 0.03 : 0.03, player.pos.z + player.vel.z * 0.7 + rand(-sp, sp));
+  const to = V3(tg.pos.x + tg.vel.x * 0.7 + rand(-sp, sp), tg.onGround ? tg.pos.y + 0.03 : 0.03, tg.pos.z + tg.vel.z * 0.7 + rand(-sp, sp));
   const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xff6a2a }));
   mesh.scale.set(0.16, 0.16, 0.45); mesh.position.copy(from); world.add(mesh);
   const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
   marker.rotation.x = -Math.PI / 2; marker.position.copy(to); world.add(marker);
   missiles.push({ mesh, marker, from, to, t: 0, T: 1.1 + from.distanceTo(to) / 32, h: 5 + from.distanceTo(to) * 0.12 });
+  { const mm = missiles[missiles.length - 1]; coopEv({ t: 'mis', f: v3a(from), to: v3a(to), T: mm.T, h: mm.h, c: 0xff6a2a, s: [0.16, 0.16, 0.45] }); }
   spawnFlash(from, 0.8, 0.08, 0xff9a50); SFX.missile();
 }
 function updateMissiles(dt) {
@@ -2184,7 +2212,7 @@ function updateMissiles(dt) {
       const d = Math.hypot(player.pos.x - m.to.x, player.pos.z - m.to.z);
       spawnFlash(m.to, 3, 0.2, 0xffa050); burstSparks(m.to, UPY, 14, 0xffa040, 7); spawnDebris(m.to, 0x4a4540, 3, 3);
       SFX.explode(m.to.distanceTo(player.pos)); shake = Math.max(shake, d < 8 ? 0.012 : 0.004);
-      if (d < 2.7 && Math.abs(player.pos.y - m.to.y) < 2.2) { damagePlayer(18, m.to, 'missile'); knockPlayer(player.pos.x - m.to.x, player.pos.z - m.to.z, 4); }
+      if (!m.vis && !isGuest()) for (const T of dmgTargets()) { const dd = Math.hypot(T.pos.x - m.to.x, T.pos.z - m.to.z); if (dd < 2.7 && Math.abs(T.pos.y - m.to.y) < 2.2) { hurtTarget(T, 18, m.to, 'missile'); knockTarget(T, T.pos.x - m.to.x, T.pos.z - m.to.z, 4); } }
       world.remove(m.mesh, m.marker); missiles.splice(i, 1);
     }
   }
@@ -2192,14 +2220,16 @@ function updateMissiles(dt) {
     const s = shocks[i]; s.r += 13 * dt;
     s.mesh.scale.set(s.r, s.r, 1); s.mesh.material.opacity = Math.max(0, 0.85 * (1 - s.r / 24));
     const d = Math.hypot(player.pos.x - s.x, player.pos.z - s.z);
-    if (!s.hit && Math.abs(d - s.r) < 0.9 && player.pos.y < 0.3) { s.hit = true; damagePlayer(22, V3(s.x, 0, s.z), 'shock'); player.vy = 5; player.onGround = false; }
+    if (!isGuest()) for (const T of dmgTargets()) { const dd = Math.hypot(T.pos.x - s.x, T.pos.z - s.z);
+      if (!s.hits.has(T) && Math.abs(dd - s.r) < 0.9 && T.pos.y < 0.3) { s.hits.add(T); hurtTarget(T, 22, V3(s.x, 0, s.z), 'shock'); if (T === player) { player.vy = 5; player.onGround = false; } } }
     if (s.r > 24) { world.remove(s.mesh); shocks.splice(i, 1); }
   }
 }
 function spawnShock(x, z) {
   const mesh = new THREE.Mesh(shockGeo, new THREE.MeshBasicMaterial({ color: 0xffb060, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
   mesh.rotation.x = -Math.PI / 2; mesh.position.set(x, 0.15, z); world.add(mesh);
-  shocks.push({ mesh, r: 2, x, z, hit: false });
+  shocks.push({ mesh, r: 2, x, z, hit: false, hits: new Set() });
+  coopEv({ t: 'shock', x, z });
 }
 function rexMouth(e, out) { e.parts.head.group.updateMatrixWorld(true); return e.parts.head.group.localToWorld(out.set(0, 0.35, 4.15)); }
 function distPointSeg(p, a, b) {
@@ -2211,7 +2241,7 @@ function updateBoss(e, dt) {
   const B = e.bs, pos = e.root.position, cfg = e.cfg, S = cfg.scale;
   partTick(e, dt);
   for (const k in B.cd) B.cd[k] -= dt;
-  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  const dx = tg.pos.x - pos.x, dz = tg.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
   const toYaw = Math.atan2(dx, dz), yawErr = angDiff(toYaw, e.yaw);
   if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; e.alert = true; } }
   if (!e.alert && dist < 28) e.alert = true;
@@ -2249,7 +2279,7 @@ function updateBoss(e, dt) {
       turnTo = toYaw; turnRate *= 1.6;
       if (B.t <= 0) {
         SFX.brk();
-        if (dist < 6.8 * S && Math.abs(yawErr) < 0.75 && player.pos.y < 6) { damagePlayer(44, pos, 'bite'); knockPlayer(dx, dz, 7); }
+        if (dist < 6.8 * S && Math.abs(yawErr) < 0.75 && tg.pos.y < 6) { hurtTg(44, pos, 'bite'); knockTg(dx, dz, 7); }
         B.state = 'recover'; B.t = 0.7 * REC; B.bit = 0.35;
       }
       break;
@@ -2259,7 +2289,7 @@ function updateBoss(e, dt) {
     case 'spin': {
       e.yaw += (Math.PI * 2 / 0.75) * dt * B.spinDir;
       const tailDir = e.yaw + Math.PI;
-      if (!B.spinHit && dist < 9.5 * S && Math.abs(angDiff(toYaw, tailDir)) < 0.5 && player.pos.y < 3.5) { B.spinHit = true; damagePlayer(33, pos, 'tail'); knockPlayer(dx, dz, 11); }
+      if (!B.spinHit && dist < 9.5 * S && Math.abs(angDiff(toYaw, tailDir)) < 0.5 && tg.pos.y < 3.5) { B.spinHit = true; hurtTg(33, pos, 'tail'); knockTg(dx, dz, 11); }
       if (B.t <= 0) { B.state = 'recover'; B.t = 0.6 * REC; }
       break;
     }
@@ -2279,7 +2309,7 @@ function updateBoss(e, dt) {
         _v3.set(pos.x + sx * 3.4 * S, 3.5 * S, pos.z + sz * 3.4 * S); spawnFlash(_v3, 3, 0.2, 0xffc080); burstSparks(_v3, UPY, 24, 0xffb050, 9); SFX.explode(dist);
         addFeed('REX-09 충돌 · 기절 · 동력로 노출', 'd'); achEvent('rexWall'); popup('기절 · 동력로 노출', 'weak');
       } else { pos.x = nx; pos.z = nz; }
-      if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; damagePlayer(38, pos, 'charge'); knockPlayer(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
+      if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; hurtTg(38, pos, 'charge'); knockTg(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
       B.moveSpeed = 15;
       if (B.state === 'charge' && B.t <= 0) { B.state = 'recover'; B.t = 0.9 * REC; }
       break;
@@ -2287,7 +2317,7 @@ function updateBoss(e, dt) {
     case 'laser_wind': {
       turnTo = toYaw; turnRate *= 1.6;
       const m = rexMouth(e, V3());
-      const want = V3(player.pos.x, player.pos.y + 1.1, player.pos.z).sub(m).normalize();
+      const want = V3(tg.pos.x, tg.pos.y + 1.1, tg.pos.z).sub(m).normalize();
       if (!B.laserAimed) { B.laserDir.copy(want); B.laserAimed = true; }
       const ang = B.laserDir.angleTo(want), maxA = (B.t > 0.5 ? 0.9 : 0) * dt;
       B.laserLocked = B.t <= 0.5;
@@ -2300,7 +2330,7 @@ function updateBoss(e, dt) {
       turnTo = toYaw; turnRate = 0.3 * (B.phase2 ? 1.4 : 1);
       if (!bossWorking(e, 'head')) { B.state = 'recover'; B.t = 0.6 * REC; break; }
       const m = rexMouth(e, V3());
-      const want = V3(player.pos.x, player.pos.y + 1.1, player.pos.z).sub(m).normalize();
+      const want = V3(tg.pos.x, tg.pos.y + 1.1, tg.pos.z).sub(m).normalize();
       const ang = B.laserDir.angleTo(want), maxA = (B.phase2 ? 0.22 : 0.16) * dt;
       if (ang > 1e-4) B.laserDir.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(B.laserDir, want).slerp(new THREE.Quaternion(), 1 - Math.min(1, maxA / ang))).normalize();
       // 사거리: 장애물 또는 바닥까지
@@ -2309,8 +2339,8 @@ function updateBoss(e, dt) {
       const end = m.clone().addScaledVector(B.laserDir, len);
       B.laserEnd = end;
       let near = 1e9;
-      for (const h of [0.3, 0.8, 1.3, player.height - 0.1]) near = Math.min(near, distPointSeg(_v1.set(player.pos.x, player.pos.y + h, player.pos.z), m, end));
-      if (near < 0.75) { B.laserAcc += 45 * dt; if (B.laserAcc >= 6) { B.laserAcc -= 6; damagePlayer(6, m, 'laser'); } }
+      for (const h of [0.3, 0.8, 1.3, tg.height - 0.1]) near = Math.min(near, distPointSeg(_v1.set(tg.pos.x, tg.pos.y + h, tg.pos.z), m, end));
+      if (near < 0.75) { B.laserAcc += 45 * dt; if (B.laserAcc >= 6) { B.laserAcc -= 6; hurtTg(6, m, 'laser'); } }
       if (Math.random() < 0.8) { burstSparks(end, UPY, 3, 0xff8a40, 6); }
       if (Math.random() < 0.3 && end.distanceTo(camera.position) > 4) spawnFlash(end, 2.2, 0.08, 0xff7a30);
       if (B.t <= 0) { B.state = 'recover'; B.t = 0.8 * REC; }
@@ -3431,6 +3461,449 @@ function buildQuarry() {
   return { spawn: V3(0, 0, 33), yaw: 0, bounds: { x: 39, z: 39 } };
 }
 // =====================================================================
+//  협동 모드 (2인 · 방장 권위 방식)
+//  방장: 실제 게임 판정 전부 · 친구: 자기 이동/사격 입력을 보내고 방장이 보낸 상태를 그림
+// =====================================================================
+const COOP_BUILD = 'coop-1';
+const COOP_MISSIONS = ['C'];
+const CODE_CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const NET = { role: null, peer: null, conn: null, code: '', status: 'off', err: '', inGame: false, rp: null, av: null,
+  sendT: 0, fullT: 0, evq: [], outq: [], partner: '', lastRecv: 0, remoteShot: false, remoteOc: false, mute: false, revT: 0 };
+const isHost = () => NET.inGame && NET.role === 'host';
+const isGuest = () => NET.inGame && NET.role === 'guest';
+const coopOn = () => NET.inGame;
+let tg = player;   // 지금 AI가 노리는 대상 (로컬 플레이어 또는 원격 플레이어 프록시)
+
+function peerOpts() {
+  const q = new URLSearchParams(location.search).get('peerhost');
+  if (!q) return { debug: 0 };
+  const [h, p] = q.split(':'); return { host: h, port: +p, path: '/', secure: false, debug: 0, config: { iceServers: [] } };
+}
+function loadPeerJs() {
+  return new Promise((res, rej) => {
+    if (window.Peer) return res();
+    const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = () => window.Peer ? res() : rej(new Error('peer')); s.onerror = () => rej(new Error('load')); document.head.appendChild(s);
+  });
+}
+function coopReset() {
+  try { if (NET.conn) NET.conn.close(); } catch (e) { }
+  try { if (NET.peer) NET.peer.destroy(); } catch (e) { }
+  Object.assign(NET, { role: null, peer: null, conn: null, code: '', status: 'off', err: '', inGame: false, rp: null, evq: [], outq: [], partner: '' });
+}
+function coopFail(msg) { const r = NET.role; coopReset(); NET.err = msg; if (state === 'hub') { hubModal = 'coop'; renderHub(); } }
+async function coopHost() {
+  coopReset(); NET.role = 'host'; NET.status = 'starting'; renderHub();
+  try { await loadPeerJs(); } catch (e) { return coopFail('네트워크 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); }
+  const open = (n) => {
+    NET.code = Array.from({ length: 4 }, () => CODE_CH[Math.floor(Math.random() * CODE_CH.length)]).join('');
+    const peer = new window.Peer('margin-coop-' + NET.code, peerOpts()); NET.peer = peer;
+    peer.on('open', () => { NET.status = 'waiting'; if (state === 'hub') renderHub(); });
+    peer.on('connection', conn => { if (NET.conn) { try { conn.close(); } catch (e) { } return; } coopBind(conn); });
+    peer.on('error', err => {
+      if (err.type === 'unavailable-id' && n < 5) { try { peer.destroy(); } catch (e) { } open(n + 1); }
+      else if (NET.status !== 'connected') coopFail('방을 만들지 못했습니다 (' + err.type + '). 잠시 후 다시 시도해 주세요.');
+    });
+    peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) { } });
+  };
+  open(0);
+}
+async function coopJoin(code) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 4) { NET.err = '방 코드 4자리를 입력해 주세요.'; renderHub(); return; }
+  coopReset(); NET.role = 'guest'; NET.code = code; NET.status = 'joining'; renderHub();
+  try { await loadPeerJs(); } catch (e) { return coopFail('네트워크 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); }
+  const peer = new window.Peer(peerOpts()); NET.peer = peer;
+  peer.on('open', () => {
+    const conn = peer.connect('margin-coop-' + code, { reliable: true, serialization: 'json' }); coopBind(conn);
+    setTimeout(() => { if (NET.role === 'guest' && NET.status === 'joining') coopFail('방에 연결하지 못했습니다. 코드와 인터넷 연결을 확인해 주세요.'); }, 15000);
+  });
+  peer.on('error', err => { if (NET.status !== 'connected') coopFail(err.type === 'peer-unavailable' ? '해당 코드의 방을 찾지 못했습니다.' : '연결 실패 (' + err.type + ')'); });
+}
+function coopBind(conn) {
+  NET.conn = conn;
+  conn.on('open', () => { NET.status = 'connected'; NET.err = ''; NET.lastRecv = time; coopSend({ t: 'hello', b: COOP_BUILD }); SFX.ui(); if (state === 'hub') renderHub(); });
+  conn.on('data', d => { NET.lastRecv = time; try { coopRecv(typeof d === 'string' ? JSON.parse(d) : d); } catch (e) { console.error('coop recv', e); } });
+  conn.on('close', () => coopLost());
+  conn.on('error', () => coopLost());
+}
+function coopSend(m) { try { if (NET.conn && NET.conn.open) NET.conn.send(m); } catch (e) { } }
+function coopLeave() { coopSend({ t: 'bye' }); if (coopOn() && state === 'mission') endMission('abandon'); coopReset(); if (state === 'hub') renderHub(); }
+function coopLost() {
+  if (NET.status === 'off') return;
+  const wasGuest = NET.role === 'guest', inMission = coopOn() && state === 'mission';
+  coopReset(); NET.err = '동료와의 연결이 끊어졌습니다.';
+  if (inMission) {
+    if (wasGuest) { addFeed('방장 연결 끊김 · 임무 중단 (회수한 부품은 정산)', 'x'); endMission('extract'); }
+    else { addFeed('동료 연결 끊김 · 혼자 계속 진행', 'x'); if (NET.av) { world.remove(NET.av.g); NET.av = null; } }
+  } else if (state === 'hub') renderHub();
+}
+function coopLaunch(m) {
+  if (NET.role !== 'host' || NET.status !== 'connected' || !COOP_MISSIONS.includes(m)) return;
+  NET.inGame = true; coopSend({ t: 'start', m }); selectedMission = m; startMission(m);
+}
+
+// ---------------- 원격 플레이어 (모습 + 판정용 프록시) ----------------
+function makeRemote() { return { remote: true, pos: V3(), vel: V3(), onGround: true, eye: EYE, height: P_HEIGHT, crouch: 0, hspeed: 0, hp: 100, mhp: 100, dn: false, out: false, downT: 0, yaw: 0, pitch: 0, w: 'pistol', tpos: V3(), shots: 0 }; }
+function buildAvatar() {
+  const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
+  const mat = c => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
+  const add = (geo, c, x, y, z, parent = body) => { const m = new THREE.Mesh(geo, mat(c)); m.position.set(x, y, z); parent.add(m); return m; };
+  add(_box3(0.16, 0.8, 0.18), 0x2c3a46, -0.13, 0.4, 0); add(_box3(0.16, 0.8, 0.18), 0x2c3a46, 0.13, 0.4, 0);
+  add(_box3(0.5, 0.62, 0.3), 0x3f8fd0, 0, 1.12, 0); add(_box3(0.54, 0.18, 0.34), 0x2a2d30, 0, 1.38, 0);
+  const head = new THREE.Group(); head.position.set(0, 1.58, 0); body.add(head);
+  add(_box3(0.3, 0.28, 0.3), 0x3a4752, 0, 0, 0, head);
+  const visor = new THREE.Mesh(_box3(0.26, 0.08, 0.02), new THREE.MeshBasicMaterial({ color: 0x7ad8ff })); visor.position.set(0, 0.02, 0.16); head.add(visor);
+  const arm = new THREE.Group(); arm.position.set(-0.3, 1.32, 0.05); body.add(arm);
+  add(_box3(0.12, 0.12, 0.45), 0x3f8fd0, 0, -0.05, 0.2, arm);
+  add(_box3(0.08, 0.12, 0.55), 0x1e1e1e, 0.02, 0.0, 0.5, arm);
+  const flash = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffd28a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  flash.position.set(0.02, 0, 0.82); arm.add(flash);
+  const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d');
+  x.fillStyle = 'rgba(10,12,14,.75)'; x.fillRect(0, 8, 256, 48); x.fillStyle = '#7ad8ff'; x.font = 'bold 30px sans-serif'; x.textAlign = 'center'; x.fillText('동료', 128, 43);
+  const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+  tag.scale.set(1.0, 0.25, 1); tag.position.set(0, 2.15, 0); g.add(tag);
+  world.add(g);
+  return { g, body, head, arm, flash, tag };
+}
+function updateAvatar(dt) {
+  const r = NET.rp, a = NET.av; if (!r || !a) return;
+  a.g.position.lerp(r.tpos, clamp(dt * 14, 0, 1)); r.pos.copy(a.g.position);
+  a.g.rotation.y = lerpAngle(a.g.rotation.y, r.yaw + Math.PI, clamp(dt * 14, 0, 1));
+  a.arm.rotation.x = -r.pitch; a.head.rotation.x = -r.pitch * 0.6;
+  const down = r.dn || r.out;
+  a.body.rotation.x = lerp(a.body.rotation.x, down ? -1.45 : 0, clamp(dt * 6, 0, 1));
+  a.body.position.y = lerp(a.body.position.y, down ? 0.25 : -r.crouch * 0.45, clamp(dt * 6, 0, 1));
+  a.flash.material.opacity = Math.max(0, a.flash.material.opacity - dt * 18);
+  a.tag.material.opacity = r.out ? 0.35 : 1;
+}
+function lerpAngle(a, b, k) { return a + angDiff(b, a) * k; }
+function avatarMuzzle(out) { const a = NET.av; if (!a) return out.copy(NET.rp ? NET.rp.pos : player.pos); a.g.updateMatrixWorld(true); return a.flash.getWorldPosition(out); }
+function avatarShotFx(wid, pts) {
+  if (!NET.av) return; NET.av.flash.material.opacity = 1;
+  const m = avatarMuzzle(V3()); SFX.eshot('combat', m.distanceTo(player.pos) * 0.6);
+  for (const p of pts || []) spawnTracer(m, V3(p[0], p[1], p[2]), 0x9ad8ff, 0.06);
+}
+
+// ---------------- 대상 선택 · 피해 전달 ----------------
+function coopTargets() {
+  const t = [];
+  if (!player.downed) t.push(player);
+  if (isHost() && NET.rp && !NET.rp.dn && !NET.rp.out && NET.conn) t.push(NET.rp);
+  return t;
+}
+function pickTarget(e, dt) {
+  if (!isHost() || !NET.rp) return player;
+  const c = coopTargets(); if (!c.length) return player; if (c.length === 1) return c[0];
+  const ep = e.dragon ? e.headPos : e.root.position;
+  if (!e.boss) return c.reduce((a, b) => Math.hypot(a.pos.x - ep.x, a.pos.z - ep.z) <= Math.hypot(b.pos.x - ep.x, b.pos.z - ep.z) ? a : b);
+  e.tgtT = (e.tgtT || 0) - dt;
+  if (e.tgt && c.includes(e.tgt) && e.tgtT > 0) return e.tgt;
+  const ag = e.aggro || {};
+  const score = p => (ag[p === player ? 'l' : 'r'] || 0) * 0.02 + 40 / (4 + Math.hypot(p.pos.x - ep.x, p.pos.z - ep.z)) + Math.random() * 2;
+  e.tgt = c.reduce((a, b) => score(a) >= score(b) ? a : b); e.tgtT = rand(5, 8);
+  for (const k in ag) ag[k] *= 0.5;
+  return e.tgt;
+}
+function hurtTarget(T, d, from, src) {
+  if (T === player || !T.remote) { damagePlayer(d, from, src); return; }
+  if (T.dn || T.out) return;
+  coopEv({ t: 'hurt', d: +d.toFixed(2), f: [from.x, from.y, from.z], s: src });
+}
+function knockTarget(T, dx, dz, p) { if (T === player || !T.remote) knockPlayer(dx, dz, p); else coopEv({ t: 'knock', dx, dz, p }); }
+function dmgTargets() { return isHost() && NET.rp && NET.conn && !NET.rp.dn && !NET.rp.out ? [player, NET.rp] : [player]; }
+// 친구 화면의 사격: 판정은 방장이 하고, 여기서는 맞은 위치 연출만
+function guestRay(origin, dir, w) {
+  raycaster.set(origin, dir); raycaster.far = w.range; raycaster.near = 0.05;
+  const h = raycaster.intersectObjects(hittables, false)[0];
+  if (!h) return { point: origin.clone().addScaledVector(dir, w.range), part: null };
+  const n = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().negate();
+  const ud = h.object.userData, p = ud.part;
+  if (p) {
+    const precise = p.precise || ud.hitMult > 1.2, armorish = p.type === 'armor';
+    burstSparks(h.point, n, precise ? 9 : 6, precise ? 0xff9a3a : (armorish ? 0xe8e4d8 : 0xffc060), precise ? 7 : 5);
+    spawnFlash(h.point, precise ? 0.5 : 0.32, 0.06, precise ? 0xffb060 : 0xfff0d0);
+    const kind = precise ? 'weak' : armorish ? 'armor' : 'hit'; showHitmarker(kind); SFX.hit(kind);
+    return { point: h.point, part: p, mesh: h.object };
+  }
+  burstSparks(h.point, n, 4, 0xd8d0c0, 3); spawnFlash(h.point, 0.18, 0.05, 0xddd6c8);
+  return { point: h.point, part: null, mesh: h.object };
+}
+const hurtTg = (d, from, src) => hurtTarget(tg, d, from, src);
+const knockTg = (dx, dz, p) => knockTarget(tg, dx, dz, p);
+
+// ---------------- 이벤트 큐 ----------------
+function coopEv(o) { if (isHost()) NET.evq.push(o); }
+function coopOut(o) { if (isGuest()) NET.outq.push(o); }
+const eIdx = e => enemies.indexOf(e);
+const v3a = v => [+v.x.toFixed(3), +v.y.toFixed(3), +v.z.toFixed(3)];
+const av3 = a => V3(a[0], a[1], a[2]);
+
+// ---------------- 방장: 상태 전송 ----------------
+function snapEnemy(e, i) {
+  const p = e.root.position, o = { i, x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), r: +e.yaw.toFixed(3), a: e.alert ? 1 : 0 };
+  if (e.type === 'rex') {
+    const B = e.bs;
+    Object.assign(o, { s: B.state, t: +(B.t || 0).toFixed(2), ms: +(B.moveSpeed || 0).toFixed(2), cr: B.crawl ? 1 : 0, p2: B.phase2 ? 1 : 0, mk: +(B.markerA || 0).toFixed(2),
+      ld: v3a(B.laserDir), lk: B.laserLocked ? 1 : 0, le: B.laserEnd ? v3a(B.laserEnd) : null });
+  } else { o.ms = +(e.moveSpeed || 0).toFixed(2); o.st = e.stunT > 0 ? 1 : 0; o.wp = e.parts.weapon && e.parts.weapon.attached ? +e.parts.weapon.group.rotation.x.toFixed(2) : 0; }
+  return o;
+}
+function coopHostSend(dt) {
+  NET.sendT -= dt; NET.fullT -= dt;
+  if (NET.sendT > 0) return;
+  NET.sendT = 0.05;
+  const full = NET.fullT <= 0; if (full) NET.fullT = 1;
+  const es = [], ps = [];
+  enemies.forEach((e, i) => {
+    if (e.dead) return;
+    es.push(snapEnemy(e, i));
+    for (const id in e.parts) { const p = e.parts[id]; if ((p.nd || full) && p.attached) { ps.push([i, id, +p.hp.toFixed(1), +p.brk.toFixed(1), p.state]); p.nd = 0; } }
+  });
+  const eu = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+  coopSend({ t: 'snap', h: { p: v3a(player.pos), y: +eu.y.toFixed(3), x: +eu.x.toFixed(3), c: +player.crouch.toFixed(2), dn: player.downed ? 1 : 0, out: player.out ? 1 : 0,
+    hp: Math.round(player.hp), mhp: player.maxHp, dt: +(run.downT || 0).toFixed(1), w: curWeapon().id, sh: NET.hostShots || null }, e: es, p: ps, ev: NET.evq, ob: run.objDone ? 1 : 0, fo: run.focusT > 0 ? 1 : 0 });
+  NET.evq = []; NET.hostShots = null;
+}
+function coopHostShotFx(pts) { if (!isHost()) return; NET.hostShots = (NET.hostShots || []).concat(pts.slice(0, 3)); }
+
+// ---------------- 친구: 입력 전송 ----------------
+function coopGuestSend(dt) {
+  NET.sendT -= dt; if (NET.sendT > 0) return; NET.sendT = 0.05;
+  const eu = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+  coopSend({ t: 'in', p: v3a(player.pos), v: [+player.vel.x.toFixed(2), +player.vel.z.toFixed(2)], y: +eu.y.toFixed(3), x: +eu.x.toFixed(3), c: +player.crouch.toFixed(2),
+    og: player.onGround ? 1 : 0, hs: +player.hspeed.toFixed(2), hp: Math.round(player.hp), mhp: player.maxHp, dn: player.downed ? 1 : 0, out: player.out ? 1 : 0, dt: +(run.downT || 0).toFixed(1),
+    w: curWeapon().id, ev: NET.outq });
+  NET.outq = [];
+}
+
+// ---------------- 수신 ----------------
+function coopRecv(m) {
+  switch (m.t) {
+    case 'hello': NET.partner = m.b; if (m.b !== COOP_BUILD) NET.err = '두 사람의 게임 버전이 다릅니다. 둘 다 새로고침해 주세요.'; if (state === 'hub') renderHub(); break;
+    case 'bye': coopLost(); break;
+    case 'start': if (NET.role === 'guest') { NET.inGame = true; selectedMission = m.m; if (state === 'mission') { run = null; } startMission(m.m); } break;
+    case 'snap': if (isGuest() && state === 'mission') coopApplySnap(m); break;
+    case 'in': if (isHost() && state === 'mission') coopApplyInput(m); break;
+  }
+}
+function coopApplyInput(m) {
+  const r = NET.rp; if (!r) return;
+  r.tpos.set(m.p[0], m.p[1], m.p[2]); r.vel.set(m.v[0], 0, m.v[1]); r.yaw = m.y; r.pitch = m.x; r.crouch = m.c; r.onGround = !!m.og; r.hspeed = m.hs;
+  r.eye = lerp(EYE, 1.02, r.crouch); r.height = lerp(P_HEIGHT, 1.22, r.crouch);
+  r.hp = m.hp; r.mhp = m.mhp; r.dn = !!m.dn; r.out = !!m.out; r.downT = m.dt; r.w = m.w;
+  for (const ev of m.ev || []) {
+    if (ev.t === 'shot') {
+      NET.remoteShot = true; NET.remoteOc = !!ev.oc;
+      const o = av3(ev.o), pts = [];
+      for (const d of ev.d) { const res = fireRay(o, av3(d).normalize(), ev.w); pts.push(v3a(res.point)); }
+      NET.remoteShot = false; NET.remoteOc = false;
+      avatarShotFx(ev.w.id, pts);
+      for (const e of enemies) if (!e.dead && !e.alert && e.root.position.distanceTo(r.pos) < 11) e.pendingAlert = e.pendingAlert || rand(0.6, 1.2);
+    } else if (ev.t === 'nade') { NET.remoteShot = true; launchThrowable(ev.k, av3(ev.f), av3(ev.v), !!ev.imp, ev.ex); NET.remoteShot = false; }
+    else if (ev.t === 'focus') run.focusT = Math.max(run.focusT, 4);
+    else if (ev.t === 'pick') { }
+    else if (ev.t === 'rev') coopRevived();
+    else if (ev.t === 'ex') coopTryExtract(true);
+    else if (ev.t === 'leave') { r.out = true; addFeed('동료가 임무에서 이탈했습니다', 'x'); }
+  }
+}
+function coopApplySnap(m) {
+  for (const ev of m.ev || []) coopGuestEvent(ev);
+  if (state !== 'mission' || !run) return;
+  const r = NET.rp, h = m.h;
+  if (r) { r.tpos.set(h.p[0], h.p[1], h.p[2]); r.yaw = h.y; r.pitch = h.x; r.crouch = h.c; r.dn = !!h.dn; r.out = !!h.out; r.hp = h.hp; r.mhp = h.mhp; r.downT = h.dt; r.w = h.w; if (h.sh) avatarShotFx(h.w, h.sh); }
+  for (const s of m.e) { const e = enemies[s.i]; if (e && !e.dead) { e.net = s; e.alert = !!s.a; } }
+  for (const [i, id, hp, brk, st] of m.p) {
+    const e = enemies[i]; if (!e) continue; const p = e.parts[id]; if (!p || !p.attached) continue;
+    const ch = p.state !== st || Math.abs(p.hp - hp) > 0.05;
+    if (hp < p.hp - 0.05) { p.flash = 0.07; for (const mm of p.meshes) mm.material.emissive.setRGB(0.55, 0.38, 0.2); }
+    p.hp = hp; p.brk = brk; p.state = st; if (ch && p.flash <= 0) updatePartVisual(p);
+  }
+  run.focusT = m.fo ? Math.max(run.focusT, 0.1) : run.focusT;
+}
+function coopGuestEvent(ev) {
+  const E = enemies[ev.i], P = E && ev.pid ? E.parts[ev.pid] : null;
+  switch (ev.t) {
+    case 'spawn': { const e = spawnEnemy(ev.k, ev.x, ev.z, ev.r); e.pendingAlert = 0; e.alert = true; if (eIdx(e) !== ev.i) console.warn('coop spawn index mismatch', eIdx(e), ev.i); break; }
+    case 'det': if (P && P.attached) detachPart(P, av3(ev.v), false); break;
+    case 'sh': if (P && P.attached) shatter(P); break;
+    case 'kill': if (E && !E.dead) killEnemy(E, ev.c); break;
+    case 'loot': coopGuestLoot(ev); break;
+    case 'unl': { const l = loots.find(x => x.lid === ev.lid); if (l) { loots.splice(loots.indexOf(l), 1); world.remove(l.obj, l.ring, l.beam); } break; }
+    case 'got': {
+      const l = loots.find(x => x.lid === ev.lid); if (l) { loots.splice(loots.indexOf(l), 1); world.remove(l.obj, l.ring, l.beam); }
+      run.loot.push(ev.l); SFX.pickup(); achEvent('pickup', { l: Object.assign({ p: P || { id: '', enemy: { type: ev.l.src } } }, ev.l) });
+      addFeed(`회수 · ${ev.l.name} (${STATE_KO[ev.l.state]} ${Math.round(ev.l.cond * 100)}%) ${fmt(ev.l.val)} CR`, 'p'); break;
+    }
+    case 'mis': {
+      const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: ev.c })); mesh.scale.set(ev.s[0], ev.s[1], ev.s[2]); const from = av3(ev.f), to = av3(ev.to); mesh.position.copy(from); world.add(mesh);
+      const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
+      marker.rotation.x = -Math.PI / 2; marker.position.copy(to); world.add(marker);
+      missiles.push({ mesh, marker, from, to, t: 0, T: ev.T, h: ev.h, vis: true }); spawnFlash(from, 0.8, 0.08, 0xff9a50); SFX.missile(); break;
+    }
+    case 'shock': spawnShock(ev.x, ev.z); break;
+    case 'boom': { const p = av3(ev.p), d = p.distanceTo(player.pos); SFX.explode(d); spawnFlash(p, ev.R * 1.1, 0.22, 0xffa050); burstSparks(p, UPY, 26, 0xffa040, 9); spawnDebris(p, 0x3a3630, 5, 5); blastLight.position.copy(p); blastLight.intensity = 80; shake = Math.max(shake, d < 12 ? 0.02 : 0.006); break; }
+    case 'empfx': { const p = av3(ev.p); SFX.emp(); spawnFlash(p, ev.R * 1.3, 0.3, 0x6ac8ff); burstSparks(p, UPY, 30, 0x6ac8ff, 8);
+      const ring = new THREE.Mesh(shockGeo, new THREE.MeshBasicMaterial({ color: 0x6ac8ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+      ring.rotation.x = -Math.PI / 2; ring.position.set(p.x, Math.max(0.15, p.y), p.z); world.add(ring); fadeRings.push({ mesh: ring, t: 0, R: ev.R }); break; }
+    case 'nade': NET.remoteShot = true; launchThrowable(ev.k, av3(ev.f), av3(ev.v), !!ev.imp, ev.ex); NET.remoteShot = false; break;
+    case 'eshot': {
+      const pr = poolGet(FX.projs, 80, () => { const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffffff })); scene.add(mesh); return { mesh, vel: V3(), prev: V3() }; });
+      const m = av3(ev.f), d = av3(ev.d);
+      pr.alive = true; pr.life = 3; pr.dmg = 0; pr.src = null; pr.mesh.visible = true; pr.mesh.material.color.setHex(ev.c);
+      pr.mesh.position.copy(m); pr.vel.copy(d).multiplyScalar(ev.s); pr.mesh.scale.set(ev.z, ev.z, ev.z * 3.5); pr.mesh.lookAt(_v1.copy(m).add(d)); spawnFlash(m, 0.4, 0.06, ev.c); SFX.eshot(ev.k, m.distanceTo(player.pos)); break;
+    }
+    case 'feed': addFeed(ev.s, ev.c); break;
+    case 'pop': popup(ev.s, ev.c); break;
+    case 'hurt': damagePlayer(ev.d, av3(ev.f), ev.s); break;
+    case 'knock': knockPlayer(ev.dx, ev.dz, ev.p); break;
+    case 'rev': coopRevived(); break;
+    case 'obj':
+      if (!run.objDone) { run.objDone = true; run.bossKillT = ev.bt; run.pistolOnly = Object.keys(run.used).every(k => ['pistol', 'emp'].includes(k)); SFX.objective(); addFeed(`${run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); }
+      break;
+    case 'end': coopEndLocal(ev.k); break;
+    case 'sfx': if (SFX[ev.n]) SFX[ev.n](); break;
+  }
+}
+function coopGuestLoot(ev) {
+  const E = enemies[ev.i], p = E && E.parts[ev.pid]; if (!p) return;
+  const fi = fallers.findIndex(f => f.obj === p.group); if (fi >= 0) fallers.splice(fi, 1);
+  if (p.attached) { p.attached = false; removeHittables(p.meshes); }
+  world.attach(p.group); p.group.position.set(ev.gp[0], ev.gp[1], ev.gp[2]); p.group.quaternion.set(ev.gq[0], ev.gq[1], ev.gq[2], ev.gq[3]);
+  p.state = ev.state; p.flash = 0; updatePartVisual(p);
+  const ring = new THREE.Mesh(lootRingGeo, new THREE.MeshBasicMaterial({ color: 0xffb340, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(ev.x, ev.y + 0.03, ev.z);
+  const beam = new THREE.Mesh(lootBeamGeo, new THREE.MeshBasicMaterial({ color: 0xffb340, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
+  beam.position.set(ev.x, ev.y + 1.2, ev.z); world.add(ring, beam);
+  loots.push({ lid: ev.lid, p, obj: p.group, ring, beam, x: ev.x, y: ev.y, z: ev.z, cond: ev.cond, state: ev.state, r: ev.r, rs: ev.r / 2.3, name: ev.name, base: ev.base, val: ev.val });
+}
+
+// ---------------- 친구 화면의 적 (방장 상태를 따라 그림) ----------------
+function puppetUpdate(e, dt) {
+  const s = e.net; if (e.dead) return;
+  if (s) {
+    const k = clamp(dt * 12, 0, 1);
+    e.root.position.x = lerp(e.root.position.x, s.x, k); e.root.position.y = lerp(e.root.position.y, s.y, k); e.root.position.z = lerp(e.root.position.z, s.z, k);
+    if (Math.hypot(e.root.position.x - s.x, e.root.position.z - s.z) > 6) e.root.position.set(s.x, s.y, s.z);
+    e.yaw = lerpAngle(e.yaw, s.r, k); e.root.rotation.y = e.yaw;
+  }
+  if (e.type === 'rex') {
+    const B = e.bs;
+    if (s) {
+      if (s.s !== B.state) {
+        if (s.s === 'roar' || s.s === 'charge') SFX.roar(); else if (s.s === 'laser') SFX.laser(); else if (s.s === 'spin') SFX.missile();
+        else if (s.s === 'recover' && B.state === 'bite') { B.bit = 0.35; SFX.brk(); }
+        else if (s.s === 'stunned' || s.s === 'knockdown') { shake = Math.max(shake, 0.02); }
+      }
+      B.state = s.s; B.t = s.t; B.moveSpeed = s.ms; B.crawl = !!s.cr; B.phase2 = !!s.p2; B.markerA = s.mk; B.laserDir.set(s.ld[0], s.ld[1], s.ld[2]); B.laserLocked = !!s.lk; B.laserEnd = s.le ? av3(s.le) : null;
+    }
+    partTick(e, dt);
+    if (B.state === 'laser' && B.laserEnd && Math.random() < 0.6) burstSparks(B.laserEnd, UPY, 3, 0xff8a40, 6);
+    animateRex(e, dt);
+    return;
+  }
+  partTick(e, dt);
+  if (s) { e.stunT = s.st ? 0.2 : 0; if (e.parts.weapon && e.parts.weapon.attached) e.parts.weapon.group.rotation.x = s.wp; }
+  e.moveSpeed = s ? s.ms : 0;
+  animateLegs(e, e.moveSpeed, dt);
+}
+
+// ---------------- 쓰러짐 · 부활 · 탈출 ----------------
+function coopDown() {
+  if (player.downed) return;
+  player.downed = true; player.hp = 0; run.downT = 35; mouseDown = rightDown = false; run.burstLeft = 0;
+  addFeed('쓰러짐 · 동료가 다가와 E를 길게 누르면 일어납니다', 'x'); popup('쓰러짐', 'bad'); SFX.hurt();
+  if (isHost()) coopEv({ t: 'feed', s: '동료 쓰러짐 · 다가가서 E를 길게 눌러 일으키세요', c: 'x' });
+}
+function coopRevived() {
+  if (!player.downed || player.out || !run) return;
+  player.downed = false; player.hp = player.maxHp * 0.4; run.iframeT = 1.5; player.lastHurt = time;
+  addFeed('동료가 일으켜 세웠습니다', 'p'); popup('부활', 'ok'); SFX.skill('nano');
+}
+function coopTick(dt) {
+  if (!run) return;
+  // 쓰러진 상태 · 출혈
+  if (player.downed && !player.out) {
+    run.downT -= dt;
+    if (run.downT <= 0) { player.out = true; addFeed('출혈 한계 · 이번 임무에서 이탈 (정산 시 사망 처리)', 'x'); if (isHost()) coopEv({ t: 'feed', s: '동료가 출혈 한계로 이탈했습니다', c: 'x' }); }
+  }
+  updateAvatar(dt);
+  // 동료 부활
+  const r = NET.rp;
+  if (r && (r.dn && !r.out) && !player.downed && Math.hypot(r.pos.x - player.pos.x, r.pos.z - player.pos.z) < 2.4 && keys.KeyE) {
+    NET.revT += dt;
+    if (NET.revT >= 2.5) { NET.revT = 0; if (isHost()) coopEv({ t: 'rev' }); else coopOut({ t: 'rev' }); r.dn = false; addFeed('동료를 일으켜 세웠습니다', 'p'); }
+  } else NET.revT = 0;
+  if (isHost()) {
+    // 친구의 전리품 회수 (방장이 판정)
+    if (r && !r.dn && !r.out) for (let i = loots.length - 1; i >= 0; i--) {
+      const l = loots[i];
+      if (Math.hypot(l.x - r.pos.x, l.z - r.pos.z) <= l.r && Math.abs(l.y - r.pos.y) <= 1.6) {
+        loots.splice(i, 1); world.remove(l.obj, l.ring, l.beam);
+        coopEv({ t: 'got', lid: l.lid, i: eIdx(l.p.enemy), pid: l.p.id, l: { name: l.name, base: l.base, val: l.val, cond: l.cond, state: l.state, src: l.p.enemy.type } });
+      }
+    }
+    // 둘 다 쓰러지면 실패
+    const meDown = player.downed || player.out, youDown = !r || !NET.conn || r.dn || r.out;
+    if (meDown && youDown && state === 'mission') { coopEv({ t: 'end', k: 'dead' }); coopHostSend(0.05); NET.sendT = 0; coopFlush(); endMission('dead'); return; }
+    coopHostSend(dt);
+  } else coopGuestSend(dt);
+}
+function coopFlush() { if (isHost()) { NET.sendT = 0; NET.fullT = 1; coopHostSend(0); } }
+function inZone(p) { return extraction && Math.hypot(extraction.x - p.x, extraction.z - p.z) < extraction.r + 0.6; }
+function coopTryExtract(fromGuest) {
+  if (isGuest()) { coopOut({ t: 'ex' }); popup('동료가 탈출 지점에 오면 함께 탈출합니다', 'dim'); return; }
+  if (!run.objDone) return;
+  const r = NET.rp, partnerOk = !r || !NET.conn || r.out || r.dn || inZone(r.pos), meOk = player.out || player.downed || inZone(player.pos);
+  if (partnerOk && meOk) { coopEv({ t: 'end', k: 'extract' }); coopFlush(); endMission(player.downed || player.out ? 'dead' : 'extract'); }
+  else if (fromGuest) coopEv({ t: 'pop', s: '방장이 탈출 지점에 와야 합니다', c: 'dim' });
+  else { popup('동료가 탈출 지점에 와야 합니다', 'dim'); coopEv({ t: 'feed', s: '방장이 탈출 지점에서 기다리는 중', c: 'x' }); }
+}
+function coopEndLocal(k) {
+  if (state !== 'mission') return;
+  const dead = player.downed || player.out;
+  endMission(k === 'dead' || dead ? 'dead' : k === 'abandon' ? 'extract' : k);
+}
+function coopHud() {
+  const el = $('coopinfo'); if (!el) return;
+  if (!coopOn() || !NET.rp) { el.classList.add('hidden'); return; }
+  const r = NET.rp; el.classList.remove('hidden');
+  el.innerHTML = !NET.conn ? '<span class="bad">동료 연결 끊김</span>' : r.out ? '<span class="bad">동료 이탈</span>' : r.dn ? `<span class="bad">동료 쓰러짐 · ${Math.ceil(r.downT)}초</span>` : `동료 체력 <span class="mono">${Math.round(r.hp)} / ${r.mhp}</span>`;
+}
+function coopPrompt() {
+  if (!coopOn() || !run) return '';
+  if (player.out) return '<span class="bad">이번 임무에서 이탈했습니다 · 동료의 탈출을 기다리는 중</span>';
+  if (player.downed) return `<span class="bad">쓰러짐 · 동료가 일으켜 줄 때까지 ${Math.ceil(run.downT)}초</span>`;
+  const r = NET.rp;
+  if (r && r.dn && !r.out && Math.hypot(r.pos.x - player.pos.x, r.pos.z - player.pos.z) < 2.4) return `<b>[E 길게]</b>동료 일으키기 ${NET.revT > 0 ? Math.round(NET.revT / 2.5 * 100) + '%' : ''}`;
+  return '';
+}
+function coopModalHtml() {
+  const st = NET.status, err = NET.err ? `<div class="bad" style="margin-top:12px;font-size:13px">${NET.err}</div>` : '';
+  let body = '';
+  if (st === 'off') body = `<div class="dim" style="font-size:13px;line-height:1.6">친구와 함께 보스 작전에 들어갑니다. 지금은 <b>OP-X 렉스 사냥</b>만 지원합니다. 방장의 컴퓨터가 게임을 진행하므로 방장은 게임 창을 내리지 마세요.</div>
+      <div style="display:flex;gap:10px;margin-top:16px"><button class="primary" id="cohost">방 만들기</button></div>
+      <div class="lbl" style="margin:20px 0 8px">참가하기</div>
+      <div style="display:flex;gap:8px"><input id="cocode" maxlength="4" placeholder="방 코드 4자리" style="flex:1;text-transform:uppercase;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.3em;padding:10px;background:#111;border:1px solid var(--line);color:#efe9de"><button id="cojoin">참가</button></div>`;
+  else if (st === 'starting' || st === 'joining') body = `<div class="dim">${st === 'starting' ? '방을 만드는 중…' : `방 <b class="mono">${NET.code}</b>에 연결하는 중…`}</div><div style="margin-top:16px"><button id="coleave">취소</button></div>`;
+  else if (st === 'waiting') body = `<div class="lbl">방 코드</div><div class="mono acc" style="font-size:44px;letter-spacing:.35em;margin:6px 0 10px">${NET.code}</div>
+      <div class="dim" style="font-size:13px;line-height:1.6">친구가 같은 주소에서 <b>협동 → 참가하기</b>에 이 코드를 입력하면 연결됩니다.</div><div style="margin-top:16px"><button id="coleave">방 닫기</button></div>`;
+  else if (st === 'connected') body = NET.role === 'host'
+    ? `<div class="ok" style="font-size:15px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">출격하면 둘이 함께 REX-09 작전에 들어갑니다. 협동에서는 REX-09의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
+       <div style="display:flex;gap:10px;margin-top:16px"><button class="primary" id="colaunch">협동 출격 · OP-X 렉스 사냥</button><button id="coleave">연결 끊기</button></div>`
+    : `<div class="ok" style="font-size:15px">방 <span class="mono">${NET.code}</span> 접속됨</div><div class="dim" style="font-size:13px;margin-top:8px">방장이 출격하면 자동으로 함께 작전에 들어갑니다. 그동안 상점에서 장비를 정비해도 됩니다.</div><div style="margin-top:16px"><button id="coleave">나가기</button></div>`;
+  return `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>협동</h2><span class="lbl">2인 · 보스 작전</span></header><div class="body">${body}${err}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
+}
+function coopBindModal(H) {
+  const b = id => H.querySelector('#' + id);
+  if (b('cohost')) b('cohost').onclick = () => { NET.err = ''; coopHost(); };
+  if (b('cojoin')) b('cojoin').onclick = () => { const v = b('cocode').value; NET.err = ''; coopJoin(v); };
+  if (b('cocode')) b('cocode').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); coopJoin(e.target.value); } };
+  if (b('coleave')) b('coleave').onclick = () => { coopLeave(); NET.err = ''; renderHub(); };
+  if (b('colaunch')) b('colaunch').onclick = () => coopLaunch('C');
+}
+// =====================================================================
 //  업적
 // =====================================================================
 const ACH_CATS = ['전투', '회수', '보스', '성장', '기상천외'];
@@ -3458,13 +3931,13 @@ const ACH = [
   { id: 'rexCore', cat: '보스', name: '티라노 재활용', desc: 'REX-09에서 떨어진 부품 8개 이상을 들고 탈출한다.', cr: 450 },
   { id: 'rexCrawl', cat: '보스', name: '하체 붕괴', desc: 'REX-09의 두 다리를 완전히 망가뜨려 기어 다니게 만든다.', cr: 300 },
   { id: 'rexWall', cat: '보스', name: '기둥 박치기 3연속', desc: '한 전투에서 REX-09를 기둥에 세 번 들이받게 한다.', cr: 350 },
-  { id: 'dragon', cat: '보스', name: '용 사냥꾼', desc: '청룡을 격파한다.', cr: 750 },
-  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 1800 },
+  { id: 'dragon', cat: '보스', name: '용 사냥꾼', desc: '청룡을 격파한다.', cr: 900 },
+  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 2200 },
   { id: 'pearl', cat: '보스', name: '여의주 도둑', desc: '상태 90% 이상의 여의주를 회수한다.', cr: 600 },
   { id: 'barber', cat: '보스', name: '청룡 이발소', desc: '한 전투에서 청룡의 양쪽 뿔을 온전히 떼어 낸다.', cr: 350 },
   { id: 'both', cat: '보스', name: '용과 공룡', desc: 'REX-09와 청룡을 모두 격파한다.', cr: 900 },
-  { id: 'spider', cat: '보스', name: '거미 퇴치', desc: 'ARACHNE를 격파한다.', cr: 800 },
-  { id: 'spiderPistol', cat: '보스', name: '권총 한 자루 vs 다리 여섯 개', desc: '기본 권총만으로 ARACHNE를 격파한다.', cr: 1800 },
+  { id: 'spider', cat: '보스', name: '거미 퇴치', desc: 'ARACHNE를 격파한다.', cr: 700 },
+  { id: 'spiderPistol', cat: '보스', name: '권총 한 자루 vs 다리 여섯 개', desc: '기본 권총만으로 ARACHNE를 격파한다.', cr: 1600 },
   { id: 'spiderLegs', cat: '보스', name: '다리 여섯 개 수거', desc: '한 전투에서 ARACHNE의 다리 여섯 개를 모두 무너뜨린다.', cr: 600 },
   { id: 'trio', cat: '보스', name: '최종 작전 완수', desc: '세 보스를 모두 격파한다.', cr: 1500 },
   // 성장
@@ -3596,7 +4069,7 @@ function achEvent(type, d = {}) {
         if (!multi && run.shots >= 20 && run.shotsHit >= run.shots) achUnlock('acc100');
         if (run.shots >= 300 && run.shotsHit / run.shots <= 0.05) achUnlock('miss95');
         if (A.dmg >= 300) achUnlock('tank300');
-        if (run.objDone && run.mission.boss && run.pistolOnly) achUnlock({ C: 'rexPistol', D: 'dragonPistol', F: 'spiderPistol' }[run.mission.id]);
+        if (run.objDone && run.mission.boss && run.pistolOnly && !run.coop) achUnlock({ C: 'rexPistol', D: 'dragonPistol', F: 'spiderPistol' }[run.mission.id]);
       }
       if (k === 'dead') {
         if (run.loot.reduce((a, l) => a + l.val, 0) >= 3000) achUnlock('deathRich');
@@ -3630,6 +4103,7 @@ const _achEu = new THREE.Euler();
 
 function killEnemy(e, cause) {
   if (e.dead) return;
+  coopEv({ t: 'kill', i: eIdx(e), c: cause }); NET.mute = true;
   e.dead = true; e.glow.material.opacity = 0;
   run.kills++; run.killReward += e.noReward ? 0 : e.cfg.killReward; run.killsByType[e.type] = (run.killsByType[e.type] || 0) + 1;
   achEvent('kill', { e, cause });
@@ -3662,6 +4136,7 @@ function killEnemy(e, cause) {
   if (e.laser) world.remove(e.laser);
   if (e.bs && e.bs.beam) world.remove(e.bs.beam);
   world.remove(e.root);
+  NET.mute = false;
   checkObjective();
 }
 // 사망 시: 자식 부위는 각자 분리 (중첩 그룹 처리)
@@ -3673,11 +4148,12 @@ function detachPartSingle(p, vel) {
   fallers.push({ obj: p.group, vel: vel.clone(), ang: V3(rand(-5, 5), rand(-5, 5), rand(-5, 5)), t: 0, onLand: () => createLoot(p) });
 }
 function checkObjective() {
+  if (isGuest()) return;
   if (run.mission.boss) {
     if (!run.objDone && run.boss && run.boss.dead) {
       run.bossKillT = time - (run.boss.bs.engageT || run.startT);
       run.pistolOnly = Object.keys(run.used).every(k => ['pistol', 'emp'].includes(k));
-      run.objDone = true; SFX.objective(); addFeed(`${run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); }
+      run.objDone = true; SFX.objective(); NET.mute = true; addFeed(`${run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); NET.mute = false; coopEv({ t: 'obj', bt: run.bossKillT }); }
     return;
   }
   if (run.mission.relays) {
@@ -3721,7 +4197,7 @@ function updateFallers(dt) {
 const lootRingGeo = new THREE.RingGeometry(0.45, 0.58, 28);
 const lootBeamGeo = new THREE.CylinderGeometry(0.035, 0.035, 2.4, 6, 1, true);
 function createLoot(p) {
-  if (!run || state !== 'mission') return;
+  if (!run || state !== 'mission' || isGuest()) return;
   const cond = conditionOf(p);
   if (cond <= 0) return;
   _box.setFromObject(p.group); const c = _box.getCenter(V3());
@@ -3763,6 +4239,8 @@ function createLoot(p) {
   p.flash = 0; updatePartVisual(p);
   loots.push({ p, obj: p.group, ring, beam, x: c.x, y: ly, z: c.z, cond, state: p.state, r: pr, rs: pr / 2.3,
     name: `${p.enemy.cfg.name} ${p.name}`, base: Math.round(p.val * run.mission.partMult), val: partValue(p, cond) });
+  if (isHost()) { const L = loots[loots.length - 1]; L.lid = ++NET.lid; const q = p.group.quaternion;
+    coopEv({ t: 'loot', lid: L.lid, i: eIdx(p.enemy), pid: p.id, x: L.x, y: L.y, z: L.z, r: L.r, cond: L.cond, state: L.state, name: L.name, base: L.base, val: L.val, gp: v3a(p.group.position), gq: [q.x, q.y, q.z, q.w] }); }
 }
 // 자동 회수: 전리품 위를 지나가기만 하면 줍는다
 function autoPickup() {
@@ -3789,7 +4267,8 @@ function nearestCrate() {
 }
 function inExtraction() { return extraction && Math.hypot(extraction.x - player.pos.x, extraction.z - player.pos.z) < extraction.r; }
 function interact() {
-  const l = nearestLoot();
+  if (player.downed) return;
+  const l = isGuest() ? null : nearestLoot();
   if (l) { pickup(l); return; }
   const c = nearestCrate();
   if (c) {
@@ -3799,12 +4278,13 @@ function interact() {
     SFX.reload(); addFeed(`탄약 보급 · ${WEAPONS[prim.id].name}`, 'p'); return;
   }
   if (inExtraction()) {
-    if (run.objDone) { endMission('extract'); return; }
-    popup('조기 탈출은 E 길게 누르기', 'dim');
+    if (run.objDone) { if (coopOn()) { coopTryExtract(); return; } endMission('extract'); return; }
+    popup(coopOn() ? '협동에서는 보스를 격파해야 탈출할 수 있습니다' : '조기 탈출은 E 길게 누르기', 'dim');
   }
 }
 function pickup(l) {
   loots.splice(loots.indexOf(l), 1);
+  if (l.lid) coopEv({ t: 'unl', lid: l.lid });
   world.remove(l.obj, l.ring, l.beam);
   run.loot.push({ name: l.name, base: l.base, val: l.val, cond: l.cond, state: l.state, src: l.p.enemy.type });
   achEvent('pickup', { l });
@@ -3818,7 +4298,7 @@ function pickup(l) {
 let godMode = false; // 테스트 전용
 let dmgLog = {};
 function damagePlayer(dmg, from, src = 'etc') {
-  if (state !== 'mission' || godMode) return;
+  if (state !== 'mission' || godMode || player.downed) return;
   if (run.iframeT > 0) { achEvent('iframe', { src }); return; }
   let d = dmg * (1 - player.dr);
   if (run.shield > 0) { const ab = Math.min(run.shield, d); run.shield -= ab; d -= ab; if (d <= 0) { SFX.hit('armor'); return; } }
@@ -3829,7 +4309,7 @@ function damagePlayer(dmg, from, src = 'etc') {
   // 피격 방향 표시
   const fwd = camera.getWorldDirection(_v1); const a = Math.atan2(from.x - player.pos.x, from.z - player.pos.z) - Math.atan2(fwd.x, fwd.z);
   $('dmgdir').style.transform = `rotate(${-a}rad)`; dmgDirT = 1;
-  if (player.hp <= 0) { player.hp = 0; endMission('dead'); }
+  if (player.hp <= 0) { player.hp = 0; if (coopOn()) coopDown(); else endMission('dead'); }
 }
 
 // =====================================================================
@@ -3837,6 +4317,7 @@ function damagePlayer(dmg, from, src = 'etc') {
 // =====================================================================
 function updatePlayer(dt) {
   const w = curW();
+  if (player.downed) { ads = 0; mouseDown = false; player.vel.set(0, 0, 0); player.eye = lerp(player.eye, 0.5, clamp(dt * 4, 0, 1)); camera.position.set(player.pos.x, player.pos.y + player.eye, player.pos.z); return; }
   // 정조준
   const wantAds = rightDown && run.switchT <= 0;
   ads = clamp(ads + (wantAds ? 1 : -1) * dt * (w.scope ? 6 : 9), 0, 1);
@@ -3904,7 +4385,7 @@ function updatePlayer(dt) {
     else if (!firedThisPress && fireCd <= 0) { if (tryFire() || curWeapon().mag <= 0) firedThisPress = true; }
   }
   // 조기 탈출: 목표 미완료 시 E를 1.5초 누르고 있어야 함 (출발 지점에서의 실수 방지)
-  if (keys.KeyE && !run.objDone && inExtraction() && !nearestCrate()) {
+  if (keys.KeyE && !run.objDone && !coopOn() && inExtraction() && !nearestCrate()) {
     run.exHold = (run.exHold || 0) + dt;
     if (run.exHold >= 1.5) { run.exHold = 0; endMission('extract'); return; }
   } else run.exHold = 0;
@@ -3947,6 +4428,7 @@ function updateLootVisuals() {
 // =====================================================================
 const feedEl = $('feed');
 function addFeed(text, cls = '') {
+  if (isHost() && !NET.mute && (cls === 'k' || cls === 'd' || cls === 'x') && !text.startsWith('작전 개시')) coopEv({ t: 'feed', s: text, c: cls });
   const d = document.createElement('div'); d.className = cls; d.textContent = text; d.dataset.t = time;
   feedEl.appendChild(d); while (feedEl.children.length > 7) feedEl.removeChild(feedEl.firstChild);
 }
@@ -4013,6 +4495,7 @@ function updateHUD(dt) {
   setHTML($('wslots'), run.ws.map((s, i) => i === run.cur ? `<b>[${i + 1}] ${WEAPONS[s.id].name.split(' ')[0]}</b>` : `[${i + 1}] ${WEAPONS[s.id].name.split(' ')[0]}`).join('  '));
   setText($('reloadtxt'), run.reloadT > 0 ? '재장전 중' : (ws.mag === 0 ? (ws.reserve > 0 ? 'R 재장전' : '탄약 없음 · 2 권총 전환') : ''));
   // 목표
+  coopHud();
   setText($('objtxt'), run.objDone ? '목표 완료 · 탈출 지점으로 귀환' : (run.mission.boss ? `${run.mission.target[0]} 격파` : run.mission.relays ? `중계탑 무력화 ${enemies.filter(o => o.relay && o.dead).length} / 3` : `적대 기계 제거 ${run.kills} / ${run.total}`));
   updateBossBar();
   $('objtxt').className = 'o' + (run.objDone ? ' ok' : '');
@@ -4027,11 +4510,13 @@ function updateHUD(dt) {
   setText($('lootval'), fmt(lv * (1 + run.salvageBonus)) + ' CR'); setText($('lootcnt'), `(${run.loot.length}개)`);
   // 상호작용 안내
   const pr = $('prompt'); let msg = '';
-  if (nearestCrate()) msg = `<b>[E]</b>탄약 보급 · ${WEAPONS[run.ws[0].id].name}`;
+  const cp = coopPrompt();
+  if (cp) msg = cp;
+  else if (nearestCrate()) msg = `<b>[E]</b>탄약 보급 · ${WEAPONS[run.ws[0].id].name}`;
   else if (inExtraction()) {
     if (run.objDone) msg = `<b>[E]</b>탈출 및 정산`;
     else if (run.exHold > 0) msg = `<b>[E]</b><span class="bad">조기 탈출 중 ${Math.round(run.exHold / 1.5 * 100)}% · 계약 보상 미지급</span>`;
-    else msg = `<b>[E 길게]</b>조기 탈출 <span class="dim">(목표 미완료 · 부품과 처치 보상만 정산)</span>`;
+    else msg = coopOn() ? `<span class="dim">협동에서는 보스를 격파해야 탈출할 수 있습니다</span>` : `<b>[E 길게]</b>조기 탈출 <span class="dim">(목표 미완료 · 부품과 처치 보상만 정산)</span>`;
   }
   if (msg) { setHTML(pr, msg); pr.classList.remove('hidden'); } else pr.classList.add('hidden');
   // 피격
@@ -4099,6 +4584,11 @@ function nextGoal() {
 }
 function endMission(kind) {
   if (state !== 'mission') return;
+  if (coopOn()) {
+    if (isHost()) { if (kind === 'abandon') coopEv({ t: 'end', k: 'abandon' }); coopFlush(); }
+    else if (kind === 'abandon') { coopOut({ t: 'leave' }); NET.sendT = 0; coopGuestSend(0); }
+    NET.inGame = false; NET.rp = null;
+  }
   const id = run.mission.id, ms = run.mission;
   state = 'result';
   controls.unlock(); mouseDown = rightDown = false;
@@ -4122,8 +4612,8 @@ function endMission(kind) {
     let recNote = '';
     if (run.objDone && ms.boss) {
       const rk = ms.id === 'C' ? '' : ms.id, tk = 'bossTime' + rk, pk = 'pistolBoss' + rk;
-      if (!save.records[tk] || run.bossKillT < save.records[tk]) { save.records[tk] = run.bossKillT; recNote += `<div class="goal" style="margin-top:14px">최단 격파 기록 갱신 · <b>${run.bossKillT.toFixed(1)}초</b></div>`; }
-      if (run.pistolOnly && !save.records[pk]) { save.records[pk] = true; recNote += `<div class="goal" style="margin-top:14px"><b>권총 격파 달성</b> · ${ms.target[0]} · 기본 권총만으로 격파</div>`; }
+      if (!run.coop && (!save.records[tk] || run.bossKillT < save.records[tk])) { save.records[tk] = run.bossKillT; recNote += `<div class="goal" style="margin-top:14px">최단 격파 기록 갱신 · <b>${run.bossKillT.toFixed(1)}초</b></div>`; }
+      if (run.pistolOnly && !run.coop && !save.records[pk]) { save.records[pk] = true; recNote += `<div class="goal" style="margin-top:14px"><b>권총 격파 달성</b> · ${ms.target[0]} · 기본 권총만으로 격파</div>`; }
     }
     writeSave();
     const goal = nextGoal();
@@ -4137,7 +4627,7 @@ function endMission(kind) {
       <td class="n">${fmt(l.base)}</td><td class="n bad">${l.base - l.val ? '-' + fmt(l.base - l.val) : '0'}</td><td class="n">${fmt(l.val)}</td></tr>`).join('')
       : `<tr><td colspan="5" class="dim">회수한 부품 없음</td></tr>`;
     const kb = Object.entries(run.killsByType).map(([t, n]) => `${ETYPES[t].name} ${n}`).join(' · ') || '없음';
-    html = `<header><h2>${run.objDone ? '임무 완료 · 정산' : '조기 탈출 · 정산'}</h2><span class="lbl">${ms.code} ${ms.name}</span></header>
+    html = `<header><h2>${run.objDone ? '임무 완료 · 정산' : '조기 탈출 · 정산'}</h2><span class="lbl">${ms.code} ${ms.name}${run.coop ? ' · 협동' : ''}</span></header>
       <div class="body">
         <table class="tbl"><tr><th>회수 부품</th><th>상태</th><th class="n">기준가</th><th class="n">파손 감가</th><th class="n">판매가</th></tr>${rows}</table>
         <div class="sum">
@@ -4304,7 +4794,7 @@ function renderHub() {
   if (hubModal === 'rec') {
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(460px,94vw)"><header><h2>기록</h2></header><div class="body">
       <div class="rec"><span>누적 처치</span><span>${fmt(save.kills)}</span><span>누적 수익</span><span>${fmt(save.totalEarned)} CR</span><span>사망</span><span>${save.deaths}</span>
-      ${[['', 'REX-09'], ['D', '청룡'], ['F', 'ARACHNE']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${save.records['bossTime' + k] ? save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
+      ${[['', 'REX-09'], ['F', 'ARACHNE'], ['D', '청룡']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${save.records['bossTime' + k] ? save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
       <div class="rec" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">${Object.values(MISSIONS).map(m => `<span>${m.code} ${m.name}</span><span>${save.stats[m.id].clears} / ${save.stats[m.id].runs} · 최고 ${fmt(save.stats[m.id].best)}</span>`).join('')}</div>
       </div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
   } else if (hubModal === 'ach') {
@@ -4318,6 +4808,8 @@ function renderHub() {
     }).join('')).join('');
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(620px,94vw)"><header><h2>업적</h2><span class="lbl">${got} / ${ACH.length} · 보상 ${fmt(earned)} CR</span></header>
       <div class="body">${rows}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
+  } else if (hubModal === 'coop') {
+    modal = coopModalHtml();
   } else if (hubModal === 'set') {
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>설정 · 조작법</h2></header><div class="body">
       <div class="sens" style="margin-top:0"><span>마우스 감도</span><input type="range" id="hsens" min="0.3" max="2.5" step="0.05" value="${save.sens}"><span class="mono" id="hsensv">${(+save.sens).toFixed(2)}</span></div>
@@ -4332,10 +4824,11 @@ function renderHub() {
   $('hub').innerHTML = `
     <div class="hubshade"></div>
     <div class="top"><div class="brand">MARGIN</div>
-      <nav class="hnav"><button data-view="main" class="${hubView === 'main' ? 'sel' : ''}">거점</button><button data-view="shop" class="${hubView === 'shop' ? 'sel' : ''}">상점</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(save.ach.done).length}/${ACH.length}</span></button><button data-modal="rec">기록</button><button data-modal="set">설정</button></nav>
+      <nav class="hnav"><button data-view="main" class="${hubView === 'main' ? 'sel' : ''}">거점</button><button data-view="shop" class="${hubView === 'shop' ? 'sel' : ''}">상점</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(save.ach.done).length}/${ACH.length}</span></button><button data-modal="coop">협동${NET.status === 'connected' ? ' <span class="ok">●</span>' : NET.status === 'waiting' ? ' <span class="acc">●</span>' : ''}</button><button data-modal="rec">기록</button><button data-modal="set">설정</button></nav>
       <div class="credits"><div class="v">${fmt(save.credits)} CR</div></div></div>
     <div class="hubbody">${hubView === 'shop' ? shopView : mainView}</div>${modal}`;
   const H = $('hub');
+  coopBindModal(H);
   H.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(b.dataset.buy));
   H.querySelectorAll('[data-fill]').forEach(b => b.onclick = () => { const c = CONSUMABLES[b.dataset.fill]; while ((save.inv[c.id] || 0) < c.max && buy(c.id, true)); renderHub(); });
   H.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { shopTab = b.dataset.tab; SFX.ui(); renderHub(); H.querySelector('.hubbody').scrollTop = 0; });
@@ -4378,9 +4871,10 @@ const clock = new THREE.Clock();
 function update(dt) {
   time += dt;
   if (state === 'hub') updateHub3D(dt);
-  if (active()) {
+  if (active() || (coopOn() && state === 'mission')) {
     updatePlayer(dt);
-    if (state === 'mission' && player.hp > 0) autoPickup();
+    if (state === 'mission' && player.hp > 0 && !player.downed && !isGuest()) autoPickup();
+    if (coopOn() && state === 'mission') coopTick(dt);
     if (state === 'mission') achTick(dt);
     // 전진 권한: 경계 중이고 무장한 적 가운데 가장 가까운 2기만 플레이어 쪽으로 밀고 들어옴
     const cand = enemies.filter(e => !e.dead && !e.boss && e.alert && e.canShoot);
@@ -4550,7 +5044,7 @@ loop();
 if (TEST) {
   window.__M = {
     get save() { return save; }, get run() { return run; }, get enemies() { return enemies; }, get loots() { return loots; },
-    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, spawnDrone, spiderExposed, get MAPB() { return MAPB; }, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
+    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, NET, coopHost, coopJoin, coopLaunch, coopLeave, isHost, isGuest, spawnDrone, spiderExposed, get MAPB() { return MAPB; }, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
     player, camera, THREE, startMission, endMission, buy, interact, goHub, update, render, tryFire, fireRay, switchWeapon,
     setMouse(v) { mouseDown = v; firedThisPress = false; }, setGod(v) { godMode = v; }, setAds(v) { rightDown = v; }, keys,
     aimAt(v) { camera.position.set(player.pos.x, player.pos.y + player.eye, player.pos.z); camera.lookAt(v); camera.updateMatrixWorld(); recoil.cur = recoil.target = 0; },
