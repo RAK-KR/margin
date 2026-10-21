@@ -48,6 +48,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
   repeating-linear-gradient(90deg,transparent 0 79px,#1b1d20 79px 80px),
   repeating-linear-gradient(0deg,transparent 0 79px,#1b1d20 79px 80px)}
 #hub > *{position:relative;z-index:1}
+#hub > .overlay{position:fixed;z-index:30}
 #hub > .hubshade{position:absolute;inset:0;z-index:0;pointer-events:none;
   background:linear-gradient(90deg,rgba(8,9,10,.94) 0%,rgba(8,9,10,.82) 26%,rgba(8,9,10,.2) 52%,rgba(8,9,10,0) 64%,rgba(8,9,10,.55) 100%),
   linear-gradient(0deg,rgba(8,9,10,.85) 0%,rgba(8,9,10,0) 30%)}
@@ -369,10 +370,10 @@ const WEAPONS = {
     reload: 2.6, hipSpread: 0.004, adsSpread: 0.002, moveSpread: 0.006, bloom: 0, bloomMax: 0,
     recoil: 0.05, recoilYaw: 0.01, kick: 2, adsFov: 60, armorMult: 0.55, precisionMult: 1.0, range: 45, falloff: [8, 30], moveMult: 0.97,
     desc: '산탄 8발. 근거리에서 큰 부위를 순식간에 무력화하지만, 거리가 멀어지면 위력이 크게 떨어진다.' },
-  lmg: { id: 'lmg', name: 'M-60 경기관총', price: 8000, dmg: 18, interval: 0.1, auto: true, mag: 100, reserve: 300,
-    reload: 4.2, hipSpread: 0.01, adsSpread: 0.004, moveSpread: 0.018, bloom: 0.0018, bloomMax: 0.02,
-    recoil: 0.013, recoilYaw: 0.008, kick: 0.8, adsFov: 52, armorMult: 0.8, precisionMult: 0.9, range: 110, moveMult: 0.82,
-    desc: '100발 탄띠와 높은 장갑 관통력. 재장전이 길고, 들고 있으면 이동이 느려진다.' },
+  lmg: { id: 'lmg', name: 'M-60 경기관총', price: 8000, dmg: 15, interval: 0.1, auto: true, mag: 80, reserve: 240,
+    reload: 4.6, hipSpread: 0.012, adsSpread: 0.006, moveSpread: 0.022, bloom: 0.0032, bloomMax: 0.034,
+    recoil: 0.016, recoilYaw: 0.01, kick: 0.85, adsFov: 52, armorMult: 0.6, precisionMult: 0.8, range: 110, moveMult: 0.78,
+    desc: '80발 탄띠로 오래 쏠 수 있다. 길게 쏠수록 탄이 크게 퍼지므로 끊어 쏴야 한다. 재장전이 길고, 들고 있으면 이동이 느려진다.' },
   amr: { id: 'amr', name: 'X-50 대물 저격총', price: 12000, dmg: 170, interval: 1.5, auto: false, mag: 4, reserve: 24,
     reload: 3.2, hipSpread: 0.03, adsSpread: 0.0, moveSpread: 0.04, bloom: 0, bloomMax: 0,
     recoil: 0.11, recoilYaw: 0.02, kick: 3, adsFov: 16, armorMult: 2.0, precisionMult: 1.4, range: 260, moveMult: 0.85, scope: true,
@@ -1629,13 +1630,13 @@ function shootOnce() {
     const ad = dir.clone(); const r0 = Math.tan(spread) * Math.sqrt(Math.random()), t0 = Math.random() * Math.PI * 2;
     ad.addScaledVector(right, r0 * Math.cos(t0)).addScaledVector(up, r0 * Math.sin(t0)).normalize();
     launchThrowable('gl', camera.getWorldPosition(V3()).addScaledVector(ad, 0.5), ad.multiplyScalar(w.projSpeed), true, w.explosive);
-  } else for (let pi = 0, any = false, sd = [], sp2 = []; pi < (w.pellets || 1); pi++) {
+  } else for (let pi = 0, any = false, sd = [], sp2 = [], _c = (NET.claims = []); pi < (w.pellets || 1); pi++) {
     const sp = spread + (w.pelletSpread || 0);
     const r = Math.tan(sp) * Math.sqrt(Math.random()), th = Math.random() * Math.PI * 2;
     const d = dir.clone().addScaledVector(right, r * Math.cos(th)).addScaledVector(up, r * Math.sin(th)).normalize();
     const result = fireRay(origin, d, w);
     sd.push(v3a(d)); sp2.push(v3a(result.point));
-    if (pi === (w.pellets || 1) - 1) { if (isGuest()) coopOut({ t: 'shot', o: v3a(origin), d: sd, oc: run.ocT > 0 ? 1 : 0, w: { id: w.id || ws.id, dmg: w.dmg, precisionMult: w.precisionMult, armorMult: w.armorMult, range: w.range, pierce: w.pierce, falloff: w.falloff } }); else coopHostShotFx(sp2); }
+    if (pi === (w.pellets || 1) - 1) { if (isGuest()) coopOut({ t: 'shot', o: v3a(origin), d: sd, p: sp2, c: NET.claims, oc: run.ocT > 0 ? 1 : 0, w: { id: w.id || ws.id, dmg: w.dmg, precisionMult: w.precisionMult, armorMult: w.armorMult, range: w.range, pierce: w.pierce, falloff: w.falloff } }); else coopHostShotFx(sp2); }
     if (result.part && !any) { any = true; run.shotsHit++; }
     spawnTracer(mz, result.point, w.pierce ? 0x8ad8ff : big ? 0xffe4b0 : 0xffd28a, w.scope || w.pierce ? 0.14 : 0.06);
   }
@@ -2634,6 +2635,7 @@ function dragonDown(e, cause) {
   addFeed('청룡 추락', 'k');
 }
 function dragonStrike(x, z) {
+  coopEv({ t: 'bolt', x, z });
   const mk = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x8af4ff, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
   const gy = groundAt(x, z, 0.1, 10, 0) ; mk.rotation.x = -Math.PI / 2; mk.position.set(x, gy + 0.04, z); world.add(mk);
   bolts.push({ x, z, y: gy, t: 1.35, mk, hit: false });
@@ -2650,7 +2652,7 @@ function updateBolts(dt) {
       blastLight.color.setHex(0xaaf0ff); blastLight.position.copy(_v1); blastLight.intensity = 90;
       SFX.thunder(_v1.distanceTo(player.pos));
       const d = Math.hypot(player.pos.x - b.x, player.pos.z - b.z);
-      if (d < 2.6 && Math.abs(player.pos.y - b.y) < 3) damagePlayer(30, _v1, 'lightning');
+      if (!isGuest()) for (const T of dmgTargets()) { const td = Math.hypot(T.pos.x - b.x, T.pos.z - b.z); if (td < 2.6 && Math.abs(T.pos.y - b.y) < 3) hurtTarget(T, 30, _v1.clone(), 'lightning'); }
       shake = Math.max(shake, d < 10 ? 0.012 : 0.004);
     }
     if (b.beam) { b.beam.material.opacity = Math.max(0, 0.95 + b.t * 5); b.beam.scale.x = b.beam.scale.z = 1 + Math.sin(time * 90) * 0.4; }
@@ -2663,12 +2665,13 @@ function spawnBossProj(from, dir, speed, dmg, size, color) {
   pr.mesh.visible = true; pr.mesh.material.color.setHex(color);
   pr.mesh.position.copy(from); pr.vel.copy(dir).multiplyScalar(speed);
   pr.mesh.scale.set(size, size, size * 2.2); pr.mesh.lookAt(_v1.copy(from).add(dir));
+  coopEv({ t: 'eshot', f: v3a(from), d: v3a(dir), s: speed, c: color, z: size, k: 'dragon' });
 }
 function updateDragon(e, dt) {
   const B = e.bs, cfg = e.cfg, P = e.parts;
   partTick(e, dt);
   for (const k in B.cd) B.cd[k] -= dt;
-  const pp = V3(player.pos.x, player.pos.y + 1.2, player.pos.z);
+  const pp = V3(tg.pos.x, tg.pos.y + 1.2, tg.pos.z);
   const toP = pp.clone().sub(e.headPos), distP = toP.length();
   if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; e.alert = true; } }
   if (!e.alert && Math.hypot(toP.x, toP.z) < 60) e.alert = true;
@@ -2731,7 +2734,7 @@ function updateDragon(e, dt) {
         if (B.fireT <= 0) {
           B.fireT = 0.085;
           e.mouth.getWorldPosition(_v2);
-          const aim = pp.clone().addScaledVector(player.vel, 0.35).sub(_v2).normalize();
+          const aim = pp.clone().addScaledVector(tg.vel, 0.35).sub(_v2).normalize();
           const sp = 0.06 * sensorMult(e);
           aim.add(V3(rand(-sp, sp), rand(-sp, sp), rand(-sp, sp))).normalize();
           spawnBossProj(_v2, aim, 40, 12, 0.22, 0x8af4ff);
@@ -2746,8 +2749,8 @@ function updateDragon(e, dt) {
       if (B.t <= 0) {
         const horns = ['hornL', 'hornR'].filter(id => dragonWorking(e, id)).length;
         const n = (horns ? 1 + horns * 2 : 2) + (B.phase2 ? 3 : 0);
-        dragonStrike(player.pos.x + player.vel.x * 0.5, player.pos.z + player.vel.z * 0.5);
-        for (let i = 1; i < n; i++) { const a = rand(0, Math.PI * 2), r = rand(3, 9); dragonStrike(player.pos.x + Math.cos(a) * r, player.pos.z + Math.sin(a) * r); }
+        dragonStrike(tg.pos.x + tg.vel.x * 0.5, tg.pos.z + tg.vel.z * 0.5);
+        for (let i = 1; i < n; i++) { const a = rand(0, Math.PI * 2), r = rand(3, 9); dragonStrike(tg.pos.x + Math.cos(a) * r, tg.pos.z + Math.sin(a) * r); }
         for (const id of ['hornL', 'hornR']) if (P[id].attached) updatePartVisual(P[id]);
         SFX.emp(); B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.storm = (B.phase2 ? 3.6 : 5.5) * (horns ? 1 : 1.4);
       }
@@ -2766,7 +2769,7 @@ function updateDragon(e, dt) {
         B.fireT = B.berserk ? 0.16 : 0.22;
         for (const id of live) {
           P[id].meshes[0].getWorldPosition(_v2);
-          const aim = pp.clone().addScaledVector(player.vel, 0.3).sub(_v2).normalize();
+          const aim = pp.clone().addScaledVector(tg.vel, 0.3).sub(_v2).normalize();
           const sp = 0.05; aim.add(V3(rand(-sp, sp), rand(-sp, sp), rand(-sp, sp))).normalize();
           spawnBossProj(_v2, aim, 30, 8, 0.2, 0x5ff6ff);
         }
@@ -2777,9 +2780,9 @@ function updateDragon(e, dt) {
     }
     case 'dive_wind':
       T = hp.clone().add(e.headDir.clone().setY(0).normalize().multiplyScalar(8)); T.y = 18; spd = 9;
-      B.aim = pp.clone().addScaledVector(player.vel, 0.4); B.aim.y = 1.8;
+      B.aim = pp.clone().addScaledVector(tg.vel, 0.4); B.aim.y = 1.8;
       B.markerA = 0.25 + 0.3 * (1 - Math.max(0, B.t) / 1.3);
-      if (B.t <= 0) { B.state = 'dive'; B.t = 3; B.hitDone = false; SFX.dragonRoar(); }
+      if (B.t <= 0) { B.state = 'dive'; B.t = 3; B.hitDone = false; B.hitBy = new Set(); SFX.dragonRoar(); }
       break;
     case 'dive':
       T = B.aim.clone(); spd = 25 * (B.phase2 ? 1.1 : 1); turn = 2.6;
@@ -2846,10 +2849,14 @@ function updateDragon(e, dt) {
     mk.material.opacity = B.markerA * (0.7 + 0.3 * Math.sin(time * 30));
   } else mk.material.opacity = 0;
   // 강하 · 저공 비행 충돌 피해
-  if ((B.state === 'dive' || B.state === 'skim') && !B.hitDone) {
-    let near = hp.distanceTo(pp);
-    for (let i = 0; i < 5; i++) near = Math.min(near, e.segPts[i].distanceTo(pp));
-    if (near < 3.0) { B.hitDone = true; damagePlayer(dragonWorking(e, 'clawB') ? 44 : 27, hp, 'dive'); knockPlayer(player.pos.x - hp.x, player.pos.z - hp.z, 10); }
+  if (B.state === 'dive' || B.state === 'skim') {
+    B.hitBy = B.hitBy || new Set();
+    for (const T of dmgTargets()) {
+      if (B.hitBy.has(T)) continue;
+      const tp = V3(T.pos.x, T.pos.y + 1.2, T.pos.z); let near = hp.distanceTo(tp);
+      for (let i = 0; i < 5; i++) near = Math.min(near, e.segPts[i].distanceTo(tp));
+      if (near < 3.0) { B.hitBy.add(T); B.hitDone = true; hurtTarget(T, dragonWorking(e, 'clawB') ? 44 : 27, hp.clone(), 'dive'); knockTarget(T, T.pos.x - hp.x, T.pos.z - hp.z, 10); }
+    }
   }
 }
 // 거점 전시용: 공중에서 S자로 굽이치는 자세 (화면 가로로 몸통이 펼쳐짐)
@@ -2956,6 +2963,7 @@ function spawnDrone(x, z, alt, opts = {}) {
   for (const p of Object.values(e.parts)) { p.enemy = e; hittables.push(...p.meshes); }
   r.root.position.set(x, alt ?? cfg.hover, z); r.root.rotation.y = e.yaw;
   world.add(r.root); enemies.push(e);
+  if (isHost() && state === 'mission') coopEv({ t: 'spawnd', i: enemies.length - 1, x, z, a: alt ?? cfg.hover });
   return e;
 }
 function rotorsWorking(e) { return ROTORS.filter(id => { const p = e.parts[id]; return p.attached && p.state !== 'disabled' && p.state !== 'destroyed'; }).length; }
@@ -2973,27 +2981,27 @@ function updateDrone(e, dt) {
     moveWithCollision(pos, e.vel.x * dt, e.vel.z * dt, 0.4, pos.y - 0.3, 0.6, 0); e.vel.multiplyScalar(0.985);
     const g = groundAt(pos.x, pos.z, 0.4, pos.y, 0.05);
     if (pos.y <= g + 0.3) {
-      const d = Math.hypot(player.pos.x - pos.x, player.pos.z - pos.z);
-      if (d < 2.2 && Math.abs(player.pos.y - g) < 2) { damagePlayer(12, pos.clone(), 'crash'); knockPlayer(player.pos.x - pos.x, player.pos.z - pos.z, 4); }
+      const d = Math.hypot(tg.pos.x - pos.x, tg.pos.z - pos.z);
+      for (const T of dmgTargets()) { const td = Math.hypot(T.pos.x - pos.x, T.pos.z - pos.z); if (td < 2.2 && Math.abs(T.pos.y - g) < 2) { hurtTarget(T, 12, pos.clone(), 'crash'); knockTarget(T, T.pos.x - pos.x, T.pos.z - pos.z, 4); } }
       killEnemy(e, 'crash');
     }
     return;
   }
-  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; alertEnemy(e); e.lastSeen.copy(player.pos); } }
+  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; alertEnemy(e); e.lastSeen.copy(tg.pos); } }
   let targetAlt = cfg.hover + Math.sin(time * 1.3 + e.phase) * 0.35 - (rw === 3 ? 1.1 : 0);
   if (e.stunT > 0) {
     e.stunT -= dt; targetAlt = 1.1; e.glow.material.opacity = 0; e.burstLeft = 0;
     if (Math.random() < 0.2) { _v1.copy(pos); burstSparks(_v1, UPY, 2, 0x6ac8ff, 3); }
   }
-  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  const dx = tg.pos.x - pos.x, dz = tg.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
   e.losT -= dt;
   if (e.losT <= 0 && e.stunT <= 0) {
     e.losT = rand(0.1, 0.16);
-    const range = sensorMult(e) > 2 ? 14 : cfg.detect, d3 = Math.hypot(dx, dz, player.pos.y + 1.4 - pos.y);
-    _v1.set(pos.x, pos.y - 0.1, pos.z); _v2.set(player.pos.x, player.pos.y + player.eye - 0.1, player.pos.z);
+    const range = sensorMult(e) > 2 ? 14 : cfg.detect, d3 = Math.hypot(dx, dz, tg.pos.y + 1.4 - pos.y);
+    _v1.set(pos.x, pos.y - 0.1, pos.z); _v2.set(tg.pos.x, tg.pos.y + tg.eye - 0.1, tg.pos.z);
     const was = e.canSee;
     e.canSee = d3 < range && !segBlocked(_v1, _v2);
-    if (e.canSee) { if (!e.alert) alertEnemy(e); e.lastSeen.copy(player.pos); e.lostT = 0; if (!was) e.fireCd = Math.max(e.fireCd, 0.45); }
+    if (e.canSee) { if (!e.alert) alertEnemy(e); e.lastSeen.copy(tg.pos); e.lostT = 0; if (!was) e.fireCd = Math.max(e.fireCd, 0.45); }
   }
   if (e.alert && !e.canSee) { e.lostT += dt; if (e.lostT > 8) { e.alert = false; e.lostT = 0; } }
   // 이동
@@ -3280,12 +3288,13 @@ function spiderShell(e) {
   const tu = e.parts.turret; tu.group.updateMatrixWorld(true);
   const from = e.tubes.getWorldPosition(V3()); from.y += 0.6;
   const sp = sensorMult(e) > 2 ? 6 : 1.8 + (e.bs.volley || 0) * 0.45;
-  const to = V3(player.pos.x + player.vel.x * 0.8 + rand(-sp, sp), player.onGround ? player.pos.y + 0.03 : 0.03, player.pos.z + player.vel.z * 0.8 + rand(-sp, sp));
+  const to = V3(tg.pos.x + tg.vel.x * 0.8 + rand(-sp, sp), tg.onGround ? tg.pos.y + 0.03 : 0.03, tg.pos.z + tg.vel.z * 0.8 + rand(-sp, sp));
   const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffb04a }));
   mesh.scale.set(0.2, 0.2, 0.32); mesh.position.copy(from); world.add(mesh);
   const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
   marker.rotation.x = -Math.PI / 2; marker.position.copy(to); world.add(marker);
   missiles.push({ mesh, marker, from, to, t: 0, T: 1.4 + from.distanceTo(to) / 40, h: 9 + from.distanceTo(to) * 0.15 });
+  { const mm = missiles[missiles.length - 1]; coopEv({ t: 'mis', f: v3a(from), to: v3a(to), T: mm.T, h: mm.h, c: 0xffb04a, s: [0.2, 0.2, 0.32] }); }
   spawnFlash(from, 1, 0.08, 0xffb060); SFX.missile();
 }
 function spiderLandingPoint(e, target) {
@@ -3308,7 +3317,7 @@ function spiderNext(e, dist, los) {
   const B = e.bs, legsOk = B.broken < 5;
   if (dist < 6.5 && B.cd.stomp <= 0) { B.state = 'stomp_wind'; B.t = B.phase2 ? 0.65 : 0.8; return; }
   if (legsOk && B.cd.lunge <= 0 && dist > 10 && dist < 28 && los) {
-    const land = spiderLandingPoint(e, V3(player.pos.x + player.vel.x * 0.3, 0, player.pos.z + player.vel.z * 0.3));
+    const land = spiderLandingPoint(e, V3(tg.pos.x + tg.vel.x * 0.3, 0, tg.pos.z + tg.vel.z * 0.3));
     if (land) { B.state = 'lunge_wind'; B.t = B.phase2 ? 0.75 : 0.95; B.from = e.root.position.clone(); B.to = land; return; }
     B.cd.lunge = 1.5;
   }
@@ -3319,7 +3328,7 @@ function updateSpider(e, dt) {
   const B = e.bs, P = e.parts, pos = e.root.position;
   partTick(e, dt);
   for (const k in B.cd) B.cd[k] -= dt;
-  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  const dx = tg.pos.x - pos.x, dz = tg.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
   if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) e.alert = true; }
   if (!e.alert && dist < 34) e.alert = true;
   if (e.alert && !B.started) { B.started = true; B.engageT = time; SFX.spider(); addFeed('ARACHNE 기동 · 최종 목표 교전 개시', 'k'); B.state = 'walk'; B.t = 1; }
@@ -3328,7 +3337,7 @@ function updateSpider(e, dt) {
   }
   if (e.stunT > 0 && !['collapse', 'stunned'].includes(B.state)) { B.state = 'dazed'; B.t = e.stunT; e.stunT = 0; }
   const lf = 1 - 0.1 * B.broken;
-  _v1.set(pos.x, 3.2, pos.z); _v2.set(player.pos.x, player.pos.y + player.eye, player.pos.z);
+  _v1.set(pos.x, 3.2, pos.z); _v2.set(tg.pos.x, tg.pos.y + tg.eye, tg.pos.z);
   const los = !segBlocked(_v1, _v2);
   let move = 0, targetYaw = Math.atan2(dx, dz), turn = 1.5 * lf, Htarget = SPI.standH * (B.broken >= 4 ? 0.78 : 1), lift = null;
   B.t -= dt;
@@ -3348,7 +3357,7 @@ function updateSpider(e, dt) {
       if (B.t <= 0) {
         B.state = 'stomp'; B.t = 0.45; SFX.explode(dist); shake = Math.max(shake, 0.03);
         spawnFlash(V3(pos.x, 0.3, pos.z), 6, 0.25, 0xffa050); spawnDebris(V3(pos.x, 0.2, pos.z), 0x5a554e, 8, 6);
-        if (dist < 6 && player.pos.y < 1.2) { damagePlayer(34, V3(pos.x, 1, pos.z), 'stomp'); knockPlayer(dx, dz, 10); }
+        for (const T of dmgTargets()) { const td = Math.hypot(T.pos.x - pos.x, T.pos.z - pos.z); if (td < 6 && T.pos.y < 1.2) { hurtTarget(T, 34, V3(pos.x, 1, pos.z), 'stomp'); knockTarget(T, T.pos.x - pos.x, T.pos.z - pos.z, 10); } }
         B.cd.stomp = B.phase2 ? 3.5 : 4.5;
       }
       break;
@@ -3369,8 +3378,8 @@ function updateSpider(e, dt) {
         pos.y = 0; B.state = 'land'; B.t = B.phase2 ? 1.0 : 1.3;
         SFX.explode(dist); shake = Math.max(shake, 0.035); if (B.phase2) spawnShock(pos.x, pos.z);
         spawnFlash(V3(pos.x, 0.3, pos.z), 5, 0.25, 0xffa050); spawnDebris(V3(pos.x, 0.2, pos.z), 0x5a554e, 8, 6);
-        const d2 = Math.hypot(player.pos.x - pos.x, player.pos.z - pos.z);
-        if (d2 < 3.8 && player.pos.y < 1.5) { damagePlayer(40, V3(pos.x, 1, pos.z), 'lunge'); knockPlayer(player.pos.x - pos.x, player.pos.z - pos.z, 12); }
+        for (const T of dmgTargets()) { const d2 = Math.hypot(T.pos.x - pos.x, T.pos.z - pos.z);
+          if (d2 < 3.8 && T.pos.y < 1.5) { hurtTarget(T, 40, V3(pos.x, 1, pos.z), 'lunge'); knockTarget(T, T.pos.x - pos.x, T.pos.z - pos.z, 12); } }
         B.cd.lunge = B.phase2 ? 5 : 6;
         addFeed('ARACHNE 착지 · 냉각구 개방', 'x');
       }
@@ -3417,25 +3426,8 @@ function updateSpider(e, dt) {
   } else e.moveSpeed = B.state === 'lunge' ? 0 : Math.abs(da) > 0.05 ? 1.2 : 0;
   // 몸체 높이 · 기울기 · 다리
   e.H = lerp(e.H, Htarget, clamp(dt * (B.state === 'collapse' ? 5 : 3), 0, 1));
-  const lb = e.legs.filter(L => L.side > 0 && !L.p.attached).length, rb = e.legs.filter(L => L.side < 0 && !L.p.attached).length;
-  e.body.position.y = e.H + (B.state === 'walk' ? Math.sin(e.gait * 2) * 0.06 : 0);
-  e.body.rotation.z = lerp(e.body.rotation.z, (rb - lb) * 0.06 + (B.state === 'dazed' || B.state === 'stunned' ? Math.sin(time * 20) * 0.03 : 0), 0.08);
-  e.body.rotation.x = lerp(e.body.rotation.x, B.state === 'stomp_wind' ? -0.18 : B.state === 'lunge_wind' ? 0.12 : 0, 0.12);
-  e.gait += (e.moveSpeed * 1.6 + (move ? 0 : 0)) * dt;
-  for (const L of e.legs) {
-    if (!L.p.attached) continue;
-    const ph = e.gait + (L.group ? Math.PI : 0), moving = e.moveSpeed > 0.2 ? 1 : 0;
-    let R = 3.6 + 0.45 * Math.sin(ph) * moving + (e.H < 1.5 ? 0.9 : 0), up = moving * Math.max(0, Math.cos(ph)) * 0.7;
-    if (lift && lift.front && L.idx === 0) up = lift.front;
-    if (lift && lift.all) up = lift.all;
-    L.p.group.rotation.y = L.base + 0.16 * Math.sin(ph) * moving * (L.side > 0 ? -1 : 1);
-    legIK(L, R, Math.max(0.3, e.H - 0.1 - up));
-  }
-  // 동력로 냉각구 · 눈
-  const ex = spiderExposed(e);
-  if (P.reactor.attached && P.reactor.flash <= 0) P.reactor.meshes[0].material.emissive.setHex(0xff7a1a).multiplyScalar(ex ? 1.1 + 0.4 * Math.sin(time * 14) : 0.25);
-  if (P.head.attached && P.head.flash <= 0) for (const m of e.eyes) m.material.emissive.setHex(0xff3020).multiplyScalar(B.state === 'lunge_wind' || B.state === 'stomp_wind' ? 1.5 : 0.8);
-  if (e.stunT <= 0 && B.state === 'stunned' && Math.random() < 0.3) { _v1.copy(pos).setY(e.H); burstSparks(_v1, UPY, 3, 0x6ac8ff, 4); }
+  e.gait += e.moveSpeed * 1.6 * dt;
+  spiderPose(e, dt);
 }
 function buildQuarry() {
   setEnv({ sky: 0x6f7880, fog: [30, 140], hemi: [0xdfe6ee, 0x3a3630, 1.4], sun: [0xfff0d8, 1.9, [30, 45, -20]],
@@ -3464,11 +3456,11 @@ function buildQuarry() {
 //  협동 모드 (2인 · 방장 권위 방식)
 //  방장: 실제 게임 판정 전부 · 친구: 자기 이동/사격 입력을 보내고 방장이 보낸 상태를 그림
 // =====================================================================
-const COOP_BUILD = 'coop-1';
-const COOP_MISSIONS = ['C'];
+const COOP_BUILD = 'coop-2';
+const COOP_MISSIONS = ['C', 'F', 'D'];
 const CODE_CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const NET = { role: null, peer: null, conn: null, code: '', status: 'off', err: '', inGame: false, rp: null, av: null,
-  sendT: 0, fullT: 0, evq: [], outq: [], partner: '', lastRecv: 0, remoteShot: false, remoteOc: false, mute: false, revT: 0 };
+  sendT: 0, fullT: 0, evq: [], outq: [], claims: [], partner: '', lastRecv: 0, remoteShot: false, remoteOc: false, mute: false, revT: 0 };
 const isHost = () => NET.inGame && NET.role === 'host';
 const isGuest = () => NET.inGame && NET.role === 'guest';
 const coopOn = () => NET.inGame;
@@ -3615,19 +3607,23 @@ function dmgTargets() { return isHost() && NET.rp && NET.conn && !NET.rp.dn && !
 // 친구 화면의 사격: 판정은 방장이 하고, 여기서는 맞은 위치 연출만
 function guestRay(origin, dir, w) {
   raycaster.set(origin, dir); raycaster.far = w.range; raycaster.near = 0.05;
-  const h = raycaster.intersectObjects(hittables, false)[0];
-  if (!h) return { point: origin.clone().addScaledVector(dir, w.range), part: null };
-  const n = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().negate();
-  const ud = h.object.userData, p = ud.part;
-  if (p) {
+  const hits = raycaster.intersectObjects(hittables, false);
+  if (!hits.length) return { point: origin.clone().addScaledVector(dir, w.range), part: null };
+  let first = null, last = null, cnt = 0, mult = 1; const seen = new Set();
+  for (const h of hits) {
+    const n = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().negate();
+    const ud = h.object.userData, p = ud.part; last = h.point;
+    if (!p) { if (!cnt) { burstSparks(h.point, n, 4, 0xd8d0c0, 3); spawnFlash(h.point, 0.18, 0.05, 0xddd6c8); } break; }
+    if (seen.has(p)) continue; seen.add(p); if (!first) first = { h, p };
     const precise = p.precise || ud.hitMult > 1.2, armorish = p.type === 'armor';
     burstSparks(h.point, n, precise ? 9 : 6, precise ? 0xff9a3a : (armorish ? 0xe8e4d8 : 0xffc060), precise ? 7 : 5);
     spawnFlash(h.point, precise ? 0.5 : 0.32, 0.06, precise ? 0xffb060 : 0xfff0d0);
-    const kind = precise ? 'weak' : armorish ? 'armor' : 'hit'; showHitmarker(kind); SFX.hit(kind);
-    return { point: h.point, part: p, mesh: h.object };
+    if (!cnt) { const kind = precise ? 'weak' : armorish ? 'armor' : 'hit'; showHitmarker(kind); SFX.hit(kind); }
+    const fall = w.falloff ? clamp(1 - (h.distance - w.falloff[0]) / (w.falloff[1] - w.falloff[0]), 0.25, 1) : 1;
+    NET.claims.push({ i: eIdx(p.enemy), pid: p.id, mi: p.meshes.indexOf(h.object), pt: v3a(h.point), n: v3a(n), f: +fall.toFixed(3), m: +mult.toFixed(3), pr: w.pierce ? 1 : 0 });
+    if (!w.pierce || ++cnt >= w.pierce) break; mult *= 0.7;
   }
-  burstSparks(h.point, n, 4, 0xd8d0c0, 3); spawnFlash(h.point, 0.18, 0.05, 0xddd6c8);
-  return { point: h.point, part: null, mesh: h.object };
+  return first ? { point: first.h.point, part: first.p, mesh: first.h.object } : { point: last || origin.clone().addScaledVector(dir, w.range), part: null };
 }
 const hurtTg = (d, from, src) => hurtTarget(tg, d, from, src);
 const knockTg = (dx, dz, p) => knockTarget(tg, dx, dz, p);
@@ -3641,8 +3637,16 @@ const av3 = a => V3(a[0], a[1], a[2]);
 
 // ---------------- 방장: 상태 전송 ----------------
 function snapEnemy(e, i) {
-  const p = e.root.position, o = { i, x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), r: +e.yaw.toFixed(3), a: e.alert ? 1 : 0 };
-  if (e.type === 'rex') {
+  const p = e.root.position, o = { i, x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), r: +(e.yaw || 0).toFixed(3), a: e.alert ? 1 : 0 };
+  const r2 = v => +v.toFixed(2);
+  if (e.dragon) {
+    const B = e.bs; const sp = []; for (const q of e.segPts) sp.push(r2(q.x), r2(q.y), r2(q.z));
+    Object.assign(o, { s: B.state, p2: B.phase2 ? 1 : 0, mk: r2(B.markerA || 0), aim: B.aim ? v3a(B.aim) : null, mg: r2(e.mglow.material.opacity), hp: v3a(e.headPos), hd: v3a(e.headDir), sp });
+  } else if (e.spider) {
+    const B = e.bs; Object.assign(o, { s: B.state, H: r2(e.H), g: r2(e.gait), ms: r2(e.moveSpeed || 0), to: B.to ? v3a(B.to) : null, tr: r2(e.tubes.rotation.x), bk: B.broken, p2: B.phase2 ? 1 : 0 });
+  } else if (e.drone) {
+    Object.assign(o, { bx: r2(e.body.rotation.x), bz: r2(e.body.rotation.z), fa: e.falling ? 1 : 0, st: e.stunT > 0 ? 1 : 0 });
+  } else if (e.type === 'rex') {
     const B = e.bs;
     Object.assign(o, { s: B.state, t: +(B.t || 0).toFixed(2), ms: +(B.moveSpeed || 0).toFixed(2), cr: B.crawl ? 1 : 0, p2: B.phase2 ? 1 : 0, mk: +(B.markerA || 0).toFixed(2),
       ld: v3a(B.laserDir), lk: B.laserLocked ? 1 : 0, le: B.laserEnd ? v3a(B.laserEnd) : null });
@@ -3695,8 +3699,12 @@ function coopApplyInput(m) {
   for (const ev of m.ev || []) {
     if (ev.t === 'shot') {
       NET.remoteShot = true; NET.remoteOc = !!ev.oc;
-      const o = av3(ev.o), pts = [];
-      for (const d of ev.d) { const res = fireRay(o, av3(d).normalize(), ev.w); pts.push(v3a(res.point)); }
+      const pts = ev.p || [];
+      for (const c of ev.c || []) {
+        const e = enemies[c.i], p = e && !e.dead ? e.parts[c.pid] : null; if (!p || !p.attached) continue;
+        const mesh = p.meshes[c.mi] || p.meshes[0];
+        hitPart(p, mesh, av3(c.pt), av3(c.n), Object.assign({}, ev.w, { dmg: ev.w.dmg * c.m }), c.f, !!c.pr);
+      }
       NET.remoteShot = false; NET.remoteOc = false;
       avatarShotFx(ev.w.id, pts);
       for (const e of enemies) if (!e.dead && !e.alert && e.root.position.distanceTo(r.pos) < 11) e.pendingAlert = e.pendingAlert || rand(0.6, 1.2);
@@ -3743,6 +3751,8 @@ function coopGuestEvent(ev) {
       missiles.push({ mesh, marker, from, to, t: 0, T: ev.T, h: ev.h, vis: true }); spawnFlash(from, 0.8, 0.08, 0xff9a50); SFX.missile(); break;
     }
     case 'shock': spawnShock(ev.x, ev.z); break;
+    case 'bolt': dragonStrike(ev.x, ev.z); break;
+    case 'spawnd': { const d = spawnDrone(ev.x, ev.z, ev.a); if (eIdx(d) !== ev.i) console.warn('coop drone index mismatch', eIdx(d), ev.i); break; }
     case 'boom': { const p = av3(ev.p), d = p.distanceTo(player.pos); SFX.explode(d); spawnFlash(p, ev.R * 1.1, 0.22, 0xffa050); burstSparks(p, UPY, 26, 0xffa040, 9); spawnDebris(p, 0x3a3630, 5, 5); blastLight.position.copy(p); blastLight.intensity = 80; shake = Math.max(shake, d < 12 ? 0.02 : 0.006); break; }
     case 'empfx': { const p = av3(ev.p); SFX.emp(); spawnFlash(p, ev.R * 1.3, 0.3, 0x6ac8ff); burstSparks(p, UPY, 30, 0x6ac8ff, 8);
       const ring = new THREE.Mesh(shockGeo, new THREE.MeshBasicMaterial({ color: 0x6ac8ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -3788,6 +3798,13 @@ function puppetUpdate(e, dt) {
     if (Math.hypot(e.root.position.x - s.x, e.root.position.z - s.z) > 6) e.root.position.set(s.x, s.y, s.z);
     e.yaw = lerpAngle(e.yaw, s.r, k); e.root.rotation.y = e.yaw;
   }
+  if (e.spider) { puppetSpider(e, dt); return; }
+  if (e.dragon) { puppetDragon(e, dt); return; }
+  if (e.drone) {
+    if (s) { e.body.rotation.x = s.bx; e.body.rotation.z = s.bz; e.falling = !!s.fa; e.stunT = s.st ? 0.2 : 0; }
+    partTick(e, dt); for (const d of e.discs) if (d.userData.part.attached) d.rotation.y += dt * (e.falling ? 6 : 42);
+    return;
+  }
   if (e.type === 'rex') {
     const B = e.bs;
     if (s) {
@@ -3809,6 +3826,71 @@ function puppetUpdate(e, dt) {
   animateLegs(e, e.moveSpeed, dt);
 }
 
+function puppetSpider(e, dt) {
+  const s = e.net, B = e.bs, P = e.parts, pos = e.root.position;
+  if (s) {
+    if (s.s !== B.state) {
+      const d = pos.distanceTo(player.pos);
+      if (s.s === 'lunge' || (s.s === 'walk' && !B.seen)) SFX.spider();
+      if (s.s === 'stomp' || s.s === 'land') { SFX.explode(d); shake = Math.max(shake, 0.03); spawnFlash(V3(pos.x, 0.3, pos.z), 5, 0.25, 0xffa050); spawnDebris(V3(pos.x, 0.2, pos.z), 0x5a554e, 8, 6); }
+      if (s.s === 'collapse') { SFX.explode(d); shake = Math.max(shake, 0.03); }
+      B.seen = true;
+    }
+    B.state = s.s; e.moveSpeed = s.ms; B.to = s.to ? av3(s.to) : null; e.tubes.rotation.x = s.tr; B.broken = s.bk; B.phase2 = !!s.p2;
+    e.H = lerp(e.H, s.H, clamp(dt * 12, 0, 1)); e.gait = s.g;
+  }
+  partTick(e, dt);
+  const mk = B.marker, mk2 = B.marker2; mk.material.opacity = 0; mk2.material.opacity = 0;
+  if (B.state === 'stomp_wind') { mk.position.set(pos.x, 0.05, pos.z); mk.scale.setScalar(2.4); mk.material.opacity = 0.35 + 0.4 * Math.sin(time * 30); }
+  if ((B.state === 'lunge_wind' || B.state === 'lunge') && B.to) { mk2.position.set(B.to.x, 0.05, B.to.z); mk2.scale.setScalar(1.5); mk2.material.opacity = B.state === 'lunge' ? 0.7 : 0.4 + 0.4 * Math.sin(time * 30); }
+  spiderPose(e, dt);
+}
+function spiderPose(e, dt) {
+  const B = e.bs, P = e.parts, pos = e.root.position;
+  const lift = B.state === 'stomp_wind' ? { front: 2.4 } : B.state === 'lunge' ? { all: 1.4 } : null;
+  const lb = e.legs.filter(L => L.side > 0 && !L.p.attached).length, rb = e.legs.filter(L => L.side < 0 && !L.p.attached).length;
+  e.body.position.y = e.H + (B.state === 'walk' ? Math.sin(e.gait * 2) * 0.06 : 0);
+  e.body.rotation.z = lerp(e.body.rotation.z, (rb - lb) * 0.06 + (B.state === 'dazed' || B.state === 'stunned' ? Math.sin(time * 20) * 0.03 : 0), 0.08);
+  e.body.rotation.x = lerp(e.body.rotation.x, B.state === 'stomp_wind' ? -0.18 : B.state === 'lunge_wind' ? 0.12 : 0, 0.12);
+  for (const L of e.legs) {
+    if (!L.p.attached) continue;
+    const ph = e.gait + (L.group ? Math.PI : 0), moving = e.moveSpeed > 0.2 ? 1 : 0;
+    let R = 3.6 + 0.45 * Math.sin(ph) * moving + (e.H < 1.5 ? 0.9 : 0), up = moving * Math.max(0, Math.cos(ph)) * 0.7;
+    if (lift && lift.front && L.idx === 0) up = lift.front;
+    if (lift && lift.all) up = lift.all;
+    L.p.group.rotation.y = L.base + 0.16 * Math.sin(ph) * moving * (L.side > 0 ? -1 : 1);
+    legIK(L, R, Math.max(0.3, e.H - 0.1 - up));
+  }
+  const ex = spiderExposed(e);
+  if (P.reactor.attached && P.reactor.flash <= 0) P.reactor.meshes[0].material.emissive.setHex(0xff7a1a).multiplyScalar(ex ? 1.1 + 0.4 * Math.sin(time * 14) : 0.25);
+  if (P.head.attached && P.head.flash <= 0) for (const m of e.eyes) m.material.emissive.setHex(0xff3020).multiplyScalar(B.state === 'lunge_wind' || B.state === 'stomp_wind' ? 1.5 : 0.8);
+  if (B.state === 'stunned' && Math.random() < 0.3) { _v1.copy(pos).setY(e.H); burstSparks(_v1, UPY, 3, 0x6ac8ff, 4); }
+}
+function puppetDragon(e, dt) {
+  const s = e.net, B = e.bs, P = e.parts;
+  partTick(e, dt);
+  if (s) {
+    if (s.s !== B.state) { if (s.s === 'breath') SFX.breath(); else if (s.s === 'dive' || s.s === 'crash') SFX.dragonRoar(); else if (s.s === 'storm_wind') SFX.emp(); }
+    if (!B.seenRoar && s.s !== 'cruise') { B.seenRoar = true; SFX.dragonRoar(); }
+    B.state = s.s; B.phase2 = !!s.p2; B.markerA = s.mk; B.aim = s.aim ? av3(s.aim) : null; e.mglow.material.opacity = s.mg;
+    const k = clamp(dt * 14, 0, 1);
+    e.headPos.lerp(_v2.set(s.hp[0], s.hp[1], s.hp[2]), k); e.headDir.lerp(_v2.set(s.hd[0], s.hd[1], s.hd[2]), k).normalize();
+    for (let i = 0; i < DR.segs && i * 3 + 2 < s.sp.length; i++) e.segPts[i].lerp(_v1.set(s.sp[i * 3], s.sp[i * 3 + 1], s.sp[i * 3 + 2]), k);
+  }
+  const shieldOn = partAlive(P.pearl), open = dragonNodesOpen(e);
+  for (const id of ['n1', 'n2', 'n3']) { const q = P[id]; if (!q.attached || q.state === 'disabled' || q.state === 'destroyed' || q.flash > 0) continue;
+    for (const m of q.meshes) if (m.userData.sub) m.material.emissive.setHex(0x5ff6ff).multiplyScalar(open ? 1.0 + 0.4 * Math.sin(time * 14) : 0.12); }
+  for (const id of ['n1', 'n2', 'n3']) if (P[id].shieldMesh) P[id].shieldMesh.visible = shieldOn && P[id].attached && P[id].state !== 'disabled' && P[id].state !== 'destroyed';
+  if (P.pearl.glowSprite) P.pearl.glowSprite.material.opacity = shieldOn ? 0.55 + 0.25 * Math.sin(time * 4) : 0;
+  applyDragonPose(e, e.headPos, e.headDir, e.segPts);
+  if (P.jaw.attached) P.jaw.group.rotation.x = lerp(P.jaw.group.rotation.x, (B.state === 'breath' || B.state === 'breath_wind' || B.state === 'dive') ? 0.5 : 0.08 + Math.sin(time * 1.3) * 0.04, Math.min(1, dt * 8));
+  const mk = B.marker, hp = e.headPos;
+  if (B.markerA > 0 && B.aim) {
+    const a0 = V3(hp.x, 0.05, hp.z), a1 = V3(B.aim.x, 0.05, B.aim.z), dd = a1.clone().sub(a0); const L = dd.length() + 14;
+    dd.normalize(); mk.position.copy(a0).addScaledVector(dd, L / 2); mk.scale.set(1, L, 1); mk.rotation.set(-Math.PI / 2, 0, -Math.atan2(dd.x, dd.z) + Math.PI);
+    mk.material.opacity = B.markerA * (0.7 + 0.3 * Math.sin(time * 30));
+  } else mk.material.opacity = 0;
+}
 // ---------------- 쓰러짐 · 부활 · 탈출 ----------------
 function coopDown() {
   if (player.downed) return;
@@ -3882,7 +3964,7 @@ function coopPrompt() {
 function coopModalHtml() {
   const st = NET.status, err = NET.err ? `<div class="bad" style="margin-top:12px;font-size:13px">${NET.err}</div>` : '';
   let body = '';
-  if (st === 'off') body = `<div class="dim" style="font-size:13px;line-height:1.6">친구와 함께 보스 작전에 들어갑니다. 지금은 <b>OP-X 렉스 사냥</b>만 지원합니다. 방장의 컴퓨터가 게임을 진행하므로 방장은 게임 창을 내리지 마세요.</div>
+  if (st === 'off') body = `<div class="dim" style="font-size:13px;line-height:1.6">친구와 함께 보스 작전 세 곳(렉스, 거미 전차, 청룡)에 들어갑니다. 방장의 컴퓨터가 게임을 진행하므로 방장은 게임 창을 내리지 마세요.</div>
       <div style="display:flex;gap:10px;margin-top:16px"><button class="primary" id="cohost">방 만들기</button></div>
       <div class="lbl" style="margin:20px 0 8px">참가하기</div>
       <div style="display:flex;gap:8px"><input id="cocode" maxlength="4" placeholder="방 코드 4자리" style="flex:1;text-transform:uppercase;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.3em;padding:10px;background:#111;border:1px solid var(--line);color:#efe9de"><button id="cojoin">참가</button></div>`;
@@ -3890,8 +3972,9 @@ function coopModalHtml() {
   else if (st === 'waiting') body = `<div class="lbl">방 코드</div><div class="mono acc" style="font-size:44px;letter-spacing:.35em;margin:6px 0 10px">${NET.code}</div>
       <div class="dim" style="font-size:13px;line-height:1.6">친구가 같은 주소에서 <b>협동 → 참가하기</b>에 이 코드를 입력하면 연결됩니다.</div><div style="margin-top:16px"><button id="coleave">방 닫기</button></div>`;
   else if (st === 'connected') body = NET.role === 'host'
-    ? `<div class="ok" style="font-size:15px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">출격하면 둘이 함께 REX-09 작전에 들어갑니다. 협동에서는 REX-09의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
-       <div style="display:flex;gap:10px;margin-top:16px"><button class="primary" id="colaunch">협동 출격 · OP-X 렉스 사냥</button><button id="coleave">연결 끊기</button></div>`
+    ? `<div class="ok" style="font-size:15px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">작전을 고르면 둘이 함께 들어갑니다. 협동에서는 보스의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
+       <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">${COOP_MISSIONS.map(m => `<button class="primary" data-colaunch="${m}">협동 출격 · ${MISSIONS[m].code} ${MISSIONS[m].name}</button>`).join('')}</div>
+       <div style="margin-top:12px"><button id="coleave">연결 끊기</button></div>`
     : `<div class="ok" style="font-size:15px">방 <span class="mono">${NET.code}</span> 접속됨</div><div class="dim" style="font-size:13px;margin-top:8px">방장이 출격하면 자동으로 함께 작전에 들어갑니다. 그동안 상점에서 장비를 정비해도 됩니다.</div><div style="margin-top:16px"><button id="coleave">나가기</button></div>`;
   return `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>협동</h2><span class="lbl">2인 · 보스 작전</span></header><div class="body">${body}${err}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
 }
@@ -3901,7 +3984,7 @@ function coopBindModal(H) {
   if (b('cojoin')) b('cojoin').onclick = () => { const v = b('cocode').value; NET.err = ''; coopJoin(v); };
   if (b('cocode')) b('cocode').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); coopJoin(e.target.value); } };
   if (b('coleave')) b('coleave').onclick = () => { coopLeave(); NET.err = ''; renderHub(); };
-  if (b('colaunch')) b('colaunch').onclick = () => coopLaunch('C');
+  H.querySelectorAll('[data-colaunch]').forEach(x => x.onclick = () => coopLaunch(x.dataset.colaunch));
 }
 // =====================================================================
 //  업적
