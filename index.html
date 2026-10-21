@@ -223,6 +223,13 @@ button.wide{width:100%;margin-top:22px;padding:11px}
 .sum .tot{font-size:17px;font-weight:700;border-top:1px solid var(--line2);padding-top:8px;margin-top:4px}
 .sens{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px}
 .sens input{flex:1;accent-color:var(--acc)}
+@media (max-height:860px) and (min-width:901px){
+  .hleft{top:clamp(16px,4vh,40px)}
+  .logo{font-size:clamp(36px,4.2vw,48px)} .logo:after{margin-top:12px} .logo small{margin-top:8px}
+  .hleft>.lbl{margin:20px 0 8px!important}
+  .op{padding:9px 12px} .opd{padding:8px 12px 10px 76px;font-size:12.5px;line-height:1.5}
+  .deploy{margin-top:14px;padding:12px 16px}
+}
 @media (max-width:900px){
   .hubhome{height:auto}
   .hleft,.target,.hload{position:static;width:auto;margin:20px 16px}
@@ -471,33 +478,36 @@ const STATE_KO = { intact: '정상', damaged: '손상', disabled: '무력화', d
 
 const ETYPES = {
   scout: { name: '정찰형', speed: 5.0, turn: 6, radius: 0.42, detect: 26, prefDist: 11, burst: 3, burstGap: 0.12, cooldown: 1.7,
-    leash: 12, reaction: 1.0, projSpeed: 36, projDmg: 6, projSize: 0.06, projColor: 0xffc04a, spread: 0.05, killReward: 40, scale: 1,
+    leash: 12, reaction: 1.0, projSpeed: 36, projDmg: 7, projSize: 0.06, projColor: 0xffc04a, spread: 0.05, killReward: 30, scale: 1,
     parts: { head: { hp: 16, brk: 10, val: 40 }, core: { hp: 40, val: 90 }, armor: { hp: 14, val: 15 },
       weapon: { hp: 22, brk: 16, val: 80 }, arm: { hp: 18, brk: 12, val: 28 }, legL: { hp: 26, brk: 18, val: 34 },
       legR: { hp: 26, brk: 18, val: 34 }, power: { hp: 20, brk: 14, val: 58 } } },
   combat: { name: '전투형', speed: 3.1, turn: 3.6, radius: 0.55, detect: 32, prefDist: 14, burst: 1, burstGap: 0, cooldown: 0.62,
-    leash: 10, reaction: 1.1, projSpeed: 31, projDmg: 9, projSize: 0.08, projColor: 0xff5a3a, spread: 0.04, killReward: 90, scale: 1,
+    leash: 10, reaction: 1.1, projSpeed: 31, projDmg: 11, projSize: 0.08, projColor: 0xff5a3a, spread: 0.04, killReward: 60, scale: 1,
     parts: { head: { hp: 34, brk: 20, val: 95 }, core: { hp: 110, val: 225 }, armor: { hp: 70, val: 45 },
       weapon: { hp: 55, brk: 40, val: 215 }, arm: { hp: 42, brk: 28, val: 68 }, legL: { hp: 60, brk: 40, val: 76 },
       legR: { hp: 60, brk: 40, val: 76 }, power: { hp: 50, brk: 35, val: 150 } } },
   heavy: { name: '중장갑형', speed: 1.8, turn: 1.5, radius: 0.85, detect: 34, prefDist: 12, burst: 4, burstGap: 0.16, cooldown: 3.0,
-    windup: 0.75, leash: 5, reaction: 1.3, projSpeed: 21, projDmg: 15, projSize: 0.15, projColor: 0xff3a6a, spread: 0.045, killReward: 200, scale: 1.18,
+    windup: 0.75, leash: 5, reaction: 1.3, projSpeed: 21, projDmg: 18, projSize: 0.15, projColor: 0xff3a6a, spread: 0.045, killReward: 140, scale: 1.18,
     parts: { head: { hp: 60, brk: 40, val: 170 }, core: { hp: 220, val: 480 }, armor: { hp: 240, val: 115 },
       shoulder: { hp: 110, val: 60 }, guardL: { hp: 90, val: 40 }, guardR: { hp: 90, val: 40 },
       weapon: { hp: 110, brk: 80, val: 430 }, arm: { hp: 85, brk: 55, val: 140 }, legL: { hp: 120, brk: 90, val: 150 },
       legR: { hp: 120, brk: 90, val: 150 }, power: { hp: 70, brk: 60, val: 360 } } },
 };
-ETYPES.rex = { name: 'REX-09', speed: 4.6, turn: 1.25, radius: 3.7, detect: 40, reaction: 0, killReward: 1500, scale: 1.6, leash: 99,
+ETYPES.rex = { name: 'REX-09', speed: 4.6, turn: 1.25, radius: 3.7, detect: 40, reaction: 0, killReward: 600, scale: 1.6, leash: 99,
   parts: { head: { hp: 260, brk: 150, val: 600 }, jaw: { hp: 300, brk: 200, val: 700 }, podL: { hp: 180, brk: 120, val: 450 },
     podR: { hp: 180, brk: 120, val: 450 }, arms: { hp: 120, brk: 80, val: 250 }, tail: { hp: 420, brk: 260, val: 900 },
-    legL: { hp: 900, brk: 500, val: 600 }, legR: { hp: 900, brk: 500, val: 600 }, core: { hp: 1800, val: 2200 },
-    chest: { hp: 650, val: 300 }, hatch: { hp: 400, val: 200 }, reactor: { hp: 1300, brk: 600, val: 1800 } } };
-ETYPES.dragon = { name: '청룡', title: '청룡 · 기계 용', radius: 1.4, scale: 1, killReward: 2000, detect: 80, leash: 99, reaction: 0,
-  parts: { head: { hp: 420, brk: 260, val: 700 }, jaw: { hp: 360, brk: 220, val: 650 }, hornL: { hp: 170, brk: 110, val: 380 }, hornR: { hp: 170, brk: 110, val: 380 },
-    pearl: { hp: 600, brk: 300, val: 2400 }, clawF: { hp: 300, brk: 200, val: 520 }, clawB: { hp: 300, brk: 200, val: 520 },
-    n1: { hp: 1300, brk: 450, val: 900 }, n2: { hp: 1300, brk: 450, val: 900 }, n3: { hp: 1300, brk: 450, val: 900 },
+    legL: { hp: 1000, brk: 550, val: 600 }, legR: { hp: 1000, brk: 550, val: 600 }, core: { hp: 1800, val: 2200 },
+    chest: { hp: 650, val: 300 }, hatch: { hp: 400, val: 200 }, reactor: { hp: 1550, brk: 700, val: 1800 } } };
+ETYPES.dragon = { name: '청룡', title: '청룡 · 기계 용', radius: 1.4, scale: 1, killReward: 800, detect: 80, leash: 99, reaction: 0,
+  parts: { head: { hp: 750, brk: 450, val: 700 }, jaw: { hp: 360, brk: 220, val: 650 }, hornL: { hp: 170, brk: 110, val: 380 }, hornR: { hp: 170, brk: 110, val: 380 },
+    pearl: { hp: 850, brk: 420, val: 2400 }, clawF: { hp: 300, brk: 200, val: 520 }, clawB: { hp: 300, brk: 200, val: 520 },
+    n1: { hp: 1650, brk: 560, val: 900 }, n2: { hp: 1650, brk: 560, val: 900 }, n3: { hp: 1650, brk: 560, val: 900 },
     fin: { hp: 280, brk: 180, val: 600 }, core: { hp: 4200, val: 3200 } } };
 ETYPES.rex.title = 'REX-09 · 기계 티라노';
+// 경제 조정: 부품 판매가 (일반 60% · 보스 40%)
+for (const [k, f] of [['scout', 0.6], ['combat', 0.6], ['heavy', 0.6], ['rex', 0.4], ['dragon', 0.4]])
+  for (const d of Object.values(ETYPES[k].parts)) d.val = Math.max(5, Math.round(d.val * f / 5) * 5);
 const RDIM = {
   scout: { torso: [0.46, 0.4, 0.34], thigh: [0.13, 0.46, 0.15], shin: [0.11, 0.48, 0.13], foot: [0.2, 0.08, 0.3], legX: 0.15,
     head: [0.32, 0.22, 0.3], neck: 0.1, plate: [0.5, 0.44, 0.05], power: [0.28, 0.28, 0.14], shoulderR: 0.085,
@@ -512,16 +522,49 @@ const RDIM = {
     upper: [0.2, 0.3, 0.2], gun: { len: 0.8, r: 0.075, body: [0.3, 0.28, 0.55], twin: true }, util: [0.18, 0.32, 0.18], knee: 0.13,
     col: { main: 0x6a6e74, dark: 0x2c2e32, acc: 0xb05a36, eye: 0xff2a2a }, heavy: true },
 };
+// ---------------------------------------------------------------------
+//  추가 적 · 임무 데이터 (드론형 · 저격형 · 중계탑 · 거미 전차)
+// ---------------------------------------------------------------------
+ETYPES.drone = { name: '드론형', speed: 6.2, turn: 5, radius: 0.55, detect: 34, prefDist: 12, burst: 4, burstGap: 0.1, cooldown: 2.1,
+  leash: 18, reaction: 0.9, projSpeed: 34, projDmg: 6, projSize: 0.06, projColor: 0x7ad8ff, spread: 0.05, killReward: 40, scale: 1, hover: 4.6,
+  parts: { head: { hp: 14, brk: 10, val: 30 }, core: { hp: 50, val: 70 }, weapon: { hp: 22, brk: 16, val: 50 }, power: { hp: 18, brk: 12, val: 40 },
+    rotorFL: { hp: 12, brk: 10, val: 15 }, rotorFR: { hp: 12, brk: 10, val: 15 }, rotorBL: { hp: 12, brk: 10, val: 15 }, rotorBR: { hp: 12, brk: 10, val: 15 } } };
+ETYPES.sniper = { name: '저격형', speed: 1.4, turn: 2.4, radius: 0.48, detect: 50, prefDist: 30, burst: 1, burstGap: 0, cooldown: 2.4, aimTime: 1.5,
+  leash: 4, reaction: 1.2, projSpeed: 120, projDmg: 28, projSize: 0.07, projColor: 0xff3030, spread: 0.004, killReward: 80, scale: 1.05, sniper: true,
+  parts: { head: { hp: 18, brk: 12, val: 40 }, core: { hp: 70, val: 90 }, armor: { hp: 30, val: 15 }, weapon: { hp: 40, brk: 30, val: 110 }, arm: { hp: 26, brk: 18, val: 25 },
+    legL: { hp: 40, brk: 28, val: 30 }, legR: { hp: 40, brk: 28, val: 30 }, power: { hp: 30, brk: 22, val: 60 } } };
+ETYPES.relay = { name: '중계탑', radius: 1.2, scale: 1, killReward: 150, detect: 0, leash: 0, reaction: 0,
+  parts: { armor: { hp: 260, val: 40 }, core: { hp: 320, val: 160 }, power: { hp: 140, brk: 100, val: 220 } } };
+ETYPES.spider = { name: 'ARACHNE', title: 'ARACHNE · 거미 전차', radius: 2.4, scale: 1, killReward: 700, detect: 60, leash: 99, reaction: 0,
+  parts: { head: { hp: 420, brk: 260, val: 260 }, turret: { hp: 520, brk: 320, val: 380 }, bay: { hp: 380, brk: 240, val: 300 },
+    sl1: { hp: 620, brk: 420, val: 200 }, sl2: { hp: 620, brk: 420, val: 200 }, sl3: { hp: 620, brk: 420, val: 200 },
+    sl4: { hp: 620, brk: 420, val: 200 }, sl5: { hp: 620, brk: 420, val: 200 }, sl6: { hp: 620, brk: 420, val: 200 },
+    core: { hp: 3200, val: 900 }, reactor: { hp: 1800, brk: 750, val: 760 } } };
+Object.assign(PART_NAMES, { rotorFL: '전방 좌측 로터', rotorFR: '전방 우측 로터', rotorBL: '후방 좌측 로터', rotorBR: '후방 우측 로터',
+  turret: '박격포 포탑', bay: '드론 격납고', sl1: '좌측 앞다리', sl2: '좌측 가운뎃다리', sl3: '좌측 뒷다리', sl4: '우측 앞다리', sl5: '우측 가운뎃다리', sl6: '우측 뒷다리' });
+Object.assign(PART_TYPE, { rotorFL: 'rotor', rotorFR: 'rotor', rotorBL: 'rotor', rotorBR: 'rotor', turret: 'turret', bay: 'bay',
+  sl1: 'sleg', sl2: 'sleg', sl3: 'sleg', sl4: 'sleg', sl5: 'sleg', sl6: 'sleg' });
+Object.assign(PART_MULT, { rotor: 1.4, turret: 1.0, bay: 1.0, sleg: 1.0 });
+RDIM.sniper = { torso: [0.44, 0.5, 0.32], thigh: [0.12, 0.55, 0.13], shin: [0.1, 0.58, 0.12], foot: [0.18, 0.08, 0.3], legX: 0.14,
+  head: [0.24, 0.2, 0.26], neck: 0.14, plate: [0.46, 0.46, 0.05], power: [0.26, 0.3, 0.12], shoulderR: 0.08,
+  upper: [0.08, 0.26, 0.08], gun: { len: 1.3, r: 0.03, body: [0.09, 0.12, 0.5] }, util: [0.07, 0.26, 0.07], knee: 0.07,
+  col: { main: 0x8c8f99, dark: 0x34363c, acc: 0x5a7fb0, eye: 0xff2a2a } };
 const MISSIONS = {
-  A: { id: 'A', code: 'OP-A', name: '폐기장 수색', diff: '낮음', contract: 700, partMult: 1.0,
-    desc: '폐기장에 자리 잡은 정찰 기계를 정리하라. 첫 장비 마련에 적합하다.', enemies: '정찰형 5 · 전투형 2', rec: '기본 장비', target: ['정찰형 · 전투형', '폐기장 · 위협 등급 낮음'] },
-  B: { id: 'B', code: 'OP-B', name: '공장 침투', diff: '높음', contract: 1800, partMult: 1.3, req: 'A',
-    desc: '가동 중인 조립 공장. 중장갑형은 정면 장갑이 두껍다. 측후방을 노려라.', enemies: '전투형 4 · 중장갑형 2', rec: '카빈 또는 정밀 소총 · 방어복 Mk.I', target: ['중장갑형', '조립 공장 · 위협 등급 높음'] },
-  C: { id: 'C', code: 'OP-X', name: '최종 작전 · 렉스 사냥', diff: '최상', contract: 5000, partMult: 1.0, req: 'B', boss: true,
+  A: { id: 'A', code: 'OP-A', name: '폐기장 수색', diff: '낮음', contract: 400, partMult: 1.0,
+    desc: '폐기장에 자리 잡은 정찰 기계를 정리하라. 첫 장비 마련에 적합하다.', enemies: '정찰형 5 · 전투형 2 · 드론형 1', rec: '기본 장비', target: ['정찰형 · 전투형', '폐기장 · 위협 등급 낮음'] },
+  B: { id: 'B', code: 'OP-B', name: '공장 침투', diff: '높음', contract: 900, partMult: 1.3, req: 'A',
+    desc: '가동 중인 조립 공장. 중장갑형은 정면 장갑이 두껍다. 측후방을 노려라. 안쪽 깊숙이 저격형이 자리 잡고 있다.', enemies: '전투형 4 · 중장갑형 2 · 저격형 1 · 드론형 1', rec: '카빈 또는 정밀 소총 · 방어복 Mk.I', target: ['중장갑형', '조립 공장 · 위협 등급 높음'] },
+  E: { id: 'E', code: 'OP-C', name: '변전소 장악', diff: '높음', contract: 1300, partMult: 1.15, relays: true,
+    desc: '적이 장악한 변전소. 중계탑 세 곳이 드론을 계속 띄운다. 꼭대기의 송신 코일을 끊어 중계탑을 모두 무력화하라. 망루의 저격형은 붉은 조준선이 굵어지기 전에 몸을 숨기거나 계속 움직여라.',
+    enemies: '중계탑 3 · 저격형 2 · 전투형 3 · 드론형', rec: '정밀 소총 또는 카빈 · EMP', target: ['중계탑 3기', '변전소 · 위협 등급 높음'] },
+  C: { id: 'C', code: 'OP-X', name: '최종 작전 · 렉스 사냥', diff: '최상', contract: 2500, partMult: 1.0, req: 'B', boss: true,
     desc: '폐 조선소의 대형 기계 티라노. 돌진을 기둥에 박게 하거나 두 다리를 무너뜨려 등 뒤 동력로를 노출시켜라.', enemies: 'REX-09 기계 티라노 (+ 정찰형 증원)', rec: '상위 무기 · 방어복 Mk.II (숙련자는 기본 권총으로도 가능)', target: ['REX-09', '기계 티라노 · 위협 등급 최상'] },
-  D: { id: 'D', code: 'OP-Z', name: '최종 작전 II · 청룡 격추', diff: '최상', contract: 7000, partMult: 1.0, boss: true,
+  D: { id: 'D', code: 'OP-Z', name: '최종 작전 II · 청룡 격추', diff: '최상', contract: 3000, partMult: 1.0, boss: true,
     desc: '산정 폐사원 상공을 도는 기계 용. 여의주를 깨거나 앞발째 떨어뜨려 보호막을 벗기고, 몸통의 동력 마디 세 곳을 모두 정지시켜라.',
     enemies: '청룡 (공중)', rec: '연사 · 관통 무기, EMP (숙련자는 기본 권총으로도 가능)', target: ['청룡', '기계 용 · 위협 등급 최상'] },
+  F: { id: 'F', code: 'OP-S', name: '최종 작전 III · 거미 전차', diff: '최상', contract: 3200, partMult: 1.0, boss: true,
+    desc: '폐 채석장을 배회하는 6족 보행 전차. 다리를 부숴 주저앉히면 복부 뒤쪽 아래의 동력로가 드러난다. 도약 착지 직후에도 냉각구가 잠깐 열린다.',
+    enemies: 'ARACHNE 거미 전차 (+ 드론 사출)', rec: '고화력 · 관통 무기, EMP (숙련자는 기본 권총으로도 가능)', target: ['ARACHNE', '거미 전차 · 위협 등급 최상'] },
 };
 
 // =====================================================================
@@ -530,8 +573,8 @@ const MISSIONS = {
 const SAVE_KEY = 'margin_save_v1';
 function defaultSave() {
   return { credits: 2000, weapons: { pistol: true }, utils: {}, mods: { dmg: 0, recoil: 0, reload: 0, mag: 0, move: 0 }, skills: {}, slots: ['', ''], inv: { emp: 0, frag: 0, stim: 0, ammo: 0 }, grenadeSel: 'emp', ach: { done: {}, c: {} }, equipped: 'pistol', armor: 0, salvage: 0,
-    unlocked: { A: true, B: true, C: true, D: true }, kills: 0, records: {}, deaths: 0, totalEarned: 0, sens: 1,
-    stats: { A: { runs: 0, clears: 0, best: 0 }, B: { runs: 0, clears: 0, best: 0 }, C: { runs: 0, clears: 0, best: 0 }, D: { runs: 0, clears: 0, best: 0 } } };
+    unlocked: { A: true, B: true, C: true, D: true, E: true, F: true }, kills: 0, records: {}, deaths: 0, totalEarned: 0, sens: 1,
+    stats: { A: { runs: 0, clears: 0, best: 0 }, B: { runs: 0, clears: 0, best: 0 }, C: { runs: 0, clears: 0, best: 0 }, D: { runs: 0, clears: 0, best: 0 }, E: { runs: 0, clears: 0, best: 0 }, F: { runs: 0, clears: 0, best: 0 } } };
 }
 function loadSave() {
   try {
@@ -543,7 +586,7 @@ function loadSave() {
     if (d.inv.smoke) { d.credits += d.inv.smoke * 200; } delete d.inv.smoke; if (!GRENADES.includes(d.grenadeSel)) d.grenadeSel = 'emp';
     if (!Array.isArray(d.slots) || d.slots.length !== 2) d.slots = ['', ''];
     d.ach = Object.assign({ done: {}, c: {} }, d.ach); d.ach.done = Object.assign({}, d.ach.done); d.ach.c = Object.assign({}, d.ach.c);
-    d.unlocked = { A: true, B: true, C: true, D: true }; d.records = Object.assign({}, d.records);
+    d.unlocked = { A: true, B: true, C: true, D: true, E: true, F: true }; d.records = Object.assign({}, d.records);
     d.stats = Object.assign(defaultSave().stats, d.stats);
     if (!d.weapons[d.equipped]) d.equipped = 'pistol';
     return d;
@@ -597,6 +640,7 @@ const SFX = {
   eshot(type, dist) {
     const v = clamp(1 - dist / 48, 0.04, 1) * 0.42;
     if (type === 'heavy') { sTone(320, 0.22, 'sawtooth', v, 70); sNoise(0.2, 700, 0.7, v * 0.6); }
+    else if (type === 'sniper') { sNoise(0.3, 2600, 0.7, Math.max(v, 0.2) * 1.5); sTone(170, 0.22, 'sawtooth', Math.max(v, 0.2) * 0.9, 60); }
     else sTone(type === 'scout' ? 1500 : 950, 0.08, 'square', v * 0.55, 320);
   },
   hit(kind) {
@@ -629,6 +673,8 @@ const SFX = {
   missile() { sNoise(0.45, 1700, 0.8, 0.28, 'bandpass'); },
   shock() { sTone(60, 0.8, 'sine', 0.6, 25); sNoise(0.7, 300, 0.5, 0.55); },
   laser() { sTone(220, 2.2, 'sawtooth', 0.22, 180); sTone(440, 2.2, 'square', 0.08, 300); sNoise(2.2, 2500, 0.8, 0.18, 'bandpass'); },
+  lock() { sTone(1800, 0.08, 'square', 0.13); sTone(2400, 0.08, 'square', 0.11, null, 0.1); },
+  spider() { sTone(820, 0.6, 'sawtooth', 0.14, 260); sTone(1240, 0.45, 'square', 0.05, 500, 0.05); sNoise(0.7, 1400, 0.7, 0.25); },
   objective() { sTone(523, 0.12, 'triangle', 0.28); sTone(784, 0.22, 'triangle', 0.28, null, 0.12); },
 };
 
@@ -1202,7 +1248,8 @@ function buildScrapyard() {
   spawnEnemy('scout', 25, -14, -1.2);
   spawnEnemy('combat', -16, -23, 0.4);
   spawnEnemy('combat', 13, -21, -0.2);
-  return { spawn: V3(0, 0, 25), yaw: 0 };
+  spawnDrone(2, -12, 4.6);
+  return { spawn: V3(0, 0, 25), yaw: 0, bounds: { x: 29, z: 29 } };
 }
 function buildFactory() {
   setEnv({ sky: 0x17191c, fog: [16, 78], hemi: [0xa8aeb6, 0x2e2a26, 1.1], sun: [0xfff1dc, 0.7, [20, 40, -10]],
@@ -1248,7 +1295,9 @@ function buildFactory() {
   spawnEnemy('combat', 22, -11, -0.6);
   spawnEnemy('heavy', -6, -12, 0, { guard: true });
   spawnEnemy('heavy', 7, -11, 0, { guard: true });
-  return { spawn: V3(0, 0, 21), yaw: 0 };
+  spawnEnemy('sniper', 0, -22, 0, { guard: true });
+  spawnDrone(-20, -12, 3.8);
+  return { spawn: V3(0, 0, 21), yaw: 0, bounds: { x: 31, z: 23 } };
 }
 
 function spawnEnemy(type, x, z, yaw, opts = {}) {
@@ -1261,6 +1310,7 @@ function spawnEnemy(type, x, z, yaw, opts = {}) {
   for (const p of Object.values(e.parts)) { p.enemy = e; hittables.push(...p.meshes); }
   r.root.position.set(x, 0, z); r.root.rotation.y = yaw;
   world.add(r.root); enemies.push(e);
+  if (cfg.sniper) addSniperLaser(e);
   return e;
 }
 
@@ -1269,7 +1319,8 @@ function startMission(id) {
   if (!ms || !save.unlocked[id]) return;
   initAudio();
   clearWorld();
-  const spawn = id === 'A' ? buildScrapyard() : id === 'B' ? buildFactory() : id === 'C' ? buildArena() : buildShrine();
+  const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry })[id]();
+  MAPB = spawn.bounds || { x: 30, z: 30 };
   const arm = ARMORS[save.armor];
   player.pos.copy(spawn.spawn); player.vel.set(0, 0, 0); player.vy = 0; player.onGround = true;
   player.maxHp = arm.hp; player.hp = arm.hp; player.dr = arm.dr; player.lastHurt = -99; player.crouch = 0; player.eye = EYE; player.height = P_HEIGHT;
@@ -1288,7 +1339,7 @@ function startMission(id) {
   state = 'mission';
   $('hub').classList.add('hidden'); $('result').classList.add('hidden'); $('hud').classList.remove('hidden');
   setText($('objcode'), ms.code); setText($('objname'), ms.name); setText($('armorname'), arm.name);
-  addFeed(ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');
+  addFeed(ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : ms.relays ? '작전 개시 · 중계탑 3기를 무력화하고 탈출 지점으로 귀환' : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');
   if (!TEST) { showPause(true); lockPointer(); }
 }
 
@@ -1437,7 +1488,7 @@ function explodeAt(pos, R, dmg, src = 'frag') {
       let dd = dmg * (1 - 0.6 * d / rr) * mult;
       e.lastHit = src;
       if (p.protectedBy.some(id => partAlive(e.parts[id]))) dd *= 0.5;
-      if (e.boss && p.id === 'reactor' && !bossHatchOpen(e)) dd *= 0.15;
+      if (e.boss && p.id === 'reactor' && !(e.spider ? spiderExposed(e) : bossHatchOpen(e))) dd *= 0.15;
       const ev = damagePart(p, dd); touched = true;
       if (ev !== 'destroyed') { p.flash = 0.07; for (const m of p.meshes) m.material.emissive.setRGB(0.55, 0.38, 0.2); }
       handlePartEvent(p, ev);
@@ -1466,6 +1517,13 @@ function empAt(pos, R) {
     }
     const d = Math.hypot(e.root.position.x - pos.x, e.root.position.z - pos.z) - e.cfg.radius * 0.5;
     if (d > R) continue;
+    if (e.spider) {
+      const B = e.bs;
+      if (B.state === 'collapse') { addFeed('ARACHNE 이미 주저앉음 · EMP 효과 없음', 'k'); continue; }
+      if (time >= (B.empImmune || 0)) { B.state = 'stunned'; B.t = 2.6; B.empImmune = time + 15; e.alert = true; addFeed('ARACHNE EMP 경직 · 동력로 노출', 'd'); popup('EMP · 보스 경직', 'weak'); }
+      else addFeed(`ARACHNE EMP 내성 · ${Math.ceil(B.empImmune - time)}초 남음`, 'k');
+      continue;
+    }
     if (e.boss) {
       const B = e.bs;
       if (B.state === 'knockdown') { addFeed('REX-09 이미 다운 상태 · EMP 효과 없음', 'k'); continue; }
@@ -1616,6 +1674,7 @@ function computeDamage(p, mesh, w, pierce) {
   let shielded = false;
   if (!ud.exposed && !pierce && p.protectedBy.some(id => partAlive(p.enemy.parts[id]))) { d *= p.protectedBy.includes('pearl') ? 0.25 : 0.4; shielded = true; }
   if (p.enemy.dragon && p.type === 'power' && !dragonNodesOpen(p.enemy)) { d *= 0.08; shielded = true; p.coverHit = true; } else p.coverHit = false;
+  if (p.enemy.spider && p.id === 'reactor' && !spiderExposed(p.enemy)) { d *= 0.15; shielded = true; p.coverHit = true; }
   return { d, precise, shielded };
 }
 // 반환: 'damaged' | 'disabled' | 'destroyed' | 'hit'
@@ -1660,7 +1719,7 @@ function hitPart(p, mesh, point, normal, w, fall = 1, pierce = false) {
   else if (armorish) kind = 'armor';
   showHitmarker(kind); SFX.hit(kind);
   if (precise && ev !== 'disabled' && ev !== 'destroyed') popup(mesh.userData.sub ? `약점 · ${mesh.userData.sub}` : '약점', 'weak');
-  else if (shielded && ev === 'damaged') popup(p.coverHit ? '마디 덮개 닫힘 · 공격 중에 노려라' : p.protectedBy.includes('pearl') ? '여의주 보호막 · 피해 감소' : '장갑 차폐 · 피해 감소', 'dim');
+  else if (shielded && ev === 'damaged') popup(p.coverHit ? (e.spider ? '동력로 차폐 · 다리를 부숴 주저앉혀라' : '마디 덮개 닫힘 · 공격 중에 노려라') : p.protectedBy.includes('pearl') ? '여의주 보호막 · 피해 감소' : '장갑 차폐 · 피해 감소', 'dim');
   if (!e.alert) { alertEnemy(e); e.lastSeen.copy(player.pos); }
   e.hitKick = Math.min(0.25, e.hitKick + 0.08);
   handlePartEvent(p, ev);
@@ -1686,6 +1745,10 @@ function handlePartEvent(p, ev) {
       case 'tail': shatter(p); addFeed(`${nm} 파괴 · 꼬리 휩쓸기 불가 (회수 불가)`, 'd'); popup('꼬리 파괴', 'bad'); break;
       case 'head': shatter(p); if (!e.stunned) { e.stunned = true; e.stunT = 2.4; } addFeed(`${nm} 파괴 · 조준 능력 저하`, 'd'); popup('센서 파괴', 'bad'); break;
       case 'leg': shatter(p); addFeed(`${nm} 파괴 · ${legFactor(e) === 0 ? '이동 불가' : '이동 저하'}`, 'd'); popup('다리 파괴', 'bad'); break;
+      case 'rotor': shatter(p); addFeed(`${nm} 파괴`, 'd'); popup('로터 파괴', 'bad'); break;
+      case 'sleg': shatter(p); spiderLegLost(e, p); popup('다리 파괴', 'bad'); break;
+      case 'turret': shatter(p); addFeed(`${nm} 파괴 · 포격 불가 (회수 불가)`, 'd'); popup('포탑 파괴', 'bad'); break;
+      case 'bay': shatter(p); addFeed(`${nm} 파괴 · 드론 사출 불가 (회수 불가)`, 'd'); popup('격납고 파괴', 'bad'); break;
     }
     return;
   }
@@ -1707,6 +1770,10 @@ function handlePartEvent(p, ev) {
       case 'tail': detachPart(p, V3(rand(-1, 1), 1.5, -2), true); addFeed(`${nm} 무력화 · 분리됨 · 꼬리 휩쓸기 불가`, 'd'); popup('꼬리 분리', 'ok'); break;
       case 'head': if (!e.stunned) { e.stunned = true; e.stunT = 2.4; } addFeed(`${nm} 무력화 · 조준 능력 저하`, 'd'); popup('센서 무력화', 'ok'); break;
       case 'leg': addFeed(`${nm} 무력화 · ${legFactor(e) === 0 ? '이동 불가' : '이동 저하'}`, 'd'); popup('다리 무력화', 'ok'); break;
+      case 'rotor': detachPart(p, V3(rand(-1, 1), 1.5, rand(-1, 1)), true); addFeed(`${nm} 무력화 · 분리됨`, 'd'); popup('로터 분리', 'ok'); break;
+      case 'sleg': detachPart(p, V3(rand(-1, 1), 2, rand(-1, 1)), true); spiderLegLost(e, p); popup(`${p.name} 분리`, 'ok'); break;
+      case 'turret': detachPart(p, V3(rand(-1, 1), 3, rand(-1, 1)), true); addFeed(`${nm} 무력화 · 분리됨 · 포격 불가`, 'd'); popup('포탑 분리', 'ok'); break;
+      case 'bay': updatePartVisual(p); addFeed(`${nm} 무력화 · 드론 사출 불가`, 'd'); popup('격납고 정지', 'ok'); break;
       case 'power': if (e.dragon) dragonNodeEvent(e, p); else killEnemy(e, 'shutdown'); break;
     }
   }
@@ -1762,17 +1829,17 @@ function enemySees(e, dx, dz, dist) {
     const ang = Math.abs(angDiff(Math.atan2(dx, dz), e.yaw));
     if (ang > (sensorBroken ? 0.6 : 1.05)) return false;
   }
-  _v1.set(e.root.position.x, e.eyeY, e.root.position.z);
+  _v1.set(e.root.position.x, e.root.position.y + e.eyeY, e.root.position.z);
   _v2.set(player.pos.x, player.pos.y + player.eye - 0.1, player.pos.z);
   return !segBlocked(_v1, _v2);
 }
-function enemyFire(e, dist) {
+function enemyFire(e, dist, aimAt = null, spMul = 1) {
   const cfg = e.cfg;
   e.root.updateMatrixWorld(true);
   const m = e.muzzle.getWorldPosition(V3());
-  const target = V3(player.pos.x, player.pos.y + lerp(1.15, 0.75, player.crouch), player.pos.z);
+  const target = aimAt || V3(player.pos.x, player.pos.y + lerp(1.15, 0.75, player.crouch), player.pos.z);
   const dir = target.sub(m).normalize();
-  const sp = cfg.spread * sensorMult(e) * (player.hspeed > 3.5 ? 1.35 : 1);
+  const sp = cfg.spread * spMul * (aimAt ? 1 : sensorMult(e) * (player.hspeed > 3.5 ? 1.35 : 1));
   dir.add(V3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(sp)).normalize();
   const pr = poolGet(FX.projs, 80, () => {
     const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
@@ -1783,7 +1850,7 @@ function enemyFire(e, dist) {
   pr.mesh.position.copy(m); pr.vel.copy(dir).multiplyScalar(cfg.projSpeed);
   pr.mesh.scale.set(cfg.projSize, cfg.projSize, cfg.projSize * 3.5);
   pr.mesh.lookAt(_v1.copy(m).add(dir));
-  spawnFlash(m, e.type === 'heavy' ? 0.7 : 0.4, 0.06, cfg.projColor);
+  spawnFlash(m, e.type === 'heavy' || e.type === 'sniper' ? 0.7 : 0.4, 0.06, cfg.projColor);
   SFX.eshot(e.type, dist);
 }
 function updateProjectiles(dt) {
@@ -1795,8 +1862,9 @@ function updateProjectiles(dt) {
     const p = pr.mesh.position;
     // 플레이어 판정 (구간 샘플링)
     let hitP = false;
-    for (let k = 1; k <= 4; k++) {
-      _v1.lerpVectors(pr.prev, p, k / 4);
+    const ns = Math.max(4, Math.ceil(pr.prev.distanceTo(p) / 0.25));
+    for (let k = 1; k <= ns; k++) {
+      _v1.lerpVectors(pr.prev, p, k / ns);
       const dx = _v1.x - player.pos.x, dz = _v1.z - player.pos.z;
       if (dx * dx + dz * dz < 0.42 * 0.42 && _v1.y > player.pos.y + 0.05 && _v1.y < player.pos.y + player.height + 0.05) { hitP = true; break; }
     }
@@ -1816,7 +1884,10 @@ function updateProjectiles(dt) {
 function updateEnemy(e, dt) {
   if (e.dead) return;
   if (e.dragon) { updateDragon(e, dt); return; }
+  if (e.spider) { updateSpider(e, dt); return; }
   if (e.boss) { updateBoss(e, dt); return; }
+  if (e.drone) { updateDrone(e, dt); return; }
+  if (e.relay) { updateRelay(e, dt); return; }
   const cfg = e.cfg, pos = e.root.position;
   for (const id in e.parts) { const p = e.parts[id]; if (p.flash > 0) { p.flash -= dt; if (p.flash <= 0 && p.attached) updatePartVisual(p); } }
   // 손상 부위 스파크
@@ -1851,6 +1922,7 @@ function updateEnemy(e, dt) {
   }
   // 이동 결정
   let mx = 0, mz = 0, spd = cfg.speed * lf;
+  if (e.perch || (cfg.sniper && e.aimT > 0)) spd = 0;
   if (e.alert) {
     if (!e.canShoot) { if (dist < 22) { mx = -dx / dist; mz = -dz / dist; } }
     else if (!e.canSee) {
@@ -1905,6 +1977,7 @@ function updateEnemy(e, dt) {
   const da = angDiff(ty, e.yaw); e.yaw += clamp(da, -turn, turn);
   e.root.rotation.y = e.yaw;
   // 공격
+  if (cfg.sniper) { sniperAttack(e, dt, dx, dz, dist); animateLegs(e, e.moveSpeed, dt); return; }
   const wp = e.parts.weapon;
   if (e.alert && e.canSee && e.canShoot) {
     const yawErr = Math.abs(angDiff(Math.atan2(dx, dz), e.yaw));
@@ -2132,6 +2205,7 @@ function distPointSeg(p, a, b) {
   return _v3.copy(a).addScaledVector(_v4, t).distanceTo(p);
 }
 function updateBoss(e, dt) {
+  const REC = e.bs.phase2 ? 0.7 : 0.85; // 공격 사이 빈틈 단축
   const B = e.bs, pos = e.root.position, cfg = e.cfg, S = cfg.scale;
   partTick(e, dt);
   for (const k in B.cd) B.cd[k] -= dt;
@@ -2173,8 +2247,8 @@ function updateBoss(e, dt) {
       turnTo = toYaw; turnRate *= 1.6;
       if (B.t <= 0) {
         SFX.brk();
-        if (dist < 6.8 * S && Math.abs(yawErr) < 0.75 && player.pos.y < 6) { damagePlayer(40, pos, 'bite'); knockPlayer(dx, dz, 7); }
-        B.state = 'recover'; B.t = 0.7; B.bit = 0.35;
+        if (dist < 6.8 * S && Math.abs(yawErr) < 0.75 && player.pos.y < 6) { damagePlayer(44, pos, 'bite'); knockPlayer(dx, dz, 7); }
+        B.state = 'recover'; B.t = 0.7 * REC; B.bit = 0.35;
       }
       break;
     case 'tail':
@@ -2183,8 +2257,8 @@ function updateBoss(e, dt) {
     case 'spin': {
       e.yaw += (Math.PI * 2 / 0.75) * dt * B.spinDir;
       const tailDir = e.yaw + Math.PI;
-      if (!B.spinHit && dist < 9.5 * S && Math.abs(angDiff(toYaw, tailDir)) < 0.5 && player.pos.y < 3.5) { B.spinHit = true; damagePlayer(30, pos, 'tail'); knockPlayer(dx, dz, 11); }
-      if (B.t <= 0) { B.state = 'recover'; B.t = 0.6; }
+      if (!B.spinHit && dist < 9.5 * S && Math.abs(angDiff(toYaw, tailDir)) < 0.5 && player.pos.y < 3.5) { B.spinHit = true; damagePlayer(33, pos, 'tail'); knockPlayer(dx, dz, 11); }
+      if (B.t <= 0) { B.state = 'recover'; B.t = 0.6 * REC; }
       break;
     }
     case 'charge_wind':
@@ -2203,9 +2277,9 @@ function updateBoss(e, dt) {
         _v3.set(pos.x + sx * 3.4 * S, 3.5 * S, pos.z + sz * 3.4 * S); spawnFlash(_v3, 3, 0.2, 0xffc080); burstSparks(_v3, UPY, 24, 0xffb050, 9); SFX.explode(dist);
         addFeed('REX-09 충돌 · 기절 · 동력로 노출', 'd'); achEvent('rexWall'); popup('기절 · 동력로 노출', 'weak');
       } else { pos.x = nx; pos.z = nz; }
-      if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; damagePlayer(35, pos, 'charge'); knockPlayer(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
+      if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; damagePlayer(38, pos, 'charge'); knockPlayer(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
       B.moveSpeed = 15;
-      if (B.state === 'charge' && B.t <= 0) { B.state = 'recover'; B.t = 0.9; }
+      if (B.state === 'charge' && B.t <= 0) { B.state = 'recover'; B.t = 0.9 * REC; }
       break;
     }
     case 'laser_wind': {
@@ -2216,13 +2290,13 @@ function updateBoss(e, dt) {
       const ang = B.laserDir.angleTo(want), maxA = (B.t > 0.5 ? 0.9 : 0) * dt;
       B.laserLocked = B.t <= 0.5;
       if (ang > 1e-4 && maxA > 0) B.laserDir.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(B.laserDir, want).slerp(new THREE.Quaternion(), 1 - Math.min(1, maxA / ang))).normalize();
-      if (!bossWorking(e, 'head')) { B.state = 'recover'; B.t = 0.6; B.laserAimed = false; break; }
+      if (!bossWorking(e, 'head')) { B.state = 'recover'; B.t = 0.6 * REC; B.laserAimed = false; break; }
       if (B.t <= 0) { B.state = 'laser'; B.laserAimed = false; B.t = B.phase2 ? 2.8 : 2.2; B.laserAcc = 0; SFX.laser(); addFeed('REX-09 열선 발사', 'k'); }
       break;
     }
     case 'laser': {
       turnTo = toYaw; turnRate = 0.3 * (B.phase2 ? 1.4 : 1);
-      if (!bossWorking(e, 'head')) { B.state = 'recover'; B.t = 0.6; break; }
+      if (!bossWorking(e, 'head')) { B.state = 'recover'; B.t = 0.6 * REC; break; }
       const m = rexMouth(e, V3());
       const want = V3(player.pos.x, player.pos.y + 1.1, player.pos.z).sub(m).normalize();
       const ang = B.laserDir.angleTo(want), maxA = (B.phase2 ? 0.22 : 0.16) * dt;
@@ -2237,23 +2311,23 @@ function updateBoss(e, dt) {
       if (near < 0.75) { B.laserAcc += 45 * dt; if (B.laserAcc >= 6) { B.laserAcc -= 6; damagePlayer(6, m, 'laser'); } }
       if (Math.random() < 0.8) { burstSparks(end, UPY, 3, 0xff8a40, 6); }
       if (Math.random() < 0.3 && end.distanceTo(camera.position) > 4) spawnFlash(end, 2.2, 0.08, 0xff7a30);
-      if (B.t <= 0) { B.state = 'recover'; B.t = 0.8; }
+      if (B.t <= 0) { B.state = 'recover'; B.t = 0.8 * REC; }
       break;
     }
     case 'missile':
       turnTo = toYaw; B.fireT -= dt;
       if (B.shots > 0 && B.fireT <= 0) { bossFireMissile(e); B.shots--; B.fireT = 0.26; }
-      if (B.shots <= 0 && B.t <= 0) { B.state = 'recover'; B.t = 0.6; }
+      if (B.shots <= 0 && B.t <= 0) { B.state = 'recover'; B.t = 0.6 * REC; }
       break;
     case 'slam_wind':
       if (B.t <= 0) {
         spawnShock(pos.x, pos.z); SFX.shock(); shake = Math.max(shake, 0.025);
         burstSparks(_v3.set(pos.x, 0.3, pos.z), UPY, 20, 0xc8b8a0, 6);
-        B.state = 'recover'; B.t = 1.0;
+        B.state = 'recover'; B.t = 1.0 * REC;
       }
       break;
     case 'stunned':
-      if (B.t <= 0) { B.state = 'recover'; B.t = 0.6; }
+      if (B.t <= 0) { B.state = 'recover'; B.t = 0.6 * REC; }
       break;
     case 'knockdown':
       if (B.t <= 0) {
@@ -2263,7 +2337,7 @@ function updateBoss(e, dt) {
         }
         if (legFactor(e) === 0) { B.crawl = true; achEvent('rexCrawl'); addFeed('REX-09 하체 붕괴 · 동력로 해치 고정 개방', 'd'); popup('하체 붕괴 · 동력로 상시 노출', 'weak'); }
         else { addFeed('REX-09 기립 · 다리 응급 수리', 'k'); SFX.roar(); }
-        B.state = 'recover'; B.t = 1.2;
+        B.state = 'recover'; B.t = 1.2 * REC;
       }
       break;
     case 'recover':
@@ -2366,7 +2440,7 @@ function buildArena() {
   addExtraction(0, 32);
   addAmmoCrate(-5, 33, true); addAmmoCrate(5, 33, true);
   spawnBoss(0, -10, 0);
-  return { spawn: V3(0, 0, 31), yaw: 0 };
+  return { spawn: V3(0, 0, 31), yaw: 0, bounds: { x: 37, z: 37 } };
 }
 
 // =====================================================================
@@ -2498,7 +2572,7 @@ function spawnDragon(x, y, z) {
     glow: { material: { opacity: 0 } }, eyeY: 0, coreY: 0, yaw: 0, home: V3(0, 0, 0), alert: false, canSee: true, canShoot: true, lastSeen: V3(),
     dead: false, stunT: 0, stunned: false, pendingAlert: 0, hitKick: 0, phase: 0, sparkT: 0,
     headPos: V3(x, y, z), headDir: V3(1, 0, 0), speed: 11, trail: [], segPts: Array.from({ length: DR.segs }, () => V3()),
-    bs: { state: 'cruise', t: 3, cd: { breath: 2, storm: 4, dive: 7 }, ang: Math.atan2(z, x), started: false, phase2: false, empImmune: 0 } };
+    bs: { state: 'cruise', t: 3, cd: { breath: 2, storm: 4, dive: 7, barrage: 6 }, ang: Math.atan2(z, x), started: false, phase2: false, empImmune: 0 } };
   // 시작 궤적: 원을 따라 뒤로 늘어뜨림
   for (let i = 1; i < 120; i++) { const a = e.bs.ang - i * 0.025; e.trail.push(V3(Math.cos(a) * 24, y + Math.sin(a * 2) * 2, Math.sin(a) * 24)); }
   e.headPos.copy(e.trail[0]).add(V3(-Math.sin(e.bs.ang), 0, Math.cos(e.bs.ang)).multiplyScalar(0.6));
@@ -2510,7 +2584,7 @@ function spawnDragon(x, y, z) {
   world.add(d.root); enemies.push(e);
   return e;
 }
-const DRAGON_OPEN = { breath_wind: 1, breath: 1, storm_wind: 1, dive: 1, skim: 1, downed: 1, dazed: 1, crash: 1 };
+const DRAGON_OPEN = { breath_wind: 1, breath: 1, storm_wind: 1, barrage_wind: 1, barrage: 1, dive: 1, skim: 1, downed: 1, dazed: 1, crash: 1 };
 function dragonNodesOpen(e) { return !!DRAGON_OPEN[e.bs.state]; }
 function dragonNodesDown(e) { return ['n1', 'n2', 'n3'].filter(id => { const p = e.parts[id]; return !p.attached || p.state === 'disabled' || p.state === 'destroyed'; }).length; }
 function dragonWorking(e, id) { const p = e.parts[id]; return p && p.attached && p.state !== 'destroyed' && p.state !== 'disabled'; }
@@ -2580,19 +2654,26 @@ function updateDragon(e, dt) {
     for (const m of q.meshes) if (m.userData.sub) m.material.emissive.setHex(0x5ff6ff).multiplyScalar(open ? 1.0 + 0.4 * Math.sin(time * 14) : 0.12); }
   for (const id of ['n1', 'n2', 'n3']) if (P[id].shieldMesh) P[id].shieldMesh.visible = shieldOn && P[id].attached && P[id].state !== 'disabled' && P[id].state !== 'destroyed';
   if (P.pearl.glowSprite) P.pearl.glowSprite.material.opacity = shieldOn ? 0.55 + 0.25 * Math.sin(time * 4) : 0;
-  const fast = (B.phase2 ? 1.22 : 1) * (dragonWorking(e, 'fin') ? 1 : 0.8) * (1 - 0.12 * dragonNodesDown(e));
+  if (!B.berserk && !dragonWorking(e, 'head')) {
+    B.berserk = true; SFX.dragonRoar(); addFeed('청룡 머리 파손 · 폭주 · 몸통 마디 탄막 강화', 'k'); popup('청룡 폭주', 'bad');
+    B.cd.barrage = Math.min(B.cd.barrage, 1.5);
+  }
+  const fast = (B.phase2 ? 1.22 : 1) * (B.berserk ? 1.12 : 1) * (dragonWorking(e, 'fin') ? 1 : 0.8) * (1 - 0.12 * dragonNodesDown(e));
   let T = null, spd = 11 * fast, turn = 1.5 * (dragonWorking(e, 'fin') ? 1 : 0.7);
   const hp = e.headPos;
   B.t -= dt; B.markerA = 0;
   const pick = () => {
     const opts = [];
-    if (dragonWorking(e, 'jaw') && dragonWorking(e, 'head') && B.cd.breath <= 0 && distP < 34) opts.push('breath');
-    if ((dragonWorking(e, 'hornL') || dragonWorking(e, 'hornR')) && B.cd.storm <= 0) opts.push('storm');
+    if (dragonWorking(e, 'jaw') && B.cd.breath <= 0 && distP < 34) opts.push('breath');
+    if (B.cd.storm <= 0) opts.push('storm');
     if (B.cd.dive <= 0) opts.push('dive');
+    // 마디 탄막: 머리와 무관하게 몸통 동력 마디에서 발사. 머리를 잃으면 폭주해 더 자주 쓴다
+    if (B.cd.barrage <= 0 && dragonNodesDown(e) < 3) { opts.push('barrage'); if (B.berserk) opts.push('barrage'); }
     if (!opts.length) { B.state = 'cruise'; B.t = rand(0.8, 1.5); return; }
     const s = opts[Math.floor(Math.random() * opts.length)];
     if (s === 'breath') { B.state = 'breath_wind'; B.t = 1.0; }
     else if (s === 'storm') { B.state = 'storm_wind'; B.t = 0.9; }
+    else if (s === 'barrage') { B.state = 'barrage_wind'; B.t = 0.9; B.volley = 0; SFX.shock(); }
     else { B.state = 'dive_wind'; B.t = 1.3; }
   };
   switch (B.state) {
@@ -2621,9 +2702,9 @@ function updateDragon(e, dt) {
           const aim = pp.clone().addScaledVector(player.vel, 0.35).sub(_v2).normalize();
           const sp = 0.06 * sensorMult(e);
           aim.add(V3(rand(-sp, sp), rand(-sp, sp), rand(-sp, sp))).normalize();
-          spawnBossProj(_v2, aim, 38, 12, 0.22, 0x8af4ff);
+          spawnBossProj(_v2, aim, 40, 12, 0.22, 0x8af4ff);
         }
-        if (B.t <= 0) { B.state = 'cruise'; B.t = rand(1, 1.8); B.cd.breath = B.phase2 ? 4.5 : 6; e.mglow.material.opacity = 0; }
+        if (B.t <= 0) { B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.breath = B.phase2 ? 3.5 : 5; e.mglow.material.opacity = 0; }
       }
       break;
     }
@@ -2632,12 +2713,34 @@ function updateDragon(e, dt) {
       for (const id of ['hornL', 'hornR']) if (dragonWorking(e, id)) for (const m of P[id].meshes) m.material.emissive.setRGB(0.4 + 0.4 * Math.sin(time * 30), 0.8, 1);
       if (B.t <= 0) {
         const horns = ['hornL', 'hornR'].filter(id => dragonWorking(e, id)).length;
-        const n = 1 + horns * 2 + (B.phase2 ? 2 : 0);
+        const n = (horns ? 1 + horns * 2 : 2) + (B.phase2 ? 3 : 0);
         dragonStrike(player.pos.x + player.vel.x * 0.5, player.pos.z + player.vel.z * 0.5);
         for (let i = 1; i < n; i++) { const a = rand(0, Math.PI * 2), r = rand(3, 9); dragonStrike(player.pos.x + Math.cos(a) * r, player.pos.z + Math.sin(a) * r); }
         for (const id of ['hornL', 'hornR']) if (P[id].attached) updatePartVisual(P[id]);
-        SFX.emp(); B.state = 'cruise'; B.t = rand(1, 1.8); B.cd.storm = B.phase2 ? 5 : 7;
+        SFX.emp(); B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.storm = (B.phase2 ? 3.6 : 5.5) * (horns ? 1 : 1.4);
       }
+      break;
+    }
+    case 'barrage_wind': case 'barrage': {
+      const R = 21; B.ang += (spd * 0.7 / R) * dt; T = V3(Math.cos(B.ang + 0.35) * R, 11, Math.sin(B.ang + 0.35) * R);
+      const live = ['n1', 'n2', 'n3'].filter(id => dragonWorking(e, id));
+      if (B.state === 'barrage_wind') {
+        for (const id of live) if (Math.random() < 0.5) { P[id].meshes[0].getWorldPosition(_v1); burstSparks(_v1, UPY, 1, 0x5ff6ff, 3); }
+        if (B.t <= 0) { B.state = 'barrage'; B.t = B.phase2 || B.berserk ? 1.6 : 1.2; B.fireT = 0; }
+        break;
+      }
+      B.fireT -= dt;
+      if (B.fireT <= 0) {
+        B.fireT = B.berserk ? 0.16 : 0.22;
+        for (const id of live) {
+          P[id].meshes[0].getWorldPosition(_v2);
+          const aim = pp.clone().addScaledVector(player.vel, 0.3).sub(_v2).normalize();
+          const sp = 0.05; aim.add(V3(rand(-sp, sp), rand(-sp, sp), rand(-sp, sp))).normalize();
+          spawnBossProj(_v2, aim, 30, 8, 0.2, 0x5ff6ff);
+        }
+        SFX.eshot('combat', hp.distanceTo(pp));
+      }
+      if (B.t <= 0) { B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.barrage = (B.phase2 ? 5 : 7) * (B.berserk ? 0.55 : 1); }
       break;
     }
     case 'dive_wind':
@@ -2649,7 +2752,7 @@ function updateDragon(e, dt) {
     case 'dive':
       T = B.aim.clone(); spd = 25 * (B.phase2 ? 1.1 : 1); turn = 2.6;
       B.markerA = 0.6;
-      if (hp.y < 3 || hp.distanceTo(B.aim) < 3 || B.t <= 0) { B.state = 'skim'; B.t = B.phase2 ? 2.6 : 3.4; B.skimDir = e.headDir.clone().setY(0).normalize(); }
+      if (hp.y < 3 || hp.distanceTo(B.aim) < 3 || B.t <= 0) { B.state = 'skim'; B.t = B.phase2 ? 2.2 : 2.8; B.skimDir = e.headDir.clone().setY(0).normalize(); }
       break;
     case 'skim': {
       if (!B.skimDir) B.skimDir = e.headDir.clone().setY(0).normalize();
@@ -2662,7 +2765,7 @@ function updateDragon(e, dt) {
     case 'climb':
       T = hp.clone().add(e.headDir.clone().setY(0).normalize().multiplyScalar(8)); T.y = 14; spd = 12; turn = 1.8;
       if (Math.hypot(T.x, T.z) > 28) T.multiplyScalar(0.7);
-      if (B.t <= 0) { B.state = 'cruise'; B.t = rand(1, 1.8); B.cd.dive = B.phase2 ? 7 : 9; B.ang = Math.atan2(hp.z, hp.x) - 0.35; }
+      if (B.t <= 0) { B.state = 'cruise'; B.t = rand(0.5, 1.1); B.cd.dive = B.phase2 ? 5 : 7; B.ang = Math.atan2(hp.z, hp.x) - 0.35; }
       break;
     case 'downed':
       T = hp.clone().add(e.headDir.clone().setY(0).normalize().multiplyScalar(5)); T.y = 1.1; spd = 5; turn = 0.6;
@@ -2714,7 +2817,7 @@ function updateDragon(e, dt) {
   if ((B.state === 'dive' || B.state === 'skim') && !B.hitDone) {
     let near = hp.distanceTo(pp);
     for (let i = 0; i < 5; i++) near = Math.min(near, e.segPts[i].distanceTo(pp));
-    if (near < 3.0) { B.hitDone = true; damagePlayer(dragonWorking(e, 'clawB') ? 40 : 24, hp, 'dive'); knockPlayer(player.pos.x - hp.x, player.pos.z - hp.z, 10); }
+    if (near < 3.0) { B.hitDone = true; damagePlayer(dragonWorking(e, 'clawB') ? 44 : 27, hp, 'dive'); knockPlayer(player.pos.x - hp.x, player.pos.z - hp.z, 10); }
   }
 }
 // 거점 전시용: 공중에서 S자로 굽이치는 자세 (화면 가로로 몸통이 펼쳐짐)
@@ -2755,62 +2858,628 @@ function buildShrine() {
 }
 
 // =====================================================================
+//  추가 적: 드론형 · 저격형 · 중계탑
+// =====================================================================
+let MAPB = { x: 30, z: 30 };   // 비행체 이동 한계 (맵마다 갱신)
+function partKit(cfg, parts, names = {}) {
+  const P = (id, parent) => {
+    const def = cfg.parts[id]; const g = new THREE.Group(); g.name = id; parent.add(g);
+    const type = PART_TYPE[id];
+    const p = { id, type, name: names[id] || PART_NAMES[id], group: g, meshes: [], maxHp: def.hp, hp: def.hp, brkMax: def.brk || 0, brk: def.brk || 0,
+      val: def.val, state: 'intact', precise: !!PRECISE[type], mult: PART_MULT[type], protectedBy: [], flash: 0, attached: true, children: [], enemy: null };
+    parts[id] = p; return p;
+  };
+  const M = (p, geo, color, x, y, z, o = {}) => {
+    const mat = new THREE.MeshLambertMaterial({ color, flatShading: true });
+    if (o.emissive) mat.emissive.setHex(o.emissive);
+    if (o.opacity) { mat.transparent = true; mat.opacity = o.opacity; mat.depthWrite = false; }
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z);
+    if (o.rx) m.rotation.x = o.rx; if (o.ry) m.rotation.y = o.ry; if (o.rz) m.rotation.z = o.rz;
+    m.userData = { part: p, hitMult: o.hitMult || 1, exposed: !!o.exposed, sub: o.sub || null, base: new THREE.Color(color), baseE: new THREE.Color(o.emissive || 0) };
+    (o.parent || p.group).add(m); p.meshes.push(m); return m;
+  };
+  return { P, M };
+}
+const _box3 = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+function dummyGlow() { return { material: { opacity: 0 } }; }
+
+// ---------------- 드론형 ----------------
+const ROTORS = ['rotorFL', 'rotorFR', 'rotorBL', 'rotorBR'];
+function buildDrone() {
+  const cfg = ETYPES.drone, root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const parts = {}, { P, M } = partKit(cfg, parts), C = { main: 0x9aa3a8, dark: 0x30353a, acc: 0x3f8fd0 };
+  const core = P('core', body);
+  M(core, _box3(0.62, 0.22, 0.7), C.main, 0, 0, 0);
+  M(core, _box3(0.4, 0.12, 0.46), C.dark, 0, -0.16, 0, { hitMult: 0.7, sub: '하부 프레임' });
+  M(core, _box3(0.5, 0.05, 0.5), C.acc, 0, 0.13, 0);
+  const hd = P('head', body);
+  M(hd, new THREE.SphereGeometry(0.12, 10, 8), C.dark, 0, -0.1, 0.36);
+  M(hd, _box3(0.13, 0.07, 0.04), 0x220000, 0, -0.1, 0.47, { emissive: 0xff5a2a, sub: '광학 센서' });
+  const pw = P('power', body);
+  M(pw, _box3(0.3, 0.12, 0.26), C.dark, 0, 0.19, -0.12);
+  M(pw, _box3(0.2, 0.05, 0.16), 0x002211, 0, 0.27, -0.12, { emissive: 0x3dff9a, sub: '배터리 셀' });
+  const wp = P('weapon', body);
+  M(wp, _box3(0.12, 0.1, 0.3), C.dark, 0, -0.24, 0.12);
+  M(wp, new THREE.CylinderGeometry(0.025, 0.025, 0.36, 6), 0x1e1e1e, 0, -0.24, 0.42, { rx: Math.PI / 2 });
+  const muzzle = new THREE.Object3D(); muzzle.position.set(0, -0.24, 0.62); wp.group.add(muzzle);
+  const glow = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), new THREE.MeshBasicMaterial({ color: 0x7ad8ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.position.copy(muzzle.position); wp.group.add(glow);
+  const discs = [];
+  for (const [id, sx, sz] of [['rotorFL', 1, 1], ['rotorFR', -1, 1], ['rotorBL', 1, -1], ['rotorBR', -1, -1]]) {
+    const r = P(id, body); r.group.position.set(sx * 0.5, 0.06, sz * 0.5);
+    M(r, _box3(0.5, 0.05, 0.07), C.dark, -sx * 0.18, 0, -sz * 0.18, { ry: Math.atan2(sz, -sx) });
+    M(r, new THREE.CylinderGeometry(0.07, 0.07, 0.12, 8), C.dark, 0, 0.03, 0, { hitMult: 1.5, sub: '모터' });
+    const d = M(r, new THREE.CylinderGeometry(0.27, 0.27, 0.02, 14), 0xc8d2d8, 0, 0.1, 0, { opacity: 0.55 });
+    discs.push(d);
+  }
+  return { root, body, parts, muzzle, glow, discs, eyeY: 0, coreY: 0 };
+}
+function spawnDrone(x, z, alt, opts = {}) {
+  const r = buildDrone(), cfg = ETYPES.drone;
+  const e = { type: 'drone', drone: true, cfg, root: r.root, body: r.body, parts: r.parts, muzzle: r.muzzle, glow: r.glow, discs: r.discs, eyeY: 0, coreY: 0,
+    yaw: opts.yaw ?? rand(0, 6.28), homeYaw: 0, vel: V3(), home: V3(x, 0, z), alert: false, canSee: false, losT: rand(0, 0.2), lastSeen: V3(x, 0, z), lostT: 0,
+    fireCd: 1.2, burstLeft: 0, burstT: 0, stunT: 0, empT: 0, stunned: false, strafeDir: Math.random() < 0.5 ? 1 : -1, strafeT: 0, phase: Math.random() * 6,
+    hitKick: 0, dead: false, sparkT: 0, canShoot: true, pendingAlert: opts.alert || 0, moveSpeed: 0, falling: false, vy: 0, patrolA: rand(0, 6.28),
+    noReward: !!opts.noReward, guard: false };
+  for (const p of Object.values(e.parts)) { p.enemy = e; hittables.push(...p.meshes); }
+  r.root.position.set(x, alt ?? cfg.hover, z); r.root.rotation.y = e.yaw;
+  world.add(r.root); enemies.push(e);
+  return e;
+}
+function rotorsWorking(e) { return ROTORS.filter(id => { const p = e.parts[id]; return p.attached && p.state !== 'disabled' && p.state !== 'destroyed'; }).length; }
+function updateDrone(e, dt) {
+  partTick(e, dt);
+  const pos = e.root.position, cfg = e.cfg, rw = rotorsWorking(e);
+  for (const d of e.discs) if (d.userData.part.attached) d.rotation.y += dt * (e.falling ? 6 : e.stunT > 0 ? 10 : 42);
+  if (!e.falling && rw <= 2) {
+    e.falling = true; e.vy = 0.5; e.glow.material.opacity = 0;
+    addFeed(`${cfg.name} 로터 손실 · 추락`, 'd'); popup('드론 추락', 'ok');
+  }
+  if (e.falling) {
+    e.vy -= 12 * dt; pos.y += e.vy * dt; e.yaw += dt * 7; e.root.rotation.y = e.yaw;
+    e.body.rotation.z += dt * 2.2; e.body.rotation.x += dt * 1.3;
+    moveWithCollision(pos, e.vel.x * dt, e.vel.z * dt, 0.4, pos.y - 0.3, 0.6, 0); e.vel.multiplyScalar(0.985);
+    const g = groundAt(pos.x, pos.z, 0.4, pos.y, 0.05);
+    if (pos.y <= g + 0.3) {
+      const d = Math.hypot(player.pos.x - pos.x, player.pos.z - pos.z);
+      if (d < 2.2 && Math.abs(player.pos.y - g) < 2) { damagePlayer(12, pos.clone(), 'crash'); knockPlayer(player.pos.x - pos.x, player.pos.z - pos.z, 4); }
+      killEnemy(e, 'crash');
+    }
+    return;
+  }
+  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; alertEnemy(e); e.lastSeen.copy(player.pos); } }
+  let targetAlt = cfg.hover + Math.sin(time * 1.3 + e.phase) * 0.35 - (rw === 3 ? 1.1 : 0);
+  if (e.stunT > 0) {
+    e.stunT -= dt; targetAlt = 1.1; e.glow.material.opacity = 0; e.burstLeft = 0;
+    if (Math.random() < 0.2) { _v1.copy(pos); burstSparks(_v1, UPY, 2, 0x6ac8ff, 3); }
+  }
+  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  e.losT -= dt;
+  if (e.losT <= 0 && e.stunT <= 0) {
+    e.losT = rand(0.1, 0.16);
+    const range = sensorMult(e) > 2 ? 14 : cfg.detect, d3 = Math.hypot(dx, dz, player.pos.y + 1.4 - pos.y);
+    _v1.set(pos.x, pos.y - 0.1, pos.z); _v2.set(player.pos.x, player.pos.y + player.eye - 0.1, player.pos.z);
+    const was = e.canSee;
+    e.canSee = d3 < range && !segBlocked(_v1, _v2);
+    if (e.canSee) { if (!e.alert) alertEnemy(e); e.lastSeen.copy(player.pos); e.lostT = 0; if (!was) e.fireCd = Math.max(e.fireCd, 0.45); }
+  }
+  if (e.alert && !e.canSee) { e.lostT += dt; if (e.lostT > 8) { e.alert = false; e.lostT = 0; } }
+  // 이동
+  let mx = 0, mz = 0, spd = cfg.speed * (rw === 3 ? 0.7 : 1);
+  if (e.stunT > 0) spd = 0;
+  else if (e.alert) {
+    if (!e.canShoot) { mx = -dx / dist; mz = -dz / dist; }
+    else if (e.canSee) {
+      e.strafeT -= dt; if (e.strafeT <= 0) { e.strafeT = rand(2, 4); e.strafeDir = Math.random() < 0.5 ? 1 : -1; }
+      const nx = dx / dist, nz = dz / dist, f = clamp((dist - cfg.prefDist) / 6, -1, 1);
+      mx = nx * f - nz * e.strafeDir * 0.8; mz = nz * f + nx * e.strafeDir * 0.8;
+    } else { const lx = e.lastSeen.x - pos.x, lz = e.lastSeen.z - pos.z, ld = Math.hypot(lx, lz); if (ld > 2) { mx = lx / ld; mz = lz / ld; } }
+  } else {
+    e.patrolA += dt * 0.35; spd *= 0.35;
+    const tx = e.home.x + Math.cos(e.patrolA) * 5 - pos.x, tz = e.home.z + Math.sin(e.patrolA) * 5 - pos.z, td = Math.hypot(tx, tz);
+    if (td > 0.3) { mx = tx / td; mz = tz / td; }
+  }
+  const ml = Math.hypot(mx, mz); if (ml > 0.01) { mx /= ml; mz /= ml; }
+  const k = clamp(dt * 2.5, 0, 1);
+  e.vel.x = lerp(e.vel.x, mx * spd, k); e.vel.z = lerp(e.vel.z, mz * spd, k);
+  for (const o of enemies) if (o !== e && !o.dead && o.drone) {
+    const ox = pos.x - o.root.position.x, oz = pos.z - o.root.position.z, od = Math.hypot(ox, oz);
+    if (od < 1.8 && od > 0.01) { e.vel.x += ox / od * 4 * dt; e.vel.z += oz / od * 4 * dt; }
+  }
+  moveWithCollision(pos, e.vel.x * dt, e.vel.z * dt, 0.5, pos.y - 0.35, 0.7, 0);
+  pos.x = clamp(pos.x, -MAPB.x, MAPB.x); pos.z = clamp(pos.z, -MAPB.z, MAPB.z);
+  targetAlt = Math.max(targetAlt, groundAt(pos.x, pos.z, 0.6, pos.y, 0.2) + 1.4);
+  pos.y = lerp(pos.y, targetAlt, clamp(dt * 1.8, 0, 1));
+  e.moveSpeed = Math.hypot(e.vel.x, e.vel.z);
+  // 방향 · 기울기
+  const ty = e.alert && e.canSee ? Math.atan2(dx, dz) : (e.moveSpeed > 0.3 ? Math.atan2(e.vel.x, e.vel.z) : e.yaw);
+  e.yaw += clamp(angDiff(ty, e.yaw), -cfg.turn * dt, cfg.turn * dt); e.root.rotation.y = e.yaw;
+  const fwd = e.vel.x * Math.sin(e.yaw) + e.vel.z * Math.cos(e.yaw), side = e.vel.x * Math.cos(e.yaw) - e.vel.z * Math.sin(e.yaw);
+  e.hitKick = Math.max(0, e.hitKick - dt * 1.2);
+  e.body.rotation.x = lerp(e.body.rotation.x, clamp(fwd * 0.04, -0.3, 0.3) - e.hitKick, 0.1);
+  e.body.rotation.z = lerp(e.body.rotation.z, clamp(side * 0.04, -0.3, 0.3) + (rw === 3 ? Math.sin(time * 9) * 0.15 : 0) + (e.stunT > 0 ? Math.sin(time * 25) * 0.1 : 0), 0.1);
+  // 사격
+  if (e.alert && e.canSee && e.canShoot && e.stunT <= 0) {
+    const yawErr = Math.abs(angDiff(Math.atan2(dx, dz), e.yaw));
+    if (e.burstLeft > 0) {
+      e.burstT -= dt;
+      if (e.burstT <= 0) { enemyFire(e, dist); e.burstLeft--; e.burstT = cfg.burstGap; if (!e.burstLeft) e.fireCd = cfg.cooldown * rand(0.85, 1.25); }
+    } else {
+      e.fireCd -= dt; e.glow.material.opacity = e.fireCd < 0.4 ? 0.6 : 0;
+      if (e.fireCd <= 0 && yawErr < 0.35) { e.burstLeft = cfg.burst; e.burstT = 0; }
+    }
+  } else { e.burstLeft = 0; e.glow.material.opacity = 0; }
+}
+
+// ---------------- 저격형 (조준선) ----------------
+const laserGeo = new THREE.CylinderGeometry(1, 1, 1, 6, 1, true); laserGeo.translate(0, 0.5, 0);
+function addSniperLaser(e) {
+  const m = new THREE.Mesh(laserGeo, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+  m.visible = false; world.add(m); e.laser = m; e.aimT = 0; e.aimPt = V3();
+}
+function sniperAttack(e, dt, dx, dz, dist) {
+  const cfg = e.cfg, wp = e.parts.weapon, L = e.laser, blind = sensorMult(e) > 2;
+  const chest = V3(player.pos.x, player.pos.y + lerp(1.2, 0.8, player.crouch), player.pos.z);
+  let show = false;
+  if (e.alert && e.canSee && e.canShoot && e.stunT <= 0 && wp.attached) {
+    const dy = chest.y - (e.root.position.y + e.coreY + 0.2);
+    wp.group.rotation.x = lerp(wp.group.rotation.x, -Math.atan2(dy, dist), 0.2);
+    e.fireCd -= dt;
+    const yawErr = Math.abs(angDiff(Math.atan2(dx, dz), e.yaw));
+    if (e.fireCd <= 0 && yawErr < 0.25) {
+      if (e.aimT <= 0) e.aimPt.copy(chest).add(V3(rand(-1.2, 1.2), rand(-0.3, 0.6), rand(-1.2, 1.2)));
+      e.aimT += dt;
+      // 조준점은 플레이어를 늦게 따라온다 → 계속 움직이면 빗나감
+      e.aimPt.lerp(chest, clamp(dt * 4.5, 0, 1));
+      const need = cfg.aimTime * (blind ? 0.7 : 1), k = e.aimT / need;
+      show = !blind;
+      if (L && show) {
+        e.root.updateMatrixWorld(true); const m = e.muzzle.getWorldPosition(_v1);
+        const dir = _v2.copy(e.aimPt).sub(m); let len = dir.length(); dir.divideScalar(len || 1);
+        const hit = segFirstHit(m, dir, len); if (hit >= 0) len = hit; else len = Math.max(0.5, len - 0.9);
+        L.position.copy(m); L.quaternion.setFromUnitVectors(UPY, dir);
+        const w = 0.007 + 0.014 * k; L.scale.set(w, len, w);
+        L.material.opacity = clamp(0.25 + 0.65 * k, 0, 0.95) * (k > 0.8 ? 0.6 + 0.4 * Math.sin(time * 50) : 1);
+      }
+      if (k > 0.72 && !e.beeped) { e.beeped = true; SFX.lock(); }
+      if (k >= 1) {
+        enemyFire(e, dist, blind ? null : e.aimPt.clone(), blind ? 18 : 1);
+        e.aimT = 0; e.beeped = false; e.fireCd = cfg.cooldown * rand(0.9, 1.2); show = false;
+      }
+    } else e.aimT = Math.max(0, e.aimT - dt * 3);
+  } else { e.aimT = 0; e.beeped = false; if (wp.attached) wp.group.rotation.x = lerp(wp.group.rotation.x, 0, 0.1); }
+  if (L) L.visible = show && e.aimT > 0;
+}
+
+// ---------------- 중계탑 ----------------
+function buildRelay() {
+  const cfg = ETYPES.relay, root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const parts = {}, { P, M } = partKit(cfg, parts, { armor: '보호 외피', core: '중계기 본체', power: '송신 코일' });
+  const core = P('core', body);
+  M(core, _box3(1.0, 1.5, 1.0), 0x5d6168, 0, 1.95, 0);
+  M(core, _box3(0.6, 0.3, 0.6), 0x3a3d42, 0, 2.85, 0);
+  const ar = P('armor', body);
+  for (const [x, z, w, d] of [[0, 0.55, 1.12, 0.08], [0, -0.55, 1.12, 0.08], [0.55, 0, 0.08, 1.12], [-0.55, 0, 0.08, 1.12]]) M(ar, _box3(w, 1.15, d), 0xb08a3a, x, 1.95, z);
+  core.protectedBy.push('armor');
+  const pw = P('power', body);
+  M(pw, new THREE.CylinderGeometry(0.08, 0.1, 1.4, 8), 0x2f3236, 0, 3.6, 0);
+  const coils = [];
+  for (const y of [3.25, 3.65, 4.05]) coils.push(M(pw, new THREE.TorusGeometry(0.32, 0.07, 6, 16), 0x113344, 0, y, 0, { emissive: 0x5ff6ff, rx: Math.PI / 2, sub: '송신 코일' }));
+  M(pw, new THREE.SphereGeometry(0.16, 10, 8), 0x113344, 0, 4.45, 0, { emissive: 0x5ff6ff, sub: '송신 코일' });
+  return { root, body, parts, coils };
+}
+function spawnRelay(x, z) {
+  addBox(x, z, 1.7, 1.7, 1.2, 0x44484e);
+  const r = buildRelay(), cfg = ETYPES.relay;
+  const e = { type: 'relay', relay: true, cfg, root: r.root, body: r.body, parts: r.parts, coils: r.coils, glow: dummyGlow(), eyeY: 3, coreY: 1.95,
+    yaw: 0, home: V3(x, 0, z), alert: false, dead: false, stunT: 0, empT: 0, hitKick: 0, sparkT: 0, canShoot: false, canSee: false, lastSeen: V3(), pendingAlert: 0,
+    spawnT: rand(5, 9), spawnLeft: 4, kids: [], fireCd: 0, burstLeft: 0, moveSpeed: 0 };
+  for (const p of Object.values(e.parts)) { p.enemy = e; hittables.push(...p.meshes); }
+  r.root.position.set(x, 0, z); world.add(r.root); enemies.push(e);
+  return e;
+}
+function updateRelay(e, dt) {
+  partTick(e, dt);
+  const on = partAlive(e.parts.power) && e.parts.power.state !== 'disabled' && e.stunT <= 0;
+  e.coils.forEach((m, i) => { if (e.parts.power.flash <= 0 && e.parts.power.attached) m.material.emissive.setHex(0x5ff6ff).multiplyScalar(on ? 0.5 + 0.5 * Math.max(0, Math.sin(time * 6 - i * 1.2)) : 0.05); });
+  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) { e.pendingAlert = 0; e.alert = true; } }
+  if (!e.alert && Math.hypot(player.pos.x - e.home.x, player.pos.z - e.home.z) < 30) e.alert = true;
+  if (e.stunT > 0) { e.stunT -= dt; return; }
+  if (!on) return;
+  e.spawnT -= dt * (e.alert ? 1 : 0.4);
+  if (e.spawnT <= 0) {
+    e.spawnT = e.alert ? 12 : 18;
+    const kids = e.kids.filter(k => !k.dead).length, drones = enemies.filter(o => o.drone && !o.dead).length;
+    if (e.spawnLeft > 0 && kids < 2 && drones < 7) {
+      e.spawnLeft--;
+      const d = spawnDrone(e.home.x, e.home.z, 4.6, { alert: e.alert ? 0.6 : 0, noReward: true });
+      d.home.set(e.home.x + rand(-4, 4), 0, e.home.z + rand(-4, 4));
+      e.kids.push(d); spawnFlash(V3(e.home.x, 4.5, e.home.z), 1.6, 0.2, 0x5ff6ff); SFX.shock();
+      addFeed(`${e.cfg.name} 드론 사출 · 남은 사출 ${e.spawnLeft}회`, 'k');
+    }
+  }
+}
+
+// =====================================================================
+//  임무: 변전소 장악
+// =====================================================================
+function powerTower(x, z, h, col = 0x3a3d42) {
+  const g = new THREE.Group(); const mat = new THREE.MeshLambertMaterial({ color: col });
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const m = new THREE.Mesh(_box3(0.18, h, 0.18), mat); m.position.set(sx * 0.9, h / 2, sz * 0.9); m.rotation.z = -sx * 0.06; m.rotation.x = sz * 0.06; g.add(m); }
+  for (let y = 2; y < h; y += 2.4) { const a = new THREE.Mesh(_box3(2, 0.1, 0.1), mat); a.position.set(0, y, 0.9 - y * 0.02); g.add(a); const b = a.clone(); b.position.z = -0.9 + y * 0.02; g.add(b); }
+  const arm = new THREE.Mesh(_box3(6, 0.25, 0.25), mat); arm.position.set(0, h - 1, 0); g.add(arm);
+  g.position.set(x, 0, z); world.add(g);
+}
+function buildSubstation() {
+  setEnv({ sky: 0x3b4150, fog: [22, 105], hemi: [0xb8c4d8, 0x2a2622, 1.3], sun: [0xffb27a, 1.6, [-40, 18, 30]],
+    ground: '#4a4c4a', groundLine: 'rgba(140,170,200,.16)', size: [70, 62] });
+  const W = 0x3e4146;
+  addBox(0, -31, 72, 2, 4.5, W); addBox(0, 31, 72, 2, 4.5, W); addBox(-35, 0, 2, 64, 4.5, W); addBox(35, 0, 2, 64, 4.5, W);
+  for (const [x, y, z] of [[-14, 7, -6], [14, 7, -2], [0, 7, -20], [-24, 7, 12], [24, 7, 14]]) {
+    const l = new THREE.PointLight(0xffd2a0, 70, 34, 1.7); l.position.set(x, y, z); world.add(l);
+    const lamp = new THREE.Mesh(_box3(0.5, 0.2, 0.5), new THREE.MeshBasicMaterial({ color: 0xffe6b8 })); lamp.position.set(x, y + 0.2, z); world.add(lamp);
+    const pole = new THREE.Mesh(_box3(0.15, y, 0.15), new THREE.MeshLambertMaterial({ color: 0x2c2e31 })); pole.position.set(x + 0.4, y / 2, z); world.add(pole);
+  }
+  for (const [x, z] of [[-30, -26], [30, -26], [-30, 25], [30, 25]]) powerTower(x, z, 15);
+  // 변압기 (높은 엄폐)
+  const TR = 0x5a6068, FIN = 0x4a4f56;
+  for (const [x, z] of [[-10, -4], [10, 2], [-19, 5], [18, 11], [-5, -13], [7, -17], [-14, 18], [13, 20]]) {
+    addBox(x, z, 3, 2.4, 2.8, TR); addBox(x, z, 3.4, 0.3, 2.2, FIN);
+    const ins = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1, 6), new THREE.MeshLambertMaterial({ color: 0xc9b9a0 }));
+    for (const dx of [-0.9, 0, 0.9]) { const m = ins.clone(); m.position.set(x + dx, 3.3, z); world.add(m); }
+  }
+  // 낮은 방벽 · 펜스
+  const CB = 0x7c7a74;
+  for (const [x, z, w, d] of [[-4, 17, 3, 0.6], [5, 15, 3, 0.6], [0, 8, 4, 0.6], [-14, 9, 0.6, 3], [15, 6, 0.6, 3], [-24, -4, 0.6, 3.5], [24, -6, 0.6, 3.5],
+    [-2, -6, 3, 0.6], [4, 3, 3, 0.6], [-22, -20, 3, 0.6], [22, -18, 3, 0.6], [-10, -22, 0.6, 3], [12, -26, 3, 0.6]]) addBox(x, z, w, d, 1.1, CB);
+  for (const [x, z, w, d] of [[-28, 0, 0.25, 10], [28, 2, 0.25, 10]]) addBox(x, z, w, d, 1.9, 0x8e9499);
+  for (const [x, z, st] of [[-7, 22, 1], [8, 23, 0], [-27, 16, 1], [27, -12, 0], [-17, -12, 1], [19, -2, 0], [2, -28, 1]]) {
+    crate(x, z, 0x5a5f55); if (st) crate(x, z, 0x4f5450, 1.2, 1.2);
+  }
+  // 저격 망루
+  for (const [x, z] of [[-27, -24], [27, -22]]) {
+    addBox(x, z, 4, 4, 4.2, 0x55585c);
+    const rail = new THREE.MeshLambertMaterial({ color: 0x2c2e31 });
+    for (const [rx, rz, w, d] of [[0, 2, 4, 0.08], [-2, 0, 0.08, 4], [2, 0, 0.08, 4]]) { const m = new THREE.Mesh(_box3(w, 0.9, d), rail); m.position.set(x + rx, 4.65, z + rz); world.add(m); }
+  }
+  addExtraction(0, 26);
+  addAmmoCrate(4, 24); addAmmoCrate(-31, 6); addAmmoCrate(31, 4);
+  spawnRelay(-22, -12); spawnRelay(22, -9); spawnRelay(0, -24);
+  for (const [x, z] of [[-27, -24], [27, -22]]) { const s = spawnEnemy('sniper', x, z + 1, 0, { guard: true }); s.root.position.y = 4.2; s.perch = true; }
+  spawnEnemy('combat', -12, -8, 0.3, { guard: true });
+  spawnEnemy('combat', 13, -5, -0.3, { guard: true });
+  spawnEnemy('combat', 2, -16, 0, { guard: true });
+  spawnDrone(-8, -18, 4.6); spawnDrone(10, -14, 4.6);
+  return { spawn: V3(0, 0, 26), yaw: 0, bounds: { x: 33, z: 29 } };
+}
+
+// =====================================================================
+//  최종 보스 III: ARACHNE 거미 전차
+// =====================================================================
+const SPI = { L1: 2.6, L2: 3.4, standH: 3.3, hips: [[1.3, 1.1, 0.75], [1.4, 0.2, 0.08], [1.3, -0.7, -0.6]] };
+function legIK(L, R, h) {
+  const d = clamp(Math.hypot(R, h), 0.6, L.L1 + L.L2 - 0.05), a = Math.atan2(-h, R);
+  const c1 = clamp((L.L1 * L.L1 + d * d - L.L2 * L.L2) / (2 * L.L1 * d), -1, 1);
+  const c2 = clamp((L.L1 * L.L1 + L.L2 * L.L2 - d * d) / (2 * L.L1 * L.L2), -1, 1);
+  L.fp.rotation.z = a + Math.acos(c1);
+  L.kp.rotation.z = -(Math.PI - Math.acos(c2));
+}
+function buildSpider() {
+  const cfg = ETYPES.spider, root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const parts = {}, { P, M } = partKit(cfg, parts, { core: '복부 장갑', reactor: '동력로', head: '센서 머리' });
+  const C = { main: 0x5c5a52, dark: 0x2a2a28, acc: 0xc77a2c, plate: 0x77746a };
+  // 복부 (몸체 코어)
+  const core = P('core', body);
+  M(core, _box3(2.6, 1.1, 2.4), C.main, 0, 0, 0.6);
+  M(core, _box3(2.2, 0.3, 2.0), C.plate, 0, 0.66, 0.6);
+  const ab = M(core, new THREE.SphereGeometry(1, 14, 10), C.main, 0, 0.35, -2.2); ab.scale.set(1.9, 1.35, 2.4);
+  for (const z of [-1.2, -2.2, -3.2]) M(core, _box3(2.6 - Math.abs(z + 2.2) * 0.5, 0.18, 0.5), C.acc, 0, 1.55 - Math.abs(z + 2.2) * 0.25, z);
+  // 동력로 (복부 아래 뒤쪽 · 냉각구)
+  const rc = P('reactor', body);
+  M(rc, new THREE.SphereGeometry(0.62, 12, 10), 0x331100, 0, 0.1, -4.75, { emissive: 0xff7a1a, sub: '동력로 냉각구' });
+  for (const s of [-1, 1]) M(rc, _box3(0.12, 0.9, 1.0), C.dark, s * 0.68, 0.1, -4.6);
+  M(rc, _box3(1.2, 0.12, 1.0), C.dark, 0, 0.72, -4.6);
+  // 센서 머리
+  const hd = P('head', body);
+  M(hd, _box3(1.3, 0.7, 0.8), C.dark, 0, 0.1, 2.1);
+  const eyes = [];
+  for (const [x, y, r] of [[-0.3, 0.25, 0.12], [0.3, 0.25, 0.12], [-0.45, 0.0, 0.08], [0.45, 0.0, 0.08]]) eyes.push(M(hd, new THREE.SphereGeometry(r, 8, 6), 0x220000, x, y, 2.5, { emissive: 0xff3020, sub: '광학 센서' }));
+  for (const s of [-1, 1]) M(hd, _box3(0.16, 0.5, 0.5), C.acc, s * 0.32, -0.4, 2.55, { rx: 0.4 });
+  // 박격포 포탑
+  const tu = P('turret', body); tu.group.position.set(0, 0.95, -0.4);
+  M(tu, new THREE.CylinderGeometry(0.8, 0.9, 0.5, 12), C.plate, 0, 0, 0);
+  const tubes = new THREE.Group(); tubes.position.set(0, 0.35, 0); tu.group.add(tubes);
+  for (const s of [-1, 1]) M(tu, new THREE.CylinderGeometry(0.2, 0.22, 1.4, 10), C.dark, s * 0.3, 0.55, 0.15, { rx: -0.6, parent: tubes });
+  M(tu, _box3(0.5, 0.3, 0.4), C.acc, 0, 0.1, -0.5, { parent: tubes });
+  // 드론 격납고
+  const bay = P('bay', body);
+  M(bay, _box3(1.3, 0.35, 1.2), C.dark, 0, 1.75, -2.4);
+  M(bay, _box3(1.0, 0.06, 0.9), 0x113344, 0, 1.95, -2.4, { emissive: 0x3f8fd0, sub: '사출구' });
+  // 다리 6개
+  const legs = [];
+  SPI.hips.forEach(([hx, hz, fan], i) => {
+    for (const side of [1, -1]) {
+      const id = side > 0 ? 'sl' + (i + 1) : 'sl' + (i + 4);
+      const p = P(id, body); p.group.position.set(side * hx, -0.1, hz);
+      const base = side > 0 ? -fan : Math.PI + fan; p.group.rotation.y = base;
+      const fp = new THREE.Group(); p.group.add(fp);
+      M(p, new THREE.SphereGeometry(0.42, 10, 8), C.dark, 0, 0, 0, { parent: fp });
+      M(p, _box3(SPI.L1, 0.46, 0.46), C.main, SPI.L1 / 2, 0, 0, { parent: fp });
+      M(p, _box3(SPI.L1 * 0.7, 0.12, 0.5), C.acc, SPI.L1 / 2, 0.29, 0, { parent: fp });
+      const kp = new THREE.Group(); kp.position.set(SPI.L1, 0, 0); fp.add(kp);
+      M(p, new THREE.SphereGeometry(0.36, 10, 8), 0x8a5a2a, 0, 0, 0, { parent: kp, hitMult: 1.15, exposed: true, sub: '무릎 관절' });
+      M(p, _box3(SPI.L2, 0.34, 0.34), C.main, SPI.L2 / 2, 0, 0, { parent: kp });
+      M(p, _box3(0.5, 0.2, 0.2), C.dark, SPI.L2, 0, 0, { parent: kp, rz: -0.6 });
+      legs.push({ p, side, base, fan, idx: i, fp, kp, L1: SPI.L1, L2: SPI.L2, group: i % 2 === (side > 0 ? 0 : 1) ? 0 : 1 });
+    }
+  });
+  for (const L of legs) legIK(L, 3.6, 3.2);
+  body.position.y = SPI.standH;
+  return { root, body, parts, legs, eyes, tubes, eyeY: 3.6, coreY: 3.3 };
+}
+function spawnSpider(x, z, yaw) {
+  const r = buildSpider(), cfg = ETYPES.spider;
+  const e = { type: 'spider', boss: true, spider: true, noPush: true, cfg, root: r.root, body: r.body, parts: r.parts, legs: r.legs, eyes: r.eyes, tubes: r.tubes,
+    glow: dummyGlow(), eyeY: r.eyeY, coreY: r.coreY, yaw, homeYaw: yaw, home: V3(x, 0, z), alert: false, canSee: true, canShoot: true, lastSeen: V3(x, 0, z), lostT: 0, fireCd: 0,
+    dead: false, stunT: 0, stunned: false, pendingAlert: 0, hitKick: 0, phase: 0, sparkT: 0, moveSpeed: 0, gait: 0, H: SPI.standH,
+    bs: { state: 'idle', t: 0, cd: { stomp: 2, lunge: 5, mortar: 3, bay: 14 }, started: false, phase2: false, broken: 0, collapses: 0, empImmune: 0 } };
+  for (const p of Object.values(e.parts)) { p.enemy = e; hittables.push(...p.meshes); }
+  r.root.position.set(x, 0, z); r.root.rotation.y = yaw;
+  const ring = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; world.add(ring); e.bs.marker = ring;
+  const lm = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+  lm.rotation.x = -Math.PI / 2; lm.position.y = 0.05; world.add(lm); e.bs.marker2 = lm;
+  world.add(r.root); enemies.push(e);
+  return e;
+}
+function spiderWorking(e, id) { const p = e.parts[id]; return p && p.attached && p.state !== 'destroyed' && p.state !== 'disabled'; }
+function spiderExposed(e) { return ['collapse', 'stunned', 'land'].includes(e.bs.state); }
+function spiderLegLost(e, p) {
+  if (p.counted) return; p.counted = true;
+  const B = e.bs; B.broken++;
+  addFeed(`ARACHNE 다리 손실 · ${B.broken} / 6`, 'd');
+  if ((B.broken === 3 || B.broken >= 6) && B.state !== 'collapse') {
+    B.state = 'collapse'; B.t = B.broken >= 6 ? Infinity : 5.5; B.collapses++;
+    SFX.explode(e.root.position.distanceTo(player.pos)); shake = Math.max(shake, 0.03);
+    addFeed(B.broken >= 6 ? 'ARACHNE 완전 주저앉음 · 동력로 상시 노출' : 'ARACHNE 주저앉음 · 동력로 노출', 'x'); popup('주저앉음 · 동력로 노출', 'weak');
+  }
+}
+function spiderShell(e) {
+  const tu = e.parts.turret; tu.group.updateMatrixWorld(true);
+  const from = e.tubes.getWorldPosition(V3()); from.y += 0.6;
+  const sp = sensorMult(e) > 2 ? 6 : 1.8 + (e.bs.volley || 0) * 0.45;
+  const to = V3(player.pos.x + player.vel.x * 0.8 + rand(-sp, sp), player.onGround ? player.pos.y + 0.03 : 0.03, player.pos.z + player.vel.z * 0.8 + rand(-sp, sp));
+  const mesh = new THREE.Mesh(projGeo, new THREE.MeshBasicMaterial({ color: 0xffb04a }));
+  mesh.scale.set(0.2, 0.2, 0.32); mesh.position.copy(from); world.add(mesh);
+  const marker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff3a2a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
+  marker.rotation.x = -Math.PI / 2; marker.position.copy(to); world.add(marker);
+  missiles.push({ mesh, marker, from, to, t: 0, T: 1.4 + from.distanceTo(to) / 40, h: 9 + from.distanceTo(to) * 0.15 });
+  spawnFlash(from, 1, 0.08, 0xffb060); SFX.missile();
+}
+function spiderNext(e, dist, los) {
+  const B = e.bs, legsOk = B.broken < 5;
+  if (dist < 6.5 && B.cd.stomp <= 0) { B.state = 'stomp_wind'; B.t = B.phase2 ? 0.65 : 0.8; return; }
+  if (legsOk && B.cd.lunge <= 0 && dist > 10 && dist < 28 && los) {
+    B.state = 'lunge_wind'; B.t = B.phase2 ? 0.75 : 0.95;
+    B.from = e.root.position.clone();
+    const tgt = V3(player.pos.x + player.vel.x * 0.3, 0, player.pos.z + player.vel.z * 0.3), dir = tgt.clone().sub(B.from); const L = dir.length();
+    B.to = B.from.clone().addScaledVector(dir, Math.max(0, (L - 1.5) / L));
+    return;
+  }
+  if (spiderWorking(e, 'turret') && B.cd.mortar <= 0 && dist > 7) { B.state = 'mortar_wind'; B.t = 0.8; return; }
+  B.state = 'walk'; B.t = rand(1.2, 2.2);
+}
+function updateSpider(e, dt) {
+  const B = e.bs, P = e.parts, pos = e.root.position;
+  partTick(e, dt);
+  for (const k in B.cd) B.cd[k] -= dt;
+  const dx = player.pos.x - pos.x, dz = player.pos.z - pos.z, dist = Math.hypot(dx, dz) || 0.001;
+  if (e.pendingAlert > 0) { e.pendingAlert -= dt; if (e.pendingAlert <= 0) e.alert = true; }
+  if (!e.alert && dist < 34) e.alert = true;
+  if (e.alert && !B.started) { B.started = true; B.engageT = time; SFX.spider(); addFeed('ARACHNE 기동 · 최종 목표 교전 개시', 'k'); B.state = 'walk'; B.t = 1; }
+  if (!B.phase2 && B.started && (P.reactor.hp < P.reactor.maxHp * 0.55 || B.broken >= 3)) {
+    B.phase2 = true; SFX.spider(); addFeed('ARACHNE 과열 · 포격과 도약 강화', 'k');
+  }
+  if (e.stunT > 0 && !['collapse', 'stunned'].includes(B.state)) { B.state = 'dazed'; B.t = e.stunT; e.stunT = 0; }
+  const lf = 1 - 0.1 * B.broken;
+  _v1.set(pos.x, 3.2, pos.z); _v2.set(player.pos.x, player.pos.y + player.eye, player.pos.z);
+  const los = !segBlocked(_v1, _v2);
+  let move = 0, targetYaw = Math.atan2(dx, dz), turn = 1.5 * lf, Htarget = SPI.standH * (B.broken >= 4 ? 0.78 : 1), lift = null;
+  B.t -= dt;
+  const mk = B.marker, mk2 = B.marker2; mk.material.opacity = 0; mk2.material.opacity = 0;
+  switch (B.state) {
+    case 'idle': move = 0; break;
+    case 'walk': {
+      const want = dist > 16 ? 1 : dist < 11 ? -0.6 : 0;
+      move = 3.6 * lf * want;
+      if (Math.abs(want) < 0.1) { targetYaw += 0.9 * (Math.sin(time * 0.4 + e.phase) > 0 ? 1 : -1); move = 2.2 * lf; }
+      if (B.t <= 0 && B.started) spiderNext(e, dist, los);
+      break;
+    }
+    case 'stomp_wind': {
+      lift = { front: 2.4 }; move = 0; turn *= 1.5;
+      mk.position.set(pos.x, 0.05, pos.z); mk.scale.setScalar(2.4); mk.material.opacity = 0.35 + 0.4 * Math.sin(time * 30);
+      if (B.t <= 0) {
+        B.state = 'stomp'; B.t = 0.45; SFX.explode(dist); shake = Math.max(shake, 0.03);
+        spawnFlash(V3(pos.x, 0.3, pos.z), 6, 0.25, 0xffa050); spawnDebris(V3(pos.x, 0.2, pos.z), 0x5a554e, 8, 6);
+        if (dist < 6 && player.pos.y < 1.2) { damagePlayer(34, V3(pos.x, 1, pos.z), 'stomp'); knockPlayer(dx, dz, 10); }
+        B.cd.stomp = B.phase2 ? 3.5 : 4.5;
+      }
+      break;
+    }
+    case 'stomp': if (B.t <= 0) { B.state = 'walk'; B.t = rand(0.5, 1); } break;
+    case 'lunge_wind': {
+      Htarget = 1.6; move = 0; targetYaw = Math.atan2(B.to.x - pos.x, B.to.z - pos.z); turn = 4;
+      mk2.position.set(B.to.x, 0.05, B.to.z); mk2.scale.setScalar(1.5); mk2.material.opacity = 0.4 + 0.4 * Math.sin(time * 30);
+      if (B.t <= 0) { B.state = 'lunge'; B.lt = 0; B.T = 0.55 + B.from.distanceTo(B.to) / 40; SFX.spider(); }
+      break;
+    }
+    case 'lunge': {
+      B.lt += dt; const u = Math.min(1, B.lt / B.T);
+      pos.lerpVectors(B.from, B.to, u); pos.y = Math.sin(Math.PI * u) * 5;
+      mk2.position.set(B.to.x, 0.05, B.to.z); mk2.scale.setScalar(1.5); mk2.material.opacity = 0.7;
+      Htarget = SPI.standH; lift = { all: 1.4 };
+      if (u >= 1) {
+        pos.y = 0; B.state = 'land'; B.t = B.phase2 ? 1.0 : 1.3;
+        SFX.explode(dist); shake = Math.max(shake, 0.035); if (B.phase2) spawnShock(pos.x, pos.z);
+        spawnFlash(V3(pos.x, 0.3, pos.z), 5, 0.25, 0xffa050); spawnDebris(V3(pos.x, 0.2, pos.z), 0x5a554e, 8, 6);
+        const d2 = Math.hypot(player.pos.x - pos.x, player.pos.z - pos.z);
+        if (d2 < 3.8 && player.pos.y < 1.5) { damagePlayer(40, V3(pos.x, 1, pos.z), 'lunge'); knockPlayer(player.pos.x - pos.x, player.pos.z - pos.z, 12); }
+        B.cd.lunge = B.phase2 ? 5 : 6;
+        addFeed('ARACHNE 착지 · 냉각구 개방', 'x');
+      }
+      break;
+    }
+    case 'land': Htarget = 2.0; move = 0; turn = 0.5; if (B.t <= 0) { B.state = 'walk'; B.t = rand(0.6, 1.2); } break;
+    case 'mortar_wind': {
+      move = 0; e.tubes.rotation.x = lerp(e.tubes.rotation.x, -0.5, 0.1);
+      if (B.t <= 0) { B.state = 'mortar'; B.shots = (B.phase2 ? 7 : 5) + (B.broken >= 6 ? -1 : 0); B.fireT = 0; B.volley = 0; }
+      break;
+    }
+    case 'mortar': {
+      move = B.broken >= 6 ? 0 : 1.2 * lf; B.fireT -= dt;
+      if (B.fireT <= 0 && B.shots > 0) { B.fireT = 0.26; B.shots--; B.volley++; spiderShell(e); }
+      if (B.shots <= 0 && B.fireT <= 0) { e.tubes.rotation.x = 0; B.cd.mortar = B.phase2 ? 4 : 5.5; B.state = B.broken >= 6 ? 'collapse' : 'walk'; B.t = B.broken >= 6 ? Infinity : rand(0.8, 1.4); }
+      break;
+    }
+    case 'collapse': {
+      Htarget = 0.95; move = 0; turn = B.broken >= 6 ? 0.35 : 0;
+      if (B.broken >= 6 && spiderWorking(e, 'turret') && B.cd.mortar <= 0) { B.state = 'mortar_wind'; B.t = 1.0; }
+      if (B.t <= 0) { B.state = 'rise'; B.t = 1.2; addFeed('ARACHNE 재기립', 'k'); }
+      break;
+    }
+    case 'rise': move = 0; if (B.t <= 0) { B.state = 'walk'; B.t = 1; } break;
+    case 'stunned': Htarget = 1.4; move = 0; turn = 0; if (B.t <= 0) { B.state = B.broken >= 6 ? 'collapse' : 'walk'; B.t = B.broken >= 6 ? Infinity : 1; } break;
+    case 'dazed': move = 0; turn = 0.3; targetYaw = e.yaw + Math.sin(time * 6); if (B.t <= 0) { B.state = 'walk'; B.t = 1; } break;
+  }
+  // 드론 격납고
+  if (B.started && spiderWorking(e, 'bay') && B.cd.bay <= 0) {
+    B.cd.bay = B.phase2 ? 15 : 20;
+    if (enemies.filter(o => o.drone && !o.dead).length < (B.phase2 ? 3 : 2)) {
+      P.bay.group.updateMatrixWorld(true); const bp = P.bay.meshes[1].getWorldPosition(V3());
+      for (let i = 0; i < 2; i++) { const d = spawnDrone(bp.x + (i ? 1 : -1), bp.z, bp.y + 0.5, { alert: 0.5 + i * 0.3, noReward: true }); d.home.set(pos.x, 0, pos.z); }
+      spawnFlash(bp, 1.6, 0.2, 0x3f8fd0); SFX.shock(); addFeed('ARACHNE 드론 사출', 'k');
+    }
+  }
+  // 회전 · 이동
+  const da = angDiff(targetYaw, e.yaw); e.yaw += clamp(da, -turn * dt, turn * dt); e.root.rotation.y = e.yaw;
+  if (move !== 0 && B.state !== 'lunge') {
+    const ox = pos.x, oz = pos.z;
+    moveWithCollision(pos, Math.sin(e.yaw) * move * dt, Math.cos(e.yaw) * move * dt, e.cfg.radius, 0, 6, 1.2);
+    pos.x = clamp(pos.x, -MAPB.x + 3, MAPB.x - 3); pos.z = clamp(pos.z, -MAPB.z + 3, MAPB.z - 3);
+    e.moveSpeed = Math.hypot(pos.x - ox, pos.z - oz) / dt;
+  } else e.moveSpeed = B.state === 'lunge' ? 0 : Math.abs(da) > 0.05 ? 1.2 : 0;
+  // 몸체 높이 · 기울기 · 다리
+  e.H = lerp(e.H, Htarget, clamp(dt * (B.state === 'collapse' ? 5 : 3), 0, 1));
+  const lb = e.legs.filter(L => L.side > 0 && !L.p.attached).length, rb = e.legs.filter(L => L.side < 0 && !L.p.attached).length;
+  e.body.position.y = e.H + (B.state === 'walk' ? Math.sin(e.gait * 2) * 0.06 : 0);
+  e.body.rotation.z = lerp(e.body.rotation.z, (rb - lb) * 0.06 + (B.state === 'dazed' || B.state === 'stunned' ? Math.sin(time * 20) * 0.03 : 0), 0.08);
+  e.body.rotation.x = lerp(e.body.rotation.x, B.state === 'stomp_wind' ? -0.18 : B.state === 'lunge_wind' ? 0.12 : 0, 0.12);
+  e.gait += (e.moveSpeed * 1.6 + (move ? 0 : 0)) * dt;
+  for (const L of e.legs) {
+    if (!L.p.attached) continue;
+    const ph = e.gait + (L.group ? Math.PI : 0), moving = e.moveSpeed > 0.2 ? 1 : 0;
+    let R = 3.6 + 0.45 * Math.sin(ph) * moving + (e.H < 1.5 ? 0.9 : 0), up = moving * Math.max(0, Math.cos(ph)) * 0.7;
+    if (lift && lift.front && L.idx === 0) up = lift.front;
+    if (lift && lift.all) up = lift.all;
+    L.p.group.rotation.y = L.base + 0.16 * Math.sin(ph) * moving * (L.side > 0 ? -1 : 1);
+    legIK(L, R, Math.max(0.3, e.H - 0.1 - up));
+  }
+  // 동력로 냉각구 · 눈
+  const ex = spiderExposed(e);
+  if (P.reactor.attached && P.reactor.flash <= 0) P.reactor.meshes[0].material.emissive.setHex(0xff7a1a).multiplyScalar(ex ? 1.1 + 0.4 * Math.sin(time * 14) : 0.25);
+  if (P.head.attached && P.head.flash <= 0) for (const m of e.eyes) m.material.emissive.setHex(0xff3020).multiplyScalar(B.state === 'lunge_wind' || B.state === 'stomp_wind' ? 1.5 : 0.8);
+  if (e.stunT <= 0 && B.state === 'stunned' && Math.random() < 0.3) { _v1.copy(pos).setY(e.H); burstSparks(_v1, UPY, 3, 0x6ac8ff, 4); }
+}
+function buildQuarry() {
+  setEnv({ sky: 0x6f7880, fog: [30, 140], hemi: [0xdfe6ee, 0x3a3630, 1.4], sun: [0xfff0d8, 1.9, [30, 45, -20]],
+    ground: '#77736b', groundLine: 'rgba(40,36,30,.28)', size: [80, 80] });
+  const W = 0x5e5a53;
+  addBox(0, -41, 84, 2, 9, W); addBox(0, 41, 84, 2, 9, W); addBox(-41, 0, 2, 84, 9, W); addBox(41, 0, 2, 84, 9, W);
+  // 암석 기둥 (시야 · 도약 차단)
+  for (const [x, z, w, d, h, c] of [[-14, -14, 4, 5, 10, 0x6f6a61], [16, -8, 5, 4, 8, 0x67635b], [-18, 12, 4.5, 4, 11, 0x726d64], [12, 16, 4, 4.5, 9, 0x6a665e],
+    [0, -28, 6, 3.5, 12, 0x6f6a61], [28, -24, 4, 5, 9, 0x67635b], [-28, 24, 5, 4, 10, 0x726d64], [-30, -10, 3.5, 5, 7, 0x6a665e], [30, 10, 4, 3.5, 8, 0x6f6a61]]) {
+    addBox(x, z, w, d, h, c); addBox(x + 0.6, z - 0.4, w * 0.7, d * 0.7, 1.6, 0x5c5850, h);
+  }
+  const LC = 0x8a857c;
+  for (const [x, z, w, d] of [[-8, 26, 4, 0.8], [8, 26, 4, 0.8], [-24, 2, 0.8, 4], [24, -2, 0.8, 4], [-6, 4, 3, 0.8], [7, 0, 3, 0.8],
+    [0, 14, 4, 0.8], [-20, -26, 3, 0.8], [20, 26, 3, 0.8], [-34, 30, 3, 0.8], [34, -30, 3, 0.8]]) addBox(x, z, w, d, 1.1, LC);
+  for (const [x, z, st] of [[-12, 30, 1], [13, 31, 0], [-33, -2, 1], [33, 4, 0], [-4, -18, 1], [22, 18, 0]]) { crate(x, z, 0x6d6656); if (st) crate(x, z, 0x625c4e, 1.2, 1.2); }
+  // 채석장 장비 (시각 요소)
+  const crane = new THREE.MeshLambertMaterial({ color: 0xb08a3a });
+  const mast = new THREE.Mesh(_box3(0.6, 16, 0.6), crane); mast.position.set(-36, 8, -36); world.add(mast);
+  const jib = new THREE.Mesh(_box3(14, 0.5, 0.5), crane); jib.position.set(-30, 16, -36); world.add(jib);
+  addExtraction(0, 34);
+  addAmmoCrate(-5, 35, true); addAmmoCrate(5, 35, true); addAmmoCrate(-37, 14, true); addAmmoCrate(37, -14, true);
+  spawnSpider(0, -12, 0);
+  return { spawn: V3(0, 0, 33), yaw: 0, bounds: { x: 39, z: 39 } };
+}
+// =====================================================================
 //  업적
 // =====================================================================
 const ACH_CATS = ['전투', '회수', '보스', '성장', '기상천외'];
 const ACH = [
   // 전투
-  { id: 'first_blood', cat: '전투', name: '첫 수확', desc: '기계를 처음으로 처치한다.', cr: 100 },
-  { id: 'kills100', cat: '전투', name: '고철 생산 라인', desc: '누적 100기를 처치한다.', cr: 1500, prog: () => [save.kills + (run ? run.kills : 0), 100] },
-  { id: 'disarm15', cat: '전투', name: '무장 해제 전문가', desc: '적의 주 무장을 무력화해 분리하기 15회.', cr: 800, prog: () => [save.ach.c.disarm || 0, 15] },
-  { id: 'legs10', cat: '전투', name: '다리 수집가', desc: '로봇 한 기의 두 다리를 모두 무력화하기 10회.', cr: 800, prog: () => [save.ach.c.legs || 0, 10] },
-  { id: 'sensor50', cat: '전투', name: '센서 저격수', desc: '센서 헤드를 무력화하거나 파괴하기 50회.', cr: 800, prog: () => [save.ach.c.sensor || 0, 50] },
-  { id: 'emp4', cat: '전투', name: 'EMP 도미노', desc: 'EMP 한 번으로 로봇 4기 이상을 정지시킨다.', cr: 600 },
-  { id: 'focus3', cat: '전투', name: '시간 도둑', desc: '집중 스킬 한 번이 유지되는 동안 3기를 처치한다.', cr: 800 },
-  { id: 'frag3', cat: '전투', name: '수류탄 외교', desc: '한 임무에서 파편 수류탄으로 3기를 처치한다.', cr: 600 },
-  { id: 'acc100', cat: '전투', name: '한 발도 허투루', desc: '20발 이상 쏘고 명중률 100%로 탈출한다. (산탄 · 유탄 제외)', cr: 1500 },
+  { id: 'first_blood', cat: '전투', name: '첫 수확', desc: '기계를 처음으로 처치한다.', cr: 50 },
+  { id: 'kills100', cat: '전투', name: '고철 생산 라인', desc: '누적 100기를 처치한다.', cr: 450, prog: () => [save.kills + (run ? run.kills : 0), 100] },
+  { id: 'disarm15', cat: '전투', name: '무장 해제 전문가', desc: '적의 주 무장을 무력화해 분리하기 15회.', cr: 250, prog: () => [save.ach.c.disarm || 0, 15] },
+  { id: 'legs10', cat: '전투', name: '다리 수집가', desc: '로봇 한 기의 두 다리를 모두 무력화하기 10회.', cr: 250, prog: () => [save.ach.c.legs || 0, 10] },
+  { id: 'sensor50', cat: '전투', name: '센서 저격수', desc: '센서 헤드를 무력화하거나 파괴하기 50회.', cr: 250, prog: () => [save.ach.c.sensor || 0, 50] },
+  { id: 'emp4', cat: '전투', name: 'EMP 도미노', desc: 'EMP 한 번으로 로봇 4기 이상을 정지시킨다.', cr: 200 },
+  { id: 'focus3', cat: '전투', name: '시간 도둑', desc: '집중 스킬 한 번이 유지되는 동안 3기를 처치한다.', cr: 250 },
+  { id: 'frag3', cat: '전투', name: '수류탄 외교', desc: '한 임무에서 파편 수류탄으로 3기를 처치한다.', cr: 200 },
+  { id: 'acc100', cat: '전투', name: '한 발도 허투루', desc: '20발 이상 쏘고 명중률 100%로 탈출한다. (산탄 · 유탄 제외)', cr: 450 },
   // 회수
-  { id: 'parts50', cat: '회수', name: '고물상 개업', desc: '부품 50개를 회수한다.', cr: 500, prog: () => [save.ach.c.parts || 0, 50] },
-  { id: 'parts500', cat: '회수', name: '고물상 체인점', desc: '부품 500개를 회수한다.', cr: 3000, prog: () => [save.ach.c.parts || 0, 500] },
-  { id: 'perfect8', cat: '회수', name: '무결점 해체', desc: '부품 8개 이상을 모두 상태 100%로 들고 탈출한다.', cr: 1500 },
-  { id: 'junk', cat: '회수', name: '폐품 감별사', desc: '상태 10% 이하의 부품을 굳이 회수한다.', cr: 300 },
-  { id: 'haul40', cat: '회수', name: '적재 초과', desc: '미정산 부품 40개를 들고 탈출한다.', cr: 1000 },
-  { id: 'speed5', cat: '회수', name: '광속 회수', desc: '10초 안에 부품 5개를 회수한다.', cr: 500 },
+  { id: 'parts50', cat: '회수', name: '고물상 개업', desc: '부품 50개를 회수한다.', cr: 150, prog: () => [save.ach.c.parts || 0, 50] },
+  { id: 'parts500', cat: '회수', name: '고물상 체인점', desc: '부품 500개를 회수한다.', cr: 900, prog: () => [save.ach.c.parts || 0, 500] },
+  { id: 'perfect8', cat: '회수', name: '무결점 해체', desc: '부품 8개 이상을 모두 상태 100%로 들고 탈출한다.', cr: 450 },
+  { id: 'junk', cat: '회수', name: '폐품 감별사', desc: '상태 10% 이하의 부품을 굳이 회수한다.', cr: 100 },
+  { id: 'haul40', cat: '회수', name: '적재 초과', desc: '미정산 부품 40개를 들고 탈출한다.', cr: 300 },
+  { id: 'speed5', cat: '회수', name: '광속 회수', desc: '10초 안에 부품 5개를 회수한다.', cr: 150 },
   // 보스
-  { id: 'rex', cat: '보스', name: '멸종 2회차', desc: 'REX-09를 격파한다.', cr: 2000 },
-  { id: 'rexPistol', cat: '보스', name: '공룡 사냥에 권총', desc: '기본 권총만으로 REX-09를 격파한다.', cr: 5000 },
-  { id: 'rexCore', cat: '보스', name: '티라노 재활용', desc: 'REX-09에서 떨어진 부품 8개 이상을 들고 탈출한다.', cr: 1500 },
-  { id: 'rexCrawl', cat: '보스', name: '하체 붕괴', desc: 'REX-09의 두 다리를 완전히 망가뜨려 기어 다니게 만든다.', cr: 1000 },
-  { id: 'rexWall', cat: '보스', name: '기둥 박치기 3연속', desc: '한 전투에서 REX-09를 기둥에 세 번 들이받게 한다.', cr: 1200 },
-  { id: 'dragon', cat: '보스', name: '용 사냥꾼', desc: '청룡을 격파한다.', cr: 2500 },
-  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 6000 },
-  { id: 'pearl', cat: '보스', name: '여의주 도둑', desc: '상태 90% 이상의 여의주를 회수한다.', cr: 2000 },
-  { id: 'barber', cat: '보스', name: '청룡 이발소', desc: '한 전투에서 청룡의 양쪽 뿔을 온전히 떼어 낸다.', cr: 1200 },
-  { id: 'both', cat: '보스', name: '용과 공룡', desc: '두 보스를 모두 격파한다.', cr: 3000 },
+  { id: 'rex', cat: '보스', name: '멸종 2회차', desc: 'REX-09를 격파한다.', cr: 600 },
+  { id: 'rexPistol', cat: '보스', name: '공룡 사냥에 권총', desc: '기본 권총만으로 REX-09를 격파한다.', cr: 1500 },
+  { id: 'rexCore', cat: '보스', name: '티라노 재활용', desc: 'REX-09에서 떨어진 부품 8개 이상을 들고 탈출한다.', cr: 450 },
+  { id: 'rexCrawl', cat: '보스', name: '하체 붕괴', desc: 'REX-09의 두 다리를 완전히 망가뜨려 기어 다니게 만든다.', cr: 300 },
+  { id: 'rexWall', cat: '보스', name: '기둥 박치기 3연속', desc: '한 전투에서 REX-09를 기둥에 세 번 들이받게 한다.', cr: 350 },
+  { id: 'dragon', cat: '보스', name: '용 사냥꾼', desc: '청룡을 격파한다.', cr: 750 },
+  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 1800 },
+  { id: 'pearl', cat: '보스', name: '여의주 도둑', desc: '상태 90% 이상의 여의주를 회수한다.', cr: 600 },
+  { id: 'barber', cat: '보스', name: '청룡 이발소', desc: '한 전투에서 청룡의 양쪽 뿔을 온전히 떼어 낸다.', cr: 350 },
+  { id: 'both', cat: '보스', name: '용과 공룡', desc: 'REX-09와 청룡을 모두 격파한다.', cr: 900 },
+  { id: 'spider', cat: '보스', name: '거미 퇴치', desc: 'ARACHNE를 격파한다.', cr: 800 },
+  { id: 'spiderPistol', cat: '보스', name: '권총 한 자루 vs 다리 여섯 개', desc: '기본 권총만으로 ARACHNE를 격파한다.', cr: 1800 },
+  { id: 'spiderLegs', cat: '보스', name: '다리 여섯 개 수거', desc: '한 전투에서 ARACHNE의 다리 여섯 개를 모두 무너뜨린다.', cr: 600 },
+  { id: 'trio', cat: '보스', name: '최종 작전 완수', desc: '세 보스를 모두 격파한다.', cr: 1500 },
   // 성장
-  { id: 'shop30', cat: '성장', name: '쇼핑 중독', desc: '상점에서 30번 구매한다.', cr: 800, prog: () => [save.ach.c.buys || 0, 30] },
-  { id: 'allguns', cat: '성장', name: '무기고', desc: '모든 무기를 보유한다.', cr: 3000, prog: () => [Object.keys(WEAPONS).filter(k => save.weapons[k]).length, Object.keys(WEAPONS).length] },
-  { id: 'maxmods', cat: '성장', name: '풀 개조', desc: '무기 개조를 모든 단계까지 마친다.', cr: 3000, prog: () => [Object.values(MODS).reduce((a, m) => a + save.mods[m.id], 0), Object.values(MODS).reduce((a, m) => a + m.prices.length, 0)] },
-  { id: 'rich', cat: '성장', name: '부자 용병', desc: '보유 자금 100,000 CR을 달성한다.', cr: 2000, prog: () => [Math.min(save.credits, 100000), 100000] },
+  { id: 'drone30', cat: '전투', name: '대공 사격', desc: '드론형을 30기 격추한다.', cr: 300, prog: () => [save.ach.c.drones || 0, 30] },
+  { id: 'counterSnipe', cat: '전투', name: '역저격', desc: '조준선을 겨누고 있는 저격형의 센서를 부숴 저격을 끊는다.', cr: 250 },
+  { id: 'relayFast', cat: '전투', name: '정전 사고', desc: '변전소에서 출격 90초 안에 중계탑 3기를 모두 무력화한다.', cr: 400 },
+  { id: 'shop30', cat: '성장', name: '쇼핑 중독', desc: '상점에서 30번 구매한다.', cr: 250, prog: () => [save.ach.c.buys || 0, 30] },
+  { id: 'allguns', cat: '성장', name: '무기고', desc: '모든 무기를 보유한다.', cr: 900, prog: () => [Object.keys(WEAPONS).filter(k => save.weapons[k]).length, Object.keys(WEAPONS).length] },
+  { id: 'maxmods', cat: '성장', name: '풀 개조', desc: '무기 개조를 모든 단계까지 마친다.', cr: 900, prog: () => [Object.values(MODS).reduce((a, m) => a + save.mods[m.id], 0), Object.values(MODS).reduce((a, m) => a + m.prices.length, 0)] },
+  { id: 'rich', cat: '성장', name: '부자 용병', desc: '보유 자금 100,000 CR을 달성한다.', cr: 600, prog: () => [Math.min(save.credits, 100000), 100000] },
   // 기상천외 (숨김)
-  { id: 'leave10', cat: '기상천외', hidden: true, hint: '출근하자마자...', name: '칼퇴근', desc: '출격 10초 안에 조기 탈출한다.', cr: 100 },
-  { id: 'zeroPay', cat: '기상천외', hidden: true, hint: '돈이 목적이 아니다.', name: '자원봉사', desc: '정산 금액 0 CR로 탈출한다.', cr: 100 },
+  { id: 'leave10', cat: '기상천외', hidden: true, hint: '출근하자마자...', name: '칼퇴근', desc: '출격 10초 안에 조기 탈출한다.', cr: 50 },
+  { id: 'zeroPay', cat: '기상천외', hidden: true, hint: '돈이 목적이 아니다.', name: '자원봉사', desc: '정산 금액 0 CR로 탈출한다.', cr: 50 },
   { id: 'broke', cat: '기상천외', hidden: true, hint: '쇼핑은 계획적으로.', name: '텅장', desc: '구매 후 보유 자금이 50 CR 이하가 된다.', cr: 50 },
-  { id: 'selfnade5', cat: '기상천외', hidden: true, hint: '던진 건 돌아온다.', name: '내 수류탄은 나를 사랑해', desc: '자기 폭발에 다섯 번 휘말린다.', cr: 300, prog: () => [save.ach.c.selfnade || 0, 5] },
-  { id: 'lightning3', cat: '기상천외', hidden: true, hint: '하늘이 유독 나만 노린다.', name: '피뢰침 체질', desc: '한 임무에서 낙뢰에 세 번 맞는다.', cr: 500 },
-  { id: 'roadkill3', cat: '기상천외', hidden: true, hint: '공룡 전용 횡단보도는 없다.', name: '로드킬 단골', desc: '한 전투에서 REX-09의 돌진에 세 번 치인다.', cr: 500 },
-  { id: 'deathRich', cat: '기상천외', hidden: true, hint: '가방이 너무 무거웠다.', name: '죽음의 회계사', desc: '미정산 부품 3,000 CR 이상을 들고 사망한다.', cr: 300 },
-  { id: 'soClose', cat: '기상천외', hidden: true, hint: '집이 바로 저기였는데.', name: '한 걸음만 더', desc: '탈출 지점 5m 안에서 사망한다.', cr: 300 },
-  { id: 'teabag', cat: '기상천외', hidden: true, hint: '쓰러진 기계에게 예의를...?', name: '고인 모독', desc: '처치 직후 5초 안에 잔해 옆에서 열 번 앉았다 일어난다.', cr: 400 },
-  { id: 'spin', cat: '기상천외', hidden: true, hint: '세상이 빙글빙글.', name: '회전목마', desc: '10초 안에 시점을 열 바퀴 돌린다.', cr: 300 },
-  { id: 'moon', cat: '기상천외', hidden: true, hint: '오늘따라 하늘이 예쁘다.', name: '달 보는 저격수', desc: '정조준한 채로 하늘을 10초 동안 올려다본다.', cr: 300 },
-  { id: 'pacifist', cat: '기상천외', hidden: true, hint: '총은 장식이다.', name: '무기는 거들 뿐', desc: '총을 한 발도 쏘지 않은 임무에서 수류탄으로 적을 처치한다.', cr: 600 },
-  { id: 'jump500', cat: '기상천외', hidden: true, hint: '바닥이 뜨겁다.', name: '토끼 용병', desc: '누적 500번 점프한다.', cr: 500, prog: () => [save.ach.c.jumps || 0, 500] },
-  { id: 'walk5k', cat: '기상천외', hidden: true, hint: '운동은 전장에서.', name: '산책하는 용병', desc: '누적 5km를 이동한다.', cr: 800, prog: () => [Math.floor(save.ach.c.dist || 0), 5000] },
-  { id: 'overtime', cat: '기상천외', hidden: true, hint: '퇴근은 언제?', name: '야근 수당', desc: '한 임무에 15분 이상 머문다.', cr: 600 },
-  { id: 'miss95', cat: '기상천외', hidden: true, hint: '탄약상의 VIP.', name: '총알 기부 천사', desc: '300발 이상 쏘고 명중률 5% 이하로 탈출한다.', cr: 400 },
-  { id: 'dodge', cat: '기상천외', hidden: true, hint: '종이 한 장.', name: '종이 한 장 차이', desc: '대시 무적 시간으로 보스의 공격을 흘려 낸다.', cr: 600 },
-  { id: 'tank300', cat: '기상천외', hidden: true, hint: '아프지만 괜찮아.', name: '인간 방패', desc: '한 임무에서 피해를 300 이상 받고도 살아서 탈출한다.', cr: 800 },
+  { id: 'selfnade5', cat: '기상천외', hidden: true, hint: '던진 건 돌아온다.', name: '내 수류탄은 나를 사랑해', desc: '자기 폭발에 다섯 번 휘말린다.', cr: 100, prog: () => [save.ach.c.selfnade || 0, 5] },
+  { id: 'lightning3', cat: '기상천외', hidden: true, hint: '하늘이 유독 나만 노린다.', name: '피뢰침 체질', desc: '한 임무에서 낙뢰에 세 번 맞는다.', cr: 150 },
+  { id: 'roadkill3', cat: '기상천외', hidden: true, hint: '공룡 전용 횡단보도는 없다.', name: '로드킬 단골', desc: '한 전투에서 REX-09의 돌진에 세 번 치인다.', cr: 150 },
+  { id: 'deathRich', cat: '기상천외', hidden: true, hint: '가방이 너무 무거웠다.', name: '죽음의 회계사', desc: '미정산 부품 3,000 CR 이상을 들고 사망한다.', cr: 100 },
+  { id: 'soClose', cat: '기상천외', hidden: true, hint: '집이 바로 저기였는데.', name: '한 걸음만 더', desc: '탈출 지점 5m 안에서 사망한다.', cr: 100 },
+  { id: 'teabag', cat: '기상천외', hidden: true, hint: '쓰러진 기계에게 예의를...?', name: '고인 모독', desc: '처치 직후 5초 안에 잔해 옆에서 열 번 앉았다 일어난다.', cr: 100 },
+  { id: 'spin', cat: '기상천외', hidden: true, hint: '세상이 빙글빙글.', name: '회전목마', desc: '10초 안에 시점을 열 바퀴 돌린다.', cr: 100 },
+  { id: 'moon', cat: '기상천외', hidden: true, hint: '오늘따라 하늘이 예쁘다.', name: '달 보는 저격수', desc: '정조준한 채로 하늘을 10초 동안 올려다본다.', cr: 100 },
+  { id: 'pacifist', cat: '기상천외', hidden: true, hint: '총은 장식이다.', name: '무기는 거들 뿐', desc: '총을 한 발도 쏘지 않은 임무에서 수류탄으로 적을 처치한다.', cr: 200 },
+  { id: 'jump500', cat: '기상천외', hidden: true, hint: '바닥이 뜨겁다.', name: '토끼 용병', desc: '누적 500번 점프한다.', cr: 150, prog: () => [save.ach.c.jumps || 0, 500] },
+  { id: 'walk5k', cat: '기상천외', hidden: true, hint: '운동은 전장에서.', name: '산책하는 용병', desc: '누적 5km를 이동한다.', cr: 250, prog: () => [Math.floor(save.ach.c.dist || 0), 5000] },
+  { id: 'overtime', cat: '기상천외', hidden: true, hint: '퇴근은 언제?', name: '야근 수당', desc: '한 임무에 15분 이상 머문다.', cr: 200 },
+  { id: 'miss95', cat: '기상천외', hidden: true, hint: '탄약상의 VIP.', name: '총알 기부 천사', desc: '300발 이상 쏘고 명중률 5% 이하로 탈출한다.', cr: 100 },
+  { id: 'dodge', cat: '기상천외', hidden: true, hint: '종이 한 장.', name: '종이 한 장 차이', desc: '대시 무적 시간으로 보스의 공격을 흘려 낸다.', cr: 200 },
+  { id: 'crushed', cat: '기상천외', hidden: true, hint: '하늘에서 무언가 떨어진다.', name: '추락 주의', desc: '격추한 드론의 잔해에 깔린다.', cr: 150 },
+  { id: 'underSpider', cat: '기상천외', hidden: true, hint: '가장 안전한 곳은 어디일까.', name: '등잔 밑', desc: 'ARACHNE의 몸 아래에서 10초 동안 버틴다.', cr: 250 },
+  { id: 'tank300', cat: '기상천외', hidden: true, hint: '아프지만 괜찮아.', name: '인간 방패', desc: '한 임무에서 피해를 300 이상 받고도 살아서 탈출한다.', cr: 250 },
 ];
 const ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
 let achQueue = [];
@@ -2853,7 +3522,10 @@ function achEvent(type, d = {}) {
       if (run.focusT > 0 && ++A.focusKills >= 3) achUnlock('focus3');
       if (e.type === 'rex') achUnlock('rex');
       if (e.type === 'dragon') achUnlock('dragon');
+      if (e.type === 'spider') achUnlock('spider');
+      if (e.type === 'drone' && achCount('drones') >= 30) achUnlock('drone30');
       if (achGot('rex') && achGot('dragon')) achUnlock('both');
+      if (achGot('rex') && achGot('dragon') && achGot('spider')) achUnlock('trio');
       A.lastKill = { t: time, x: e.dragon ? e.headPos.x : e.root.position.x, z: e.dragon ? e.headPos.z : e.root.position.z }; A.crouch = [];
       break;
     }
@@ -2863,6 +3535,8 @@ function achEvent(type, d = {}) {
       if ((d.ev === 'disabled' || d.ev === 'destroyed') && p.type === 'head' && !e.boss) { if (achCount('sensor') >= 50) achUnlock('sensor50'); }
       if (d.ev === 'disabled' && p.type === 'leg' && !e.boss && legFactor(e) === 0) { if (achCount('legs') >= 10) achUnlock('legs10'); }
       if (d.ev === 'disabled' && p.type === 'horn' && e.dragon && ++A.horns >= 2) achUnlock('barber');
+      if ((d.ev === 'disabled' || d.ev === 'destroyed') && p.type === 'sleg' && !p.counted && (A.sleg = (A.sleg || 0) + 1) >= 6) achUnlock('spiderLegs');
+      if ((d.ev === 'disabled' || d.ev === 'destroyed') && p.type === 'head' && e.cfg.sniper && e.aimT > 0) achUnlock('counterSnipe');
       break;
     }
     case 'pickup': {
@@ -2878,9 +3552,11 @@ function achEvent(type, d = {}) {
       if (d.src === 'self' && achCount('selfnade') >= 5) achUnlock('selfnade5');
       if (d.src === 'lightning' && ++A.lightning >= 3) achUnlock('lightning3');
       if (d.src === 'charge' && ++A.roadkill >= 3) achUnlock('roadkill3');
+      if (d.src === 'crash') achUnlock('crushed');
       break;
     }
-    case 'iframe': if (['bite', 'tail', 'charge', 'dive', 'laser', 'lightning', 'missile', 'shock'].includes(d.src)) achUnlock('dodge'); break;
+    case 'iframe': if (['bite', 'tail', 'charge', 'dive', 'laser', 'lightning', 'missile', 'shock', 'stomp', 'lunge'].includes(d.src)) achUnlock('dodge'); break;
+    case 'relays': if (d.t <= 90) achUnlock('relayFast'); break;
     case 'rexWall': if (++A.rexWall >= 3) achUnlock('rexWall'); break;
     case 'rexCrawl': achUnlock('rexCrawl'); break;
     case 'emp': if (d.n >= 4) achUnlock('emp4'); break;
@@ -2904,7 +3580,7 @@ function achEvent(type, d = {}) {
         if (!multi && run.shots >= 20 && run.shotsHit >= run.shots) achUnlock('acc100');
         if (run.shots >= 300 && run.shotsHit / run.shots <= 0.05) achUnlock('miss95');
         if (A.dmg >= 300) achUnlock('tank300');
-        if (run.objDone && run.mission.boss && run.pistolOnly) achUnlock(run.mission.id === 'C' ? 'rexPistol' : 'dragonPistol');
+        if (run.objDone && run.mission.boss && run.pistolOnly) achUnlock({ C: 'rexPistol', D: 'dragonPistol', F: 'spiderPistol' }[run.mission.id]);
       }
       if (k === 'dead') {
         if (run.loot.reduce((a, l) => a + l.val, 0) >= 3000) achUnlock('deathRich');
@@ -2917,6 +3593,11 @@ function achEvent(type, d = {}) {
 }
 // 매 프레임: 이동 거리 · 회전 · 하늘 보기
 function achTick(dt) {
+  if (run && run.boss && run.boss.spider && !run.boss.dead) {
+    const A0 = run.ac || (run.ac = { frag: 0, picks: [], crouch: [], lightning: 0, roadkill: 0, rexWall: 0, horns: 0, dmg: 0, focusKills: 0, spinT: 0, spinSum: 0, moonT: 0, lastKill: null });
+    const b = run.boss, under = Math.hypot(player.pos.x - b.root.position.x, player.pos.z - b.root.position.z) < 2.4 && b.H > 2;
+    A0.underT = under ? (A0.underT || 0) + dt : 0; if (A0.underT >= 10) achUnlock('underSpider');
+  }
   if (!run) return;
   const A = run.ac || (achEvent('noop'), run.ac);
   if (player.onGround && player.hspeed > 0.5) { const v = achCount('dist', player.hspeed * dt); if (v >= 5000) achUnlock('walk5k'); }
@@ -2934,18 +3615,18 @@ const _achEu = new THREE.Euler();
 function killEnemy(e, cause) {
   if (e.dead) return;
   e.dead = true; e.glow.material.opacity = 0;
-  run.kills++; run.killReward += e.cfg.killReward; run.killsByType[e.type] = (run.killsByType[e.type] || 0) + 1;
+  run.kills++; run.killReward += e.noReward ? 0 : e.cfg.killReward; run.killsByType[e.type] = (run.killsByType[e.type] || 0) + 1;
   achEvent('kill', { e, cause });
   e.root.updateMatrixWorld(true);
   const center = V3(); e.root.localToWorld(center.set(0, e.coreY / e.cfg.scale, 0));
   const dist = center.distanceTo(player.pos);
   if (cause === 'shutdown') {
     SFX.shutdown(); burstSparks(center, UPY, 10, 0x3dff9a, 3);
-    addFeed(`${e.cfg.name} 정지 · 동력 차단 (코어 보존) +${e.cfg.killReward}`, 'k');
+    addFeed(`${e.cfg.name} 정지 · 동력 차단 (코어 보존) +${e.noReward ? 0 : e.cfg.killReward}`, 'k');
   } else {
     SFX.explode(dist); spawnFlash(center, 2.6, 0.25, 0xffa050); burstSparks(center, UPY, 26, 0xffa040, 9);
     blastLight.position.copy(center); blastLight.intensity = 90;
-    addFeed(`${e.cfg.name} 처치 · ${cause === 'core' ? '코어 파괴' : '동력 과부하'} +${e.cfg.killReward}`, 'k');
+    addFeed(`${e.cfg.name} 처치 · ${cause === 'core' ? '코어 파괴' : cause === 'crash' ? '추락' : '동력 과부하'} +${e.noReward ? 0 : e.cfg.killReward}`, 'k');
     if (e.boss) { for (let i = 0; i < 4; i++) { const v = center.clone().add(V3(rand(-3, 3), rand(-1, 2), rand(-3, 3))); spawnFlash(v, 4, 0.35, 0xffa050); burstSparks(v, UPY, 20, 0xffa040, 10); } shake = Math.max(shake, 0.04); }
   }
   popup(cause === 'shutdown' ? '동력 차단 · 정지' : '처치', 'bad');
@@ -2961,6 +3642,8 @@ function killEnemy(e, cause) {
     detachPartSingle(p, v);
   }
   if (e.bs && e.bs.marker) world.remove(e.bs.marker);
+  if (e.bs && e.bs.marker2) world.remove(e.bs.marker2);
+  if (e.laser) world.remove(e.laser);
   if (e.bs && e.bs.beam) world.remove(e.bs.beam);
   world.remove(e.root);
   checkObjective();
@@ -2979,6 +3662,13 @@ function checkObjective() {
       run.bossKillT = time - (run.boss.bs.engageT || run.startT);
       run.pistolOnly = Object.keys(run.used).every(k => ['pistol', 'emp'].includes(k));
       run.objDone = true; SFX.objective(); addFeed(`${run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); }
+    return;
+  }
+  if (run.mission.relays) {
+    const rl = enemies.filter(o => o.relay);
+    if (!run.objDone && rl.length && rl.every(o => o.dead)) {
+      run.objDone = true; run.relayT = time - run.startT; SFX.objective(); addFeed('중계탑 전부 무력화 · 탈출 지점으로 귀환해 정산', 'x'); achEvent('relays', { t: run.relayT });
+    }
     return;
   }
   if (!run.objDone && run.kills >= run.total) {
@@ -3149,7 +3839,7 @@ function updatePlayer(dt) {
   }
   moveWithCollision(player.pos, player.vel.x * dt, player.vel.z * dt, P_RADIUS, player.pos.y, player.height, STEP);
   player.hspeed = Math.hypot(player.vel.x, player.vel.z);
-  for (const e of enemies) if (e.boss && !e.dragon && !e.dead) {
+  for (const e of enemies) if (e.boss && !e.dragon && !e.noPush && !e.dead) {
     const bx = player.pos.x - e.root.position.x, bz = player.pos.z - e.root.position.z, bd = Math.hypot(bx, bz), mn = e.cfg.radius + P_RADIUS;
     if (bd < mn && bd > 0.001) moveWithCollision(player.pos, bx / bd * (mn - bd), bz / bd * (mn - bd), P_RADIUS, player.pos.y, player.height, STEP);
   }
@@ -3300,7 +3990,7 @@ function updateHUD(dt) {
   setHTML($('wslots'), run.ws.map((s, i) => i === run.cur ? `<b>[${i + 1}] ${WEAPONS[s.id].name.split(' ')[0]}</b>` : `[${i + 1}] ${WEAPONS[s.id].name.split(' ')[0]}`).join('  '));
   setText($('reloadtxt'), run.reloadT > 0 ? '재장전 중' : (ws.mag === 0 ? (ws.reserve > 0 ? 'R 재장전' : '탄약 없음 · 2 권총 전환') : ''));
   // 목표
-  setText($('objtxt'), run.objDone ? '목표 완료 · 탈출 지점으로 귀환' : (run.mission.boss ? `${run.mission.target[0]} 격파` : `적대 기계 제거 ${run.kills} / ${run.total}`));
+  setText($('objtxt'), run.objDone ? '목표 완료 · 탈출 지점으로 귀환' : (run.mission.boss ? `${run.mission.target[0]} 격파` : run.mission.relays ? `중계탑 무력화 ${enemies.filter(o => o.relay && o.dead).length} / 3` : `적대 기계 제거 ${run.kills} / ${run.total}`));
   updateBossBar();
   $('objtxt').className = 'o' + (run.objDone ? ' ok' : '');
   if (extraction) {
@@ -3356,6 +4046,9 @@ function drawRadar() {
     g.beginPath(); g.arc(x, y, e.boss ? 6 : 3, 0, 7); g.fill();
   }
 }
+const SPIDER_CHIPS = [['head', '센서'], ['turret', '포탑'], ['bay', '격납고'], ['sl1', '좌1'], ['sl2', '좌2'], ['sl3', '좌3'], ['sl4', '우1'], ['sl5', '우2'], ['sl6', '우3'], ['reactor', '동력로']];
+const SPIDER_STATE_TXT = { stomp_wind: '짓밟기 준비 · 몸 아래에서 벗어나라', stomp: '짓밟기', lunge_wind: '도약 준비 · 붉은 원 회피', lunge: '도약', land: '착지 · 냉각구 개방',
+  mortar_wind: '포격 준비', mortar: '박격포 포격', collapse: '주저앉음 · 동력로 노출', rise: '재기립', stunned: 'EMP 경직 · 동력로 노출', dazed: '센서 교란' };
 const DRAGON_CHIPS = [['head', '센서'], ['jaw', '턱'], ['hornL', '뿔L'], ['hornR', '뿔R'], ['pearl', '여의주'], ['clawF', '앞발'], ['clawB', '뒷발'], ['n1', '마디1'], ['n2', '마디2'], ['n3', '마디3'], ['fin', '꼬리']];
 const DRAGON_STATE_TXT = { breath_wind: '숨결 충전 · 마디 개방', breath: '플라즈마 숨결 · 마디 개방', storm_wind: '낙뢰 소환 · 마디 개방', dive_wind: '강하 준비 · 붉은 경로 회피', dive: '강하 돌진',
   skim: '저공 비행 · 마디 노출', climb: '상승', downed: 'EMP 추락 · 마디 노출', crash: '추락', dazed: '센서 교란 · 마디 노출', cruise: '마디 덮개 닫힘' };
@@ -3365,12 +4058,13 @@ function updateBossBar() {
   bb.classList.remove('hidden');
   setText($('bossname'), e.cfg.title || e.cfg.name);
   let frac;
-  if (e.dragon) frac = ['n1', 'n2', 'n3'].reduce((a, id) => { const q = e.parts[id]; return a + (q.attached && q.state !== 'disabled' && q.state !== 'destroyed' ? q.hp / q.maxHp : 0); }, 0) / 3;
+  if (e.spider) frac = e.parts.reactor.attached ? e.parts.reactor.hp / e.parts.reactor.maxHp : 0;
+  else if (e.dragon) frac = ['n1', 'n2', 'n3'].reduce((a, id) => { const q = e.parts[id]; return a + (q.attached && q.state !== 'disabled' && q.state !== 'destroyed' ? q.hp / q.maxHp : 0); }, 0) / 3;
   else frac = e.parts.core.hp / e.parts.core.maxHp;
   bb.querySelector('.bb>i').style.width = (frac * 100) + '%';
-  const stxt = (e.dragon ? DRAGON_STATE_TXT : BOSS_STATE_TXT)[e.bs.state] || '';
+  const stxt = (e.spider ? SPIDER_STATE_TXT : e.dragon ? DRAGON_STATE_TXT : BOSS_STATE_TXT)[e.bs.state] || '';
   setText($('bossphase'), (e.bs.phase2 ? '2페이즈' + (stxt ? ' · ' : '') : '') + stxt + (e.dragon && partAlive(e.parts.pearl) ? (stxt || e.bs.phase2 ? ' · ' : '') + '여의주 보호막' : ''));
-  setHTML($('bossparts'), (e.dragon ? DRAGON_CHIPS : BOSS_CHIPS).map(([id, nm]) => {
+  setHTML($('bossparts'), (e.spider ? SPIDER_CHIPS : e.dragon ? DRAGON_CHIPS : BOSS_CHIPS).map(([id, nm]) => {
     const p = e.parts[id]; const cls = p.state === 'destroyed' ? 'x' : p.state === 'disabled' ? 'd' : p.state === 'damaged' ? 'm' : 'i';
     return `<span class="${cls}">${nm}${!p.attached && p.state !== 'destroyed' ? '(분리)' : ''}</span>`;
   }).join(''));
@@ -3588,7 +4282,7 @@ function renderHub() {
   if (hubModal === 'rec') {
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(460px,94vw)"><header><h2>기록</h2></header><div class="body">
       <div class="rec"><span>누적 처치</span><span>${fmt(save.kills)}</span><span>누적 수익</span><span>${fmt(save.totalEarned)} CR</span><span>사망</span><span>${save.deaths}</span>
-      ${[['', 'REX-09'], ['D', '청룡']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${save.records['bossTime' + k] ? save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
+      ${[['', 'REX-09'], ['D', '청룡'], ['F', 'ARACHNE']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${save.records['bossTime' + k] ? save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
       <div class="rec" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">${Object.values(MISSIONS).map(m => `<span>${m.code} ${m.name}</span><span>${save.stats[m.id].clears} / ${save.stats[m.id].runs} · 최고 ${fmt(save.stats[m.id].best)}</span>`).join('')}</div>
       </div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
   } else if (hubModal === 'ach') {
@@ -3697,6 +4391,8 @@ const HUB_FRAME = {
   B: { cam: V3(-5.4, 2.5, 11.2), look: V3(-1.6, 1.55, 0), light: 1, aim: V3(1, 1.4, 0), cone: 0.42 },
   C: { cam: V3(-15, 6.2, 34), look: V3(-5.2, 6.0, -1), light: 1.9, aim: V3(-1.5, 5.5, -1), cone: 0.62 },
   D: { cam: V3(-15, 4.6, 34), look: V3(-1.6, 5.0, -2), light: 1.8, aim: V3(3, 4.5, -4), cone: 0.62 },
+  E: { cam: V3(-5.4, 2.6, 11.2), look: V3(-1.6, 1.7, 0), light: 1, aim: V3(1, 1.6, 0), cone: 0.45 },
+  F: { cam: V3(-13, 5.4, 25), look: V3(-3.2, 3.0, -1), light: 1.7, aim: V3(0.5, 2.5, -1), cone: 0.6 },
 };
 function buildHubScene() {
   if (HUB.built) return; HUB.built = true;
@@ -3743,7 +4439,9 @@ function buildHubScene() {
   const B = new THREE.Group(), hB = buildRobot('heavy'); face(hB.root, 1.2, 0, HUB_FRAME.B.cam, -0.5); B.add(hB.root);
   const C = new THREE.Group(), rC = buildRex(); face(rC.root, 2.2, -1.5, HUB_FRAME.C.cam, -1.25); C.add(rC.root);
   const D = new THREE.Group(), dD = buildDragon(); dragonCoilPose(dD, 1.2, 0, 0); D.add(dD.root);
-  HUB.shows = { A: { g: A, bots: [sA, cA] }, B: { g: B, bots: [hB] }, C: { g: C, bots: [rC], rex: rC }, D: { g: D, bots: [], dragon: dD } };
+  const E = new THREE.Group(), snE = buildRobot('sniper'), drE = buildDrone(); face(snE.root, 2.0, -0.8, HUB_FRAME.E.cam, -0.45); drE.root.position.set(-0.2, 2.6, 1.0); drE.root.rotation.y = 0.9; E.add(snE.root, drE.root);
+  const F = new THREE.Group(), spF = buildSpider(); spF.root.position.set(1.2, 0.22, -1.2); spF.root.rotation.y = Math.atan2(HUB_FRAME.F.cam.x - 1.2, HUB_FRAME.F.cam.z + 1.2) - 0.55; F.add(spF.root);
+  HUB.shows = { A: { g: A, bots: [sA, cA] }, B: { g: B, bots: [hB] }, C: { g: C, bots: [rC], rex: rC }, D: { g: D, bots: [], dragon: dD }, E: { g: E, bots: [snE], drone: drE }, F: { g: F, bots: [], spider: spF } };
   rC.root.updateMatrixWorld(true); const eyeM = rC.parts.head.meshes.find(m => m.userData.sub === '광학 센서');
   eyeM.getWorldPosition(HUB.eye.position); HUB.eye.position.add(V3(-1.2, 0.6, 1.6));
   for (const k in HUB.shows) { HUB.shows[k].g.visible = false; hubScene.add(HUB.shows[k].g); }
@@ -3779,6 +4477,14 @@ function updateHub3D(dt) {
     if (b.parts.head && b.parts.head.group && !show.rex) b.parts.head.group.rotation.y = Math.sin(t * 0.5) * 0.45;
     if (b.parts.weapon && b.parts.weapon.group) b.parts.weapon.group.rotation.x = -0.15 + Math.sin(t * 0.7) * 0.06;
   });
+  if (show.drone) { const d = show.drone; for (const m of d.discs) m.rotation.y += dt * 40; d.root.position.y = 2.6 + Math.sin(time * 1.4) * 0.12; d.body.rotation.z = Math.sin(time * 0.9) * 0.08; }
+  if (show.spider) {
+    const sp = show.spider, t = time; sp.body.position.y = SPI.standH + Math.sin(t * 1.1) * 0.06;
+    const lift = (t % 8) > 6.6 ? Math.sin(((t % 8) - 6.6) / 1.4 * Math.PI) * 2 : 0;
+    for (const L of sp.legs) legIK(L, 3.6 + Math.sin(t * 0.8 + L.idx) * 0.08, SPI.standH - 0.1 - (L.idx === 0 ? lift : 0));
+    sp.tubes.rotation.x = -0.25 + Math.sin(t * 0.5) * 0.15;
+    for (const m of sp.eyes) m.material.emissive.setHex(0xff3020).multiplyScalar(0.7 + 0.3 * Math.sin(t * 3) + lift * 0.4);
+  }
   if (show.dragon) {
     const d = show.dragon; dragonCoilPose(d, 1.2, 0, time);
     d.parts.jaw.group.rotation.x = 0.1 + Math.max(0, Math.sin(time * 0.7)) * 0.35;
@@ -3821,7 +4527,7 @@ loop();
 if (TEST) {
   window.__M = {
     get save() { return save; }, get run() { return run; }, get enemies() { return enemies; }, get loots() { return loots; },
-    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
+    get state() { return state; }, get hittables() { return hittables; }, get boxes() { return boxes; }, get shocks() { return shocks; }, get bolts() { return bolts; }, get throwables() { return throwables; }, hurt(d, src) { damagePlayer(d, player.pos.clone().add(new THREE.Vector3(0, 0, -1)), src); }, achEvent, achUnlock, ACH, achTick, spawnDrone, spiderExposed, get MAPB() { return MAPB; }, killEnemy(e, c) { killEnemy(e, c); }, createLoot, dragonOpen(e) { return dragonNodesOpen(e); }, empAt(p, r) { empAt(p, r); }, dragonPose(e) { applyDragonPose(e, e.headPos, e.headDir, e.segPts); }, get dmgLog() { return dmgLog; }, get missiles() { return missiles; }, get fallers() { return fallers; },
     player, camera, THREE, startMission, endMission, buy, interact, goHub, update, render, tryFire, fireRay, switchWeapon,
     setMouse(v) { mouseDown = v; firedThisPress = false; }, setGod(v) { godMode = v; }, setAds(v) { rightDown = v; }, keys,
     aimAt(v) { camera.position.set(player.pos.x, player.pos.y + player.eye, player.pos.z); camera.lookAt(v); camera.updateMatrixWorld(); recoil.cur = recoil.target = 0; },
