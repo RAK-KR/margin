@@ -1,29 +1,29 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=30';
-import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { camera, scene } from '../core/renderer.js?v=30';
-import { removeHittables } from '../world/world.js?v=30';
-import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=30';
-import { updatePartVisual } from '../enemies/robot.js?v=30';
-import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=30';
-import { damagePlayer } from '../player/player.js?v=30';
-import { spawnEnemy, startMission } from '../world/missions.js?v=30';
-import { kd } from '../player/input.js?v=30';
-import { launchThrowable } from '../combat/shooting.js?v=30';
-import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=30';
-import { animateLegs } from '../enemies/ai.js?v=30';
-import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=30';
-import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=30';
-import { _box3, spawnDrone } from '../enemies/extra.js?v=30';
-import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=30';
-import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=30';
-import { achEvent, killEnemy } from '../meta/achievements.js?v=30';
-import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=30';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=30';
-import { endMission } from '../game/result.js?v=30';
-import { renderHub } from '../ui/hub.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=32';
+import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { camera, scene } from '../core/renderer.js?v=32';
+import { removeHittables } from '../world/world.js?v=32';
+import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=32';
+import { updatePartVisual } from '../enemies/robot.js?v=32';
+import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=32';
+import { damagePlayer } from '../player/player.js?v=32';
+import { spawnEnemy, startMission } from '../world/missions.js?v=32';
+import { kd } from '../player/input.js?v=32';
+import { launchThrowable } from '../combat/shooting.js?v=32';
+import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=32';
+import { animateLegs } from '../enemies/ai.js?v=32';
+import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=32';
+import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=32';
+import { _box3, spawnDrone } from '../enemies/extra.js?v=32';
+import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=32';
+import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=32';
+import { achEvent, killEnemy } from '../meta/achievements.js?v=32';
+import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=32';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=32';
+import { endMission } from '../game/result.js?v=32';
+import { renderHub } from '../ui/hub.js?v=32';
 
 // =====================================================================
 //  협동 모드 (2인 · 방장 권위 방식)
@@ -569,20 +569,20 @@ function coopPrompt() {
   return '';
 }
 function coopModalHtml() {
-  const st = NET.status, err = NET.err ? `<div class="bad" style="margin-top:12px;font-size:13px">${NET.err}</div>` : '';
+  const st = NET.status, err = NET.err ? `<div class="bad" style="margin-top:12px;font-size:15.5px">${NET.err}</div>` : '';
   let body = '';
-  if (st === 'off') body = `<div class="dim" style="font-size:13px;line-height:1.6">친구와 함께 보스 작전(렉스, 거미 전차, 청룡, 익스트림)에 들어갑니다. 방장의 컴퓨터가 게임을 진행하므로 방장은 게임 창을 내리지 마세요.</div>
+  if (st === 'off') body = `<div class="dim" style="font-size:15.5px;line-height:1.6">친구와 함께 보스 작전(렉스, 거미 전차, 청룡, 익스트림)에 들어갑니다. 방장의 컴퓨터가 게임을 진행하므로 방장은 게임 창을 내리지 마세요.</div>
       <div style="display:flex;gap:10px;margin-top:16px"><button class="primary" id="cohost">방 만들기</button></div>
       <div class="lbl" style="margin:20px 0 8px">참가하기</div>
-      <div style="display:flex;gap:8px"><input id="cocode" maxlength="4" placeholder="방 코드 4자리" style="flex:1;text-transform:uppercase;font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.3em;padding:10px;background:#111;border:1px solid var(--line);color:#efe9de"><button id="cojoin">참가</button></div>`;
+      <div style="display:flex;gap:8px"><input id="cocode" maxlength="4" placeholder="방 코드 4자리" style="flex:1;text-transform:uppercase;font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.3em;padding:10px;background:#111;border:1px solid var(--line);color:#efe9de"><button id="cojoin">참가</button></div>`;
   else if (st === 'starting' || st === 'joining') body = `<div class="dim">${st === 'starting' ? '방을 만드는 중…' : `방 <b class="mono">${NET.code}</b>에 연결하는 중… <span class="acc">${NET.step}</span>`}</div><div style="margin-top:16px"><button id="coleave">취소</button></div>`;
   else if (st === 'waiting') body = `<div class="lbl">방 코드</div><div class="mono acc" style="font-size:44px;letter-spacing:.35em;margin:6px 0 10px">${NET.code}</div>
-      <div class="dim" style="font-size:13px;line-height:1.6">친구가 같은 주소에서 <b>협동 → 참가하기</b>에 이 코드를 입력하면 연결됩니다.</div><div style="margin-top:16px"><button id="coleave">방 닫기</button></div>`;
+      <div class="dim" style="font-size:15.5px;line-height:1.6">친구가 같은 주소에서 <b>협동 → 참가하기</b>에 이 코드를 입력하면 연결됩니다.</div><div style="margin-top:16px"><button id="coleave">방 닫기</button></div>`;
   else if (st === 'connected') body = NET.role === 'host'
-    ? `<div class="ok" style="font-size:15px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">작전을 고르면 둘이 함께 들어갑니다. 협동에서는 보스의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
+    ? `<div class="ok" style="font-size:17px">동료 접속됨 · 방 <span class="mono">${NET.code}</span></div><div class="dim" style="font-size:15.5px;margin-top:8px;line-height:1.6">작전을 고르면 둘이 함께 들어갑니다. 협동에서는 보스의 내구도가 1.6배이고, 한 명이 쓰러지면 다른 한 명이 다가가 E를 길게 눌러 일으킬 수 있습니다.</div>
        <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">${COOP_MISSIONS.filter(m => !MISSIONS[m].extreme || extremeUnlocked()).map(m => `<button class="primary" data-colaunch="${m}">협동 출격 · ${MISSIONS[m].code} ${MISSIONS[m].name}${GS.save.hardSel && hardUnlocked(m) ? ' · 하드' : ''}</button>`).join('')}</div>
        <div style="margin-top:12px"><button id="coleave">연결 끊기</button></div>`
-    : `<div class="ok" style="font-size:15px">방 <span class="mono">${NET.code}</span> 접속됨</div><div class="dim" style="font-size:13px;margin-top:8px">방장이 출격하면 자동으로 함께 작전에 들어갑니다. 그동안 상점에서 장비를 정비해도 됩니다.</div><div style="margin-top:16px"><button id="coleave">나가기</button></div>`;
+    : `<div class="ok" style="font-size:17px">방 <span class="mono">${NET.code}</span> 접속됨</div><div class="dim" style="font-size:15.5px;margin-top:8px">방장이 출격하면 자동으로 함께 작전에 들어갑니다. 그동안 상점에서 장비를 정비해도 됩니다.</div><div style="margin-top:16px"><button id="coleave">나가기</button></div>`;
   return `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(520px,94vw)"><header><h2>협동</h2><span class="lbl">2인 · 보스 작전</span></header><div class="body">${body}${err}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
 }
 function coopBindModal(H) {

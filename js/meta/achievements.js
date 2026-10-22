@@ -1,24 +1,35 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=30';
-import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=30';
-import { writeSave } from '../core/save.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { camera } from '../core/renderer.js?v=30';
-import { removeHittables } from '../world/world.js?v=30';
-import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=30';
-import { player } from '../player/playerState.js?v=30';
-import { capZones } from '../world/missions.js?v=30';
-import { legFactor } from '../combat/damage.js?v=30';
-import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=30';
-import { createLoot } from '../game/loot.js?v=30';
-import { addFeed, popup } from '../ui/hud.js?v=30';
-import { WLV_MAX } from '../ui/hub.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=32';
+import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=32';
+import { writeSave } from '../core/save.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { camera } from '../core/renderer.js?v=32';
+import { removeHittables } from '../world/world.js?v=32';
+import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=32';
+import { player } from '../player/playerState.js?v=32';
+import { capZones } from '../world/missions.js?v=32';
+import { legFactor } from '../combat/damage.js?v=32';
+import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=32';
+import { createLoot } from '../game/loot.js?v=32';
+import { addFeed, popup } from '../ui/hud.js?v=32';
+import { WLV_MAX } from '../ui/hub.js?v=32';
 
 // =====================================================================
 //  업적
 // =====================================================================
 const ACH_CATS = ['전투', '회수', '보스', '성장', '기상천외'];
+const ACH_GROUPS = [
+  ['기본 전투', ['first_blood', 'kills100', 'disarm15', 'legs10', 'sensor50', 'acc100', 'drone30', 'mite20', 'counterSnipe', 'relayFast', 'emp4', 'focus3', 'frag3', 'pacifist']],
+  ['부품 회수', ['parts50', 'parts500', 'perfect8', 'junk', 'haul40', 'speed5', 'loreAll']],
+  ['REX-09', ['rex', 'rexPistol', 'rexCore', 'rexCrawl', 'rexWall', 'hardRex', 'roadkill3']],
+  ['ARACHNE', ['spider', 'spiderPistol', 'spiderLegs', 'hardSpider', 'underSpider']],
+  ['청룡', ['dragon', 'dragonPistol', 'pearl', 'barber', 'hardDragon', 'lightning3']],
+  ['종합 · 하드 · 최종', ['both', 'trio', 'hardFirst', 'hardAll', 'hardPistol', 'extreme', 'extremeCoop', 'extremePistol', 'ending']],
+  ['성장 · 장비', ['graduate', 'wlvMax', 'wlvAll', 'shop30', 'allguns', 'maxmods', 'rich', 'broke']],
+];
+// 같은 종류의 단계형 업적은 한 줄로 (앞 단계를 달성하면 다음 단계가 보임)
+const ACH_CHAINS = [['first_blood', 'kills100'], ['parts50', 'parts500'], ['wlvMax', 'wlvAll'], ['hardFirst', 'hardAll']];
 const ACH = [
   // 전투
   { id: 'first_blood', cat: '전투', name: '첫 수확', desc: '기계를 처음으로 처치한다.', cr: 50 },
@@ -314,4 +325,4 @@ function checkObjective() {
   }
 }
 
-export { ACH, ACH_CATS, achCheckGrowth, achCount, achEvent, achGot, achTick, achUnlock, checkObjective, killEnemy };
+export { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achEvent, achGot, achTick, achUnlock, checkObjective, killEnemy };

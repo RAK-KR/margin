@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { $, _v1, _v2, fmt, setHTML, setText } from '../core/utils.js?v=30';
-import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=30';
-import { camera } from '../core/renderer.js?v=30';
-import { curWeapon, player, raycaster } from '../player/playerState.js?v=30';
-import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=30';
-import { TUT_STEPS } from '../modes/tutorial.js?v=30';
-import { currentSpread } from '../combat/shooting.js?v=30';
-import { partAlive } from '../combat/damage.js?v=30';
-import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=30';
-import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=30';
-import { drawRadar, updateBossBar } from '../game/result.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=32';
+import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=32';
+import { camera } from '../core/renderer.js?v=32';
+import { curWeapon, player, raycaster } from '../player/playerState.js?v=32';
+import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=32';
+import { TUT_STEPS } from '../modes/tutorial.js?v=32';
+import { currentSpread } from '../combat/shooting.js?v=32';
+import { partAlive } from '../combat/damage.js?v=32';
+import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=32';
+import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=32';
+import { drawRadar, updateBossBar } from '../game/result.js?v=32';
 
 // =====================================================================
 //  HUD
@@ -23,6 +23,26 @@ function addFeed(text, cls = '') {
 }
 function showHitmarker(kind) { const h = $('hitmarker'); h.className = kind; GS.hitT = kind === 'kill' ? 0.32 : 0.16; }
 function popup(text, cls) { const p = $('popup'); p.className = cls; p.textContent = text; GS.popupT = 0.9; }
+// 탈출 지점 표지: 3D 위치를 화면에 투영, 화면 밖이면 가장자리에 방향 화살표
+function updateWaypoint(x, z, d) {
+  const el = $('wp');
+  el.style.display = GS.run.tut && GS.run.tut.i < TUT_STEPS.length - 1 ? 'none' : '';
+  const v = _v4.set(x, (GS.extraction.y || 0) + 2.2, z).project(camera);
+  const W = innerWidth, H = innerHeight, m = 46;
+  let sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+  const behind = v.z > 1, off = behind || sx < m || sx > W - m || sy < m || sy > H - m;
+  let rot = 0;
+  if (off) {
+    let dx = sx - W / 2, dy = sy - H / 2; if (behind) { dx = -dx; dy = -dy; if (Math.abs(dy) < 1) dy = 1; }
+    const k = Math.min((W / 2 - m) / Math.max(1e-3, Math.abs(dx)), (H / 2 - m) / Math.max(1e-3, Math.abs(dy)));
+    sx = W / 2 + dx * k; sy = H / 2 + dy * k; rot = Math.atan2(dy, dx) + Math.PI / 2;
+  }
+  el.classList.toggle('edge', off); el.classList.toggle('wait', !GS.run.objDone);
+  el.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
+  el.querySelector('.a').style.transform = `rotate(${rot}rad)`;
+  setText($('wpd'), `${Math.round(d)}m`);
+  setText($('wpl'), GS.run.objDone ? '탈출' : '탈출 지점');
+}
 function updateHUD(dt) {
   const ws = curWeapon(), w = W(ws.id);
   // 조준점
@@ -94,8 +114,8 @@ function updateHUD(dt) {
     const dx = GS.extraction.x - player.pos.x, dz = GS.extraction.z - player.pos.z, d = Math.hypot(dx, dz);
     const fwd = camera.getWorldDirection(_v1);
     const a = Math.atan2(dx, dz) - Math.atan2(fwd.x, fwd.z);
-    $('extdir').style.transform = `rotate(${-a}rad)`;
     setText($('exttxt'), `탈출 지점 ${Math.round(d)}m`);
+    updateWaypoint(GS.extraction.x, GS.extraction.z, d);
   }
   const lv = GS.run.loot.reduce((a, l) => a + l.val, 0);
   setText($('lootval'), fmt(lv * (1 + GS.run.salvageBonus)) + ' CR'); setText($('lootcnt'), `(${GS.run.loot.length}개)`);
@@ -110,7 +130,7 @@ function updateHUD(dt) {
   else if (inExtraction()) {
     if (GS.run.objDone) msg = `<b>[${UK()}]</b>탈출 및 정산`;
     else if (GS.run.exHold > 0) msg = `<b>[${UK()}]</b><span class="bad">조기 탈출 중 ${Math.round(GS.run.exHold / 1.5 * 100)}% · 계약 보상 미지급</span>`;
-    else msg = coopOn() ? `<span class="dim">협동에서는 보스를 격파해야 탈출할 수 있습니다</span>` : `<b>[${UK()} 길게]</b>조기 탈출 <span class="dim">(목표 미완료 · 부품과 처치 보상만 정산)</span>`;
+    else msg = GS.run.tut ? '' : coopOn() ? `<span class="dim">협동에서는 보스를 격파해야 탈출할 수 있습니다</span>` : `<b>[${UK()} 길게]</b>조기 탈출 <span class="dim">(목표 미완료 · 부품과 처치 보상만 정산)</span>`;
   }
   if (!msg && capZones.length) msg = zonePrompt();
   if (msg) { setHTML(pr, msg); pr.classList.remove('hidden'); } else pr.classList.add('hidden');

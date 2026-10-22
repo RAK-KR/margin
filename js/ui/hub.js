@@ -1,14 +1,16 @@
-import { GS } from '../core/state.js?v=30';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=30';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STORY, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=30';
-import { defaultSave, writeSave } from '../core/save.js?v=30';
-import { SFX, initAudio } from '../core/audio.js?v=30';
-import { startMission } from '../world/missions.js?v=30';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=30';
-import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=30';
-import { ACH, ACH_CATS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=30';
-import { nextGoal } from '../game/result.js?v=30';
-import { hubShow } from './hub3d.js?v=30';
+import * as THREE from 'three';
+import { GS } from '../core/state.js?v=32';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=32';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STORY, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=32';
+import { defaultSave, writeSave } from '../core/save.js?v=32';
+import { SFX, initAudio } from '../core/audio.js?v=32';
+import { GUNS } from '../player/viewmodel.js?v=32';
+import { startMission } from '../world/missions.js?v=32';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=32';
+import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=32';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=32';
+import { nextGoal } from '../game/result.js?v=32';
+import { hubShow } from './hub3d.js?v=32';
 
 // =====================================================================
 //  거점 / 상점
@@ -28,9 +30,38 @@ function itemDef(it) {
   return SALVAGES[it.lvl];
 }
 function modLv(it) { return GS.save.mods[it.mid] || 0; }
+// 진행 목표: 처음 하는 사람이 다음에 뭘 해야 하는지
+const GOALS = [
+  { t: '훈련장에서 기본기 익히기', h: '상단 메뉴의 훈련장에서 조작과 기계의 약점을 직접 연습합니다.', ok: () => GS.save.tutDone, go: () => startMission('T') },
+  { t: 'OP-A 폐기장 수색 완수', h: '작전 목록에서 OP-A를 고르고 출격하세요. 기계를 모두 처치하고 탈출하면 정산합니다.', ok: () => GS.save.stats.A.clears > 0, go: () => { GS.selectedMission = 'A'; } },
+  { t: '상점에서 첫 무기 사기', h: '정산으로 번 돈으로 상점의 무기 탭에서 권총보다 강한 총을 사세요.', ok: () => Object.keys(GS.save.weapons).length > 1, go: () => { GS.hubView = 'shop'; GS.shopTab = '무기'; } },
+  { t: 'OP-B 공장 침투 완수', h: '중장갑형이 나옵니다. 다리와 등 뒤 동력 장치를 노리세요.', ok: () => GS.save.stats.B.clears > 0, go: () => { GS.selectedMission = 'B'; } },
+  { t: '방어복 사기', h: '상점의 방어복 · 회수 탭에서 방어복을 사면 체력과 피해 감소가 늘어납니다.', ok: () => GS.save.armor >= 1, go: () => { GS.hubView = 'shop'; GS.shopTab = '방어복 · 회수'; } },
+  { t: 'OP-C 변전소 장악 완수', h: '구역 세 곳 안에 머물러 점령하세요. 저격형의 붉은 조준선을 조심하세요.', ok: () => GS.save.stats.E.clears > 0, go: () => { GS.selectedMission = 'E'; } },
+  { t: '보스 REX-09 격파', h: '무릎 관절을 부숴 주저앉히고 등의 동력로를 노리세요. 기둥에 돌진을 유도하면 기절합니다.', ok: () => GS.save.stats.C.clears > 0, go: () => { GS.selectedMission = 'C'; } },
+  { t: '보스 ARACHNE 격파', h: '다리 세 개를 부수면 주저앉아 동력로가 드러납니다. 자폭 거미는 다가오기 전에 쏘세요.', ok: () => GS.save.stats.F.clears > 0, go: () => { GS.selectedMission = 'F'; } },
+  { t: '보스 청룡 격파', h: '여의주를 먼저 부수고, 동력 마디가 열릴 때 노리세요. EMP를 맞히면 땅으로 떨어집니다.', ok: () => GS.save.stats.D.clears > 0, go: () => { GS.selectedMission = 'D'; } },
+  { t: '상점 장비 모두 구매', h: '익스트림 작전이 열립니다. 소모품과 무기 강화는 제외됩니다.', ok: () => extremeUnlocked(), go: () => { GS.hubView = 'shop'; } },
+  { t: '익스트림 · 삼중 위협 완수', h: '세 보스가 한꺼번에 나옵니다. 방어복과 보조 장비 없이 깨야 합니다.', ok: () => GS.save.stats.G.clears > 0, go: () => { GS.selectedMission = 'G'; } },
+  { t: '최종 작전 · 근원지 완수', h: '기계를 만들어 내는 생산 코어를 멈추세요. 이것이 마지막 작전입니다.', ok: () => GS.save.stats.H.clears > 0, go: () => { GS.selectedMission = 'H'; } },
+];
+function curGoal() { const i = GOALS.findIndex(g => !g.ok()); return i < 0 ? null : { i, g: GOALS[i] }; }
+const GUIDE_HTML = () => `<div class="guide">
+  <p>기계들이 장악한 버려진 도시에서, 당신은 <b>기계 부품을 회수해 파는 용병</b>입니다. 작전에 나가 기계를 부수고, 떨어진 부품을 들고 돌아와 돈을 벌고, 그 돈으로 장비를 사서 더 강한 기계에 도전합니다. 마지막에는 기계를 만들어 내는 곳을 찾아 멈추는 것이 목표입니다.</p>
+  <h3>한 번의 작전</h3>
+  <ol><li>거점에서 <b>작전을 고르고 출격</b>합니다.</li><li>기계의 <b>부위</b>를 골라 부숩니다. 정면 장갑보다 관절 · 센서 · 등 뒤 동력 장치가 약점입니다.</li>
+  <li>떨어진 <b>부품을 밟아서 줍습니다.</b> 너무 많이 들면 가방이 무거워져 느려집니다.</li><li>목표를 끝내고 화면의 <b>◇ 탈출 표지</b>를 따라가 탈출합니다.</li>
+  <li><b>정산</b>: 계약금 + 처치 보상 + 부품 판매가를 받습니다. 부품은 손상될수록 값이 떨어지고, 파괴된 부품은 0입니다.</li></ol>
+  <h3>거점 화면 보는 법</h3>
+  <ul><li><b>작전 목록</b>: 오른쪽의 막대 세 칸은 위험도, 숫자는 계약금(CR)입니다. 고르면 아래에 설명이 나옵니다.</li>
+  <li><b>지금 할 일</b>: 오른쪽 아래 상자에 다음 목표가 나옵니다. 누르면 해당 작전이나 상점으로 이동합니다.</li>
+  <li><b>현재 장비</b>: 이번 출격에 들고 갈 무기 · 방어복 · 가방 · 스킬입니다. 상점에서 바꿉니다.</li>
+  <li><b>상점</b>: 무기 · 무기 강화 · 개조 · 스킬 · 소모품 · 방어복 · 가방 · 보조 장비를 삽니다.</li>
+  <li><b>하드 모드</b>: 작전을 보통으로 한 번 깨면 열립니다. 적이 강해지는 대신 보상이 커집니다.</li></ul>
+  <h3>죽으면</h3><p>그 작전에서 주운 부품과 보상을 잃습니다. 산 장비와 가진 돈은 그대로 남습니다.</p></div>`;
 // 출격 때 들고 가는 주무기 (장착 무기 + 함께 휴대, 최대 3정)
 function carryList() { return [GS.save.equipped, ...(GS.save.carry || [])].filter((id, i, a) => id && id !== 'pistol' && GS.save.weapons[id] && a.indexOf(id) === i).slice(0, MAX_CARRY); }
-let rebindA = '';
+let rebindA = '', achOpen = new Set(), demoSkill = '';
 function itemPrice(it) {
   if (it.kind === 'wlv') { const l = GS.save.wlv[it.wid] || 0; return l < WLV_MAX ? wlvBase(it.wid) * WLV_MULT[l] : Infinity; }
   if (it.kind === 'mod') { const m = MODS[it.mid], l = modLv(it); return l < m.prices.length ? m.prices[l] : Infinity; }
@@ -119,8 +150,10 @@ function renderHub() {
     const ownedCls = (it.kind === 'cons' || it.kind === 'mod' || it.kind === 'wlv') ? '' : (owned ? 'owned' : '');
     const eqCls = it.kind === 'weapon' && GS.save.equipped === it.id ? ' equipped' : '';
     const cTag = it.kind === 'weapon' && !eqCls && carryList().includes(it.id) ? '<span class="eqtag">휴대</span>' : '';
-    return `<div class="item ${ownedCls}${eqCls}"><div class="hd"><span class="nm">${name}${eqCls ? '<span class="eqtag">장착 중</span>' : cTag}</span><span class="pr">${priceTxt}</span></div>
-      <div class="ds">${d.desc}</div>${cmp ? `<div class="cmp">${cmp}</div>` : ''}<div class="act">${act}</div></div>`;
+    const gid = it.kind === 'weapon' ? it.id : it.kind === 'wlv' ? it.wid : '';
+    const demo = it.kind === 'skill' ? ` data-demo="${it.id}"` : '';
+    return `<div class="item ${ownedCls}${eqCls}${it.kind === 'skill' && demoSkill === it.id ? ' demo' : ''}"${demo}>${gid ? `<img class="gimg" alt="" src="${gunThumb(gid)}">` : ''}<div class="hd"><span class="nm">${name}${eqCls ? '<span class="eqtag">장착 중</span>' : cTag}</span><span class="pr">${priceTxt}</span></div>
+      <div class="ds">${d.desc}${it.kind === 'skill' ? '<br><span class="acc" style="font-size:13px">카드를 누르면 오른쪽 아래에서 사용 모습을 볼 수 있습니다</span>' : ''}</div>${cmp ? `<div class="cmp">${cmp}</div>` : ''}<div class="act">${act}</div></div>`;
   };
   const tabs = SHOP_CATS.map(c => `<button class="tab ${c === GS.shopTab ? 'sel' : ''}" data-tab="${c}">${c} <span class="dim mono">${SHOP.filter(x => x.cat === c).length}</span></button>`).join('');
   const shopHtml = `<div class="tabs">${tabs}</div><div class="shop">${SHOP.filter(x => x.cat === GS.shopTab).map(card).join('')}</div>`;
@@ -131,7 +164,7 @@ function renderHub() {
   const nadeTxt = GRENADES.map(g => `${CONSUMABLES[g].name.replace(' 수류탄', '')} ${GS.save.inv[g] || 0}`).join(' · ');
   const goalTxt = goal ? `<div class="nextgoal">${row('다음 목표', itemName(goal))}
       <div class="bar"><i style="width:${clamp(GS.save.credits / itemPrice(goal) * 100, 0, 100)}%"></i></div>
-      <div class="dim mono" style="font-size:11.5px;margin-top:6px">${GS.save.credits >= itemPrice(goal) ? '<span class="ok">구매 가능</span>' : fmt(itemPrice(goal) - GS.save.credits) + ' CR 부족'}</div></div>` : '';
+      <div class="dim mono" style="font-size:14px;margin-top:6px">${GS.save.credits >= itemPrice(goal) ? '<span class="ok">구매 가능</span>' : fmt(itemPrice(goal) - GS.save.credits) + ' CR 부족'}</div></div>` : '';
   const opRows = Object.values(MISSIONS).filter(m => !m.tut).map(m => `<div class="op ${GS.selectedMission === m.id ? 'sel' : ''} ${m.boss ? 'boss' : ''}" data-mis="${m.id}">
       <span class="opc mono">${m.code}</span><span class="opn">${m.name}${GS.save.stats[m.id] && GS.save.stats[m.id].hard ? ' <span class="hardtag">H</span>' : ''}</span>
       <span class="pips">${[1, 2, 3].map(i => `<i class="${i <= DIFF[m.diff] ? 'on' : ''}"></i>`).join('')}</span><span class="opr mono">${!GS.save.unlocked[m.id] ? '<span class="dim">잠김</span>' : m.extreme && !extremeUnlocked() ? `<span class="dim">잠김 ${extremeProgress().join('/')}</span>` : fmt(m.contract)}</span></div>
@@ -141,13 +174,17 @@ function renderHub() {
         <div class="logo">MARGIN<small>기계 부품 회수 계약 · 용병 거점</small></div>
         <div class="story">${GS.save.ended ? STORY.after : STORY.intro}</div>
         <div class="lbl" style="margin:24px 0 10px">작전 선택</div>
+        <div class="ophead"><span>코드</span><span>작전</span><span>위험도</span><span>계약금</span></div>
         <div class="ops">${opRows}</div>
-        ${sm.final ? `<div class="extag">${GS.save.unlocked.H ? '최종 작전 · 단독 출격 · 계약금 20,000 CR' : '익스트림 작전을 완수하면 근원지의 좌표가 열립니다'}</div>` : sm.extreme ? (extremeUnlocked() ? '<div class="extag">세 보스 동시 출현 · 방어복 · 보조 장비 사용 불가 · 계약금 12,000 CR</div>' : `<div class="dim" style="font-size:12.5px;margin-top:14px;line-height:1.6">상점의 장비를 모두 구매하면 열립니다 (소모품 · 무기 강화 제외). 현재 <b class="acc">${extremeProgress().join(' / ')}</b></div>`) : `<div class="diffsel"><button data-diff="0" class="${!GS.save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${GS.save.hardSel ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
-        ${!hardUnlocked(GS.selectedMission) ? '<div class="dim" style="font-size:12px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}`}
+        ${sm.final ? `<div class="extag">${GS.save.unlocked.H ? '최종 작전 · 단독 출격 · 계약금 20,000 CR' : '익스트림 작전을 완수하면 근원지의 좌표가 열립니다'}</div>` : sm.extreme ? (extremeUnlocked() ? '<div class="extag">세 보스 동시 출현 · 방어복 · 보조 장비 사용 불가 · 계약금 12,000 CR</div>' : `<div class="dim" style="font-size:15px;margin-top:14px;line-height:1.6">상점의 장비를 모두 구매하면 열립니다 (소모품 · 무기 강화 제외). 현재 <b class="acc">${extremeProgress().join(' / ')}</b></div>`) : `<div class="diffsel"><button data-diff="0" class="${!GS.save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${GS.save.hardSel ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
+        ${!hardUnlocked(GS.selectedMission) ? '<div class="dim" style="font-size:14.5px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}`}
         <button class="primary deploy ${sm.extreme || sm.final || (GS.save.hardSel && hardUnlocked(GS.selectedMission)) ? 'hard' : ''}" id="deploy" ${(sm.extreme && !extremeUnlocked()) || !GS.save.unlocked[sm.id] ? 'disabled' : ''}>${sm.final ? '최종 출격' : sm.extreme ? '익스트림 출격' : GS.save.hardSel && hardUnlocked(GS.selectedMission) ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
       </div>
       <div class="target ${sm.boss ? 'boss' : ''}"><div class="lbl">작전 목표 · ${sm.code}</div><div class="tname">${sm.target[0]}</div><div class="tsub">${sm.target[1]}</div></div>
       <div class="hload">
+        ${(() => { const cg = curGoal(); const done = GOALS.filter(g => g.ok()).length;
+          return cg ? `<div class="goalbox" id="goalbox"><div class="lbl">지금 할 일 · ${cg.i + 1} / ${GOALS.length}</div><div class="gt">${cg.g.t}</div><div class="gh">${cg.g.h}</div><div class="gb"><i style="width:${done / GOALS.length * 100}%"></i></div></div>`
+            : `<div class="goalbox"><div class="lbl">모든 목표 달성</div><div class="gt">근원지를 멈췄습니다</div><div class="gh">하드 모드와 업적에 도전해 보세요.</div></div>`; })()}
         <div class="lbl" style="margin-bottom:6px">현재 장비</div>
         ${row('휴대 무기', [...carryList(), 'pistol'].map(id => WEAPONS[id].name).join('<br>'))}${row('방어복', sm.extreme ? '<span class="dim">익스트림 · 사용 불가</span>' : arm.name)}${row('가방', `${BAGS[GS.save.bag || 0].name} · ${BAGS[GS.save.bag || 0].cap}kg <span class="dim">(총 ${[...carryList()].reduce((a, id) => a + GUN_KG[id], 0)}kg)</span>`)}${row('스킬', skillTxt)}${row('투척물', nadeTxt)}
         ${goalTxt}
@@ -166,24 +203,39 @@ function renderHub() {
       </div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
   } else if (GS.hubModal === 'ach') {
     const got = Object.keys(GS.save.ach.done).length, earned = ACH.filter(a => achGot(a.id)).reduce((t, a) => t + a.cr, 0);
-    const rows = ACH_CATS.map(c => `<div class="achcat">${c}${c === '기상천외' ? ' · 숨김' : ''}</div>` + ACH.filter(a => a.cat === c).map(a => {
+    const inGrp = new Set(ACH_GROUPS.flatMap(g => g[1]));
+    const groups = [...ACH_GROUPS, ['기상천외 · 숨김', ACH.filter(a => !inGrp.has(a.id)).map(a => a.id)]];
+    const rowOf = a => {
       const ok = achGot(a.id), hid = a.hidden && !ok, pr = !ok && a.prog ? a.prog() : null;
-      return `<div class="achrow ${ok ? 'got' : 'lock'}"><span class="an">${hid ? '???' : a.name}</span>
-        <span class="ar">${ok ? '<span class="ok">달성</span>' : `+${fmt(a.cr)} CR`}${pr && !hid ? `<div class="dim" style="font-size:11px;margin-top:2px">${fmt(Math.min(Math.floor(pr[0]), pr[1]))} / ${fmt(pr[1])}</div>` : ''}</span>
+      const ch = ACH_CHAINS.find(c => c.includes(a.id)), tier = ch ? `<span class="dim mono" style="font-size:12.5px"> ${ch.indexOf(a.id) + 1}/${ch.length}단계</span>` : '';
+      return `<div class="achrow ${ok ? 'got' : 'lock'}"><span class="an">${hid ? '???' : a.name}${tier}</span>
+        <span class="ar">${ok ? '<span class="ok">달성</span>' : `+${fmt(a.cr)} CR`}${pr && !hid ? `<div class="dim" style="font-size:13px;margin-top:2px">${fmt(Math.min(Math.floor(pr[0]), pr[1]))} / ${fmt(pr[1])}</div>` : ''}</span>
         <span class="ad">${hid ? '힌트 · ' + a.hint : a.desc}</span>
         ${pr && !hid ? `<span class="pb"><i style="width:${clamp(pr[0] / pr[1] * 100, 0, 100)}%"></i></span>` : ''}</div>`;
-    }).join('')).join('');
+    };
+    const rows = groups.map(([nm, ids]) => {
+      const list = ids.map(id => ACH_BY[id]).filter(Boolean);
+      const shown = list.filter(a => { const ch = ACH_CHAINS.find(c => c.includes(a.id)); if (!ch) return true; const cur = ch.find(id => !achGot(id)) || ch[ch.length - 1]; return a.id === cur; });
+      const n = list.filter(a => achGot(a.id)).length, open = achOpen.has(nm);
+      return `<div class="achgrp ${open ? 'open' : ''}"><div class="gh" data-achg="${nm}"><b>${open ? '▾' : '▸'} ${nm}</b><span class="c ${n === list.length ? 'ok' : ''}">${n} / ${list.length}</span>
+        <span class="pb"><i style="width:${n / Math.max(1, list.length) * 100}%"></i></span></div>${open ? `<div class="gb">${shown.map(rowOf).join('')}</div>` : ''}</div>`;
+    }).join('');
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(620px,94vw)"><header><h2>업적</h2><span class="lbl">${got} / ${ACH.length} · 보상 ${fmt(earned)} CR</span></header>
       <div class="body">${rows}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
+  } else if (GS.hubModal === 'guide' || GS.hubModal === 'intro') {
+    const first = GS.hubModal === 'intro';
+    modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(720px,94vw)"><header><h2>${first ? 'MARGIN에 오신 것을 환영합니다' : '게임 안내'}</h2></header><div class="body">${GUIDE_HTML()}</div>
+      <div class="foot">${first ? '<button data-close>나중에 할게요</button><button class="primary" data-gotut>훈련장부터 시작 (추천)</button>' : '<button class="primary" data-close>닫기</button>'}</div></div></div>`;
   } else if (GS.hubModal === 'coop') {
     modal = coopModalHtml();
   } else if (GS.hubModal === 'set') {
     const kb = KEYDEF.map(([a, nm]) => `<span>${nm}</span><button data-rebind="${a}" class="${rebindA === a ? 'wait' : ''}">${rebindA === a ? '키를 누르세요' : keyLabel(bind(a))}</button>`).join('');
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(680px,94vw)"><header><h2>설정 · 조작법</h2></header><div class="body">
       <div class="sens" style="margin-top:0"><span>마우스 감도</span><input type="range" id="hsens" min="0.3" max="2.5" step="0.05" value="${GS.save.sens}"><span class="mono" id="hsensv">${(+GS.save.sens).toFixed(2)}</span></div>
+      <div class="sens"><span>UI 크기</span><input type="range" id="huiz" min="0.8" max="1.8" step="0.05" value="${GS.save.uiScale || 1.3}"><span class="mono" id="huizv">${Math.round((GS.save.uiScale || 1.3) * 100)}%</span></div>
       <div class="lbl" style="margin:18px 0 10px">키 설정 · 버튼을 누른 뒤 원하는 키를 누르세요 (Esc 취소 · 겹치는 키는 서로 바뀜)</div>
       <div class="kbind">${kb}</div>
-      <div class="dim" style="font-size:12.5px;margin-top:14px;line-height:1.6">마우스: 좌클릭 사격 · 우클릭 정조준 · 휠 무기 전환. 부품은 밟으면 가방 여유만큼 자동으로 줍고, 무거운 부품은 상호작용 키로 직접 줍습니다.</div>
+      <div class="dim" style="font-size:15px;margin-top:14px;line-height:1.6">마우스: 좌클릭 사격 · 우클릭 정조준 · 휠 무기 전환. 부품은 밟으면 가방 여유만큼 자동으로 줍고, 무거운 부품은 상호작용 키로 직접 줍습니다.</div>
       </div><div class="foot"><button class="danger" id="reset">저장 데이터 초기화</button><button id="kbreset">키 기본값</button><button class="primary" data-close>닫기</button></div></div></div>`;
   }
   hubShow(GS.selectedMission);
@@ -191,7 +243,7 @@ function renderHub() {
   $('hub').innerHTML = `
     <div class="hubshade"></div>
     <div class="top"><div class="brand">MARGIN</div>
-      <nav class="hnav"><button data-view="main" class="${GS.hubView === 'main' ? 'sel' : ''}">거점</button><button data-view="shop" class="${GS.hubView === 'shop' ? 'sel' : ''}">상점</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(GS.save.ach.done).length}/${ACH.length}</span></button><button data-modal="coop">협동${NET.status === 'connected' ? ' <span class="ok">●</span>' : NET.status === 'waiting' ? ' <span class="acc">●</span>' : ''}</button><button data-modal="rec">기록</button><button data-tut class="${GS.save.tutDone ? '' : 'new'}">훈련장</button><button data-modal="set">설정</button></nav>
+      <nav class="hnav"><button data-view="main" class="${GS.hubView === 'main' ? 'sel' : ''}">거점</button><button data-view="shop" class="${GS.hubView === 'shop' ? 'sel' : ''}">상점</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(GS.save.ach.done).length}/${ACH.length}</span></button><button data-modal="coop">협동${NET.status === 'connected' ? ' <span class="ok">●</span>' : NET.status === 'waiting' ? ' <span class="acc">●</span>' : ''}</button><button data-modal="rec">기록</button><button data-tut class="${GS.save.tutDone ? '' : 'new'}">훈련장</button><button data-modal="guide">안내</button><button data-modal="set">설정</button></nav>
       <div class="credits"><div class="v">${fmt(GS.save.credits)} CR</div></div></div>
     <div class="hubbody">${GS.hubView === 'shop' ? shopView : mainView}</div>${modal}`;
   const H = $('hub');
@@ -213,6 +265,8 @@ function renderHub() {
     if (ci >= 0) GS.save.carry.splice(ci, 1); else if (carryList().length < MAX_CARRY) GS.save.carry.push(id);
     writeSave(); SFX.ui(); renderHub(); });
   H.querySelectorAll('[data-rebind]').forEach(b => b.onclick = () => { rebindA = rebindA === b.dataset.rebind ? '' : b.dataset.rebind; SFX.ui(); renderHub(); });
+  if ($('huiz')) $('huiz').onchange = e => { GS.save.uiScale = +e.target.value; writeSave(); applyUiScale(); renderHub(); };
+  if ($('huiz')) $('huiz').oninput = e => setText($('huizv'), Math.round(e.target.value * 100) + '%');
   if ($('kbreset')) $('kbreset').onclick = () => { GS.save.binds = {}; rebindA = ''; writeSave(); SFX.ui(); renderHub(); };
   H.querySelectorAll('[data-mis]').forEach(b => b.onclick = () => { GS.selectedMission = b.dataset.mis; SFX.ui(); renderHub(); });
   H.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GS.hubView = b.dataset.view; GS.hubModal = ''; SFX.ui(); renderHub(); H.querySelector('.hubbody').scrollTop = 0; });
@@ -220,6 +274,12 @@ function renderHub() {
   H.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { GS.hubModal = ''; rebindA = ''; renderHub(); });
   if ($('hmodal')) $('hmodal').onclick = e => { if (e.target.id === 'hmodal') { GS.hubModal = ''; rebindA = ''; renderHub(); } };
   if ($('deploy')) $('deploy').onclick = () => startMission(GS.selectedMission);
+  if ($('goalbox')) $('goalbox').onclick = () => { const cg = curGoal(); if (!cg) return; SFX.ui(); cg.g.go(); if (GS.state === 'hub') renderHub(); };
+  H.querySelectorAll('[data-gotut]').forEach(b => b.onclick = () => { GS.save.seenIntro = true; writeSave(); GS.hubModal = ''; startMission('T'); });
+  if (GS.hubModal === 'intro') H.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { GS.save.seenIntro = true; writeSave(); }));
+  H.querySelectorAll('[data-achg]').forEach(b => b.onclick = () => { const g = b.dataset.achg; if (achOpen.has(g)) achOpen.delete(g); else achOpen.add(g); SFX.ui(); const sc = H.querySelector('#hmodal .body').scrollTop; renderHub(); H.querySelector('#hmodal .body').scrollTop = sc; });
+  H.querySelectorAll('[data-demo]').forEach(b => b.onclick = e => { if (e.target.closest('button')) return; demoSkill = b.dataset.demo; renderHub(); });
+  updateSkillDemo();
   H.querySelectorAll('[data-tut]').forEach(b => b.onclick = () => { SFX.ui(); startMission('T'); });
   H.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { GS.save.hardSel = b.dataset.diff === '1'; writeSave(); SFX.ui(); renderHub(); });
   if ($('hsens')) $('hsens').oninput = e => { GS.save.sens = +e.target.value; setText($('hsensv'), GS.save.sens.toFixed(2)); $('sens').value = GS.save.sens; setText($('sensv'), GS.save.sens.toFixed(2)); writeSave(); };
@@ -236,6 +296,78 @@ addEventListener('keydown', e => {
   }
   rebindA = ''; renderHub();
 }, true);
+// 총기 그림: 1인칭 총기 모델을 옆에서 찍어 이미지로 보관
+const GUN_IMG = {}; let thumbR = null;
+function gunThumb(id) {
+  if (GUN_IMG[id]) return GUN_IMG[id];
+  try {
+    if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(360, 140); thumbR.setClearColor(0x000000, 0); }
+    const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xfff4e0, 0x3a3630, 2.2)); const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(2, 3, 1); sc.add(sun);
+    const g = GUNS[id].clone(true); g.visible = true; g.position.set(0, 0, 0); g.rotation.set(0, 0, 0);
+    g.traverse(o => { if (o.material && o.material.blending === THREE.AdditiveBlending) o.visible = false; });
+    sc.add(g); g.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(g), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
+    const cam = new THREE.PerspectiveCamera(22, 360 / 140, 0.01, 50), dist = Math.max(sz.z * 1.05, sz.y * 2.7) / (2 * Math.tan(11 * Math.PI / 180)) * 0.44;
+    cam.position.set(c.x + dist, c.y + dist * 0.12, c.z + dist * 0.05); cam.lookAt(c);
+    thumbR.render(sc, cam); GUN_IMG[id] = thumbR.domElement.toDataURL('image/png');
+  } catch (e) { GUN_IMG[id] = ''; }
+  return GUN_IMG[id];
+}
+// 스킬 시연: 오른쪽 아래에서 반복 재생되는 짧은 그림
+let demoRaf = 0;
+function updateSkillDemo() {
+  let el = $('skilldemo');
+  const on = GS.state === 'hub' && GS.hubView === 'shop' && GS.shopTab === '스킬' && !GS.hubModal;
+  if (!on) { if (el) el.remove(); cancelAnimationFrame(demoRaf); demoRaf = 0; return; }
+  if (!demoSkill) demoSkill = Object.keys(SKILLS)[0];
+  const sk = SKILLS[demoSkill];
+  if (!el) { el = document.createElement('div'); el.id = 'skilldemo'; document.body.appendChild(el); }
+  el.innerHTML = `<div class="lbl">스킬 시연</div><div class="t">${sk.name}</div><canvas width="632" height="356"></canvas><div class="k">${sk.desc}<br>장착한 슬롯의 키(${SLOT_KEYS[0]} / ${SLOT_KEYS[1]})로 사용 · 재사용 대기 ${sk.cd}초</div>`;
+  const cv = el.querySelector('canvas'), ctx = cv.getContext('2d'), t0 = performance.now();
+  cancelAnimationFrame(demoRaf);
+  const draw = () => { if (!cv.isConnected) return; drawSkillDemo(ctx, demoSkill, (performance.now() - t0) / 1000); demoRaf = requestAnimationFrame(draw); };
+  draw();
+}
+function drawSkillDemo(c, id, T) {
+  const W = 632, H = 356, t = T % 4, GY = 280;
+  c.clearRect(0, 0, W, H); c.fillStyle = '#0d0e10'; c.fillRect(0, 0, W, H);
+  c.strokeStyle = '#2a2c2f'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, GY); c.lineTo(W, GY); c.stroke();
+  const man = (x, col = '#e8e2d6') => { c.fillStyle = col; c.beginPath(); c.arc(x, GY - 92, 14, 0, 7); c.fill(); c.fillRect(x - 12, GY - 76, 24, 46); c.fillRect(x - 11, GY - 30, 9, 30); c.fillRect(x + 2, GY - 30, 9, 30); c.fillRect(x + 8, GY - 66, 30, 7); };
+  const bot = (x, col = '#8a8478') => { c.fillStyle = col; c.fillRect(x - 22, GY - 110, 44, 50); c.fillRect(x - 14, GY - 132, 28, 20); c.fillStyle = '#ff5a2a'; c.fillRect(x - 8, GY - 126, 16, 6); c.fillStyle = col; c.fillRect(x - 18, GY - 60, 12, 60); c.fillRect(x + 6, GY - 60, 12, 60); };
+  const txt = (s, x, y, col = '#e8a33d', sz = 30) => { c.fillStyle = col; c.font = `700 ${sz}px 'IBM Plex Sans KR', sans-serif`; c.textAlign = 'center'; c.fillText(s, x, y); };
+  const bar = (x, y, w, k, col) => { c.fillStyle = '#26282b'; c.fillRect(x, y, w, 12); c.fillStyle = col; c.fillRect(x, y, w * k, 12); };
+  if (id === 'dash') {
+    const k = Math.min(1, Math.max(0, (t - 1) / 0.35)), x = 120 + 300 * (k < 1 ? k * k * (3 - 2 * k) : 1);
+    if (t > 1 && t < 1.6) for (let i = 1; i < 6; i++) { c.globalAlpha = 0.18 * (6 - i) / 6; man(x - i * 40, '#8ad8ff'); } c.globalAlpha = 1;
+    man(x, t > 1 && t < 1.35 ? '#8ad8ff' : '#e8e2d6'); bot(560);
+    const bx = 520 - (t % 4) * 160; if (bx > 60) { c.fillStyle = '#ff9a3a'; c.fillRect(bx, GY - 70, 18, 5); }
+    if (t > 1 && t < 1.35) txt('무적 0.28초', x, GY - 130, '#8ad8ff');
+    txt('이동 방향으로 순간 돌진', W / 2, 40);
+  } else if (id === 'nano') {
+    man(220); bot(520); const k = t < 0.6 ? 0.35 : Math.min(0.8, 0.35 + (t - 0.6) / 3 * 0.45);
+    bar(150, GY - 150, 140, k, k < 0.5 ? '#d9443a' : '#5ad18a');
+    for (let i = 0; i < 4; i++) { const yy = (t * 60 + i * 30) % 120; c.globalAlpha = 1 - yy / 120; txt('+', 190 + i * 22, GY - 110 - yy, '#5ad18a', 28); } c.globalAlpha = 1;
+    txt('3초에 걸쳐 체력 45 회복', W / 2, 40);
+  } else if (id === 'shield') {
+    man(200); bot(520); const sh = Math.max(0, 1 - Math.floor(t / 0.5) * 0.12);
+    c.strokeStyle = `rgba(106,216,255,${0.35 + 0.4 * sh})`; c.lineWidth = 5; c.beginPath(); c.arc(200, GY - 60, 82, 0, 7); c.stroke();
+    for (let i = 0; i < 3; i++) { const bx = 490 - ((t * 260 + i * 120) % 260); if (bx > 290) { c.fillStyle = '#ff9a3a'; c.fillRect(bx, GY - 70 - i * 10, 18, 5); } else { c.fillStyle = '#8ad8ff'; c.beginPath(); c.arc(285, GY - 70 - i * 10, 6, 0, 7); c.fill(); } }
+    bar(140, GY - 170, 120, sh, '#6ad8ff'); txt('6초 동안 피해 80 흡수', W / 2, 40);
+  } else if (id === 'overclock') {
+    man(160); bot(500); const on = t > 1.2;
+    if (Math.floor(t * 4) % 2 === 0) { c.fillStyle = '#ffd28a'; c.fillRect(200, GY - 64, 260, 3); }
+    const n = Math.floor(t * 4); if (n % 2 === 0) txt(on ? '140' : '100', 500 + (n % 3) * 18, GY - 150 - (t * 40 % 30), on ? '#ff9a3a' : '#e8e2d6', on ? 30 : 24);
+    if (on) { c.strokeStyle = 'rgba(255,154,58,.6)'; c.lineWidth = 3; c.strokeRect(130, GY - 112, 60, 112); }
+    txt(on ? '약점 분석 · 피해 +40%' : '평소 피해', W / 2, 40);
+  } else if (id === 'focus') {
+    man(160); bot(520); const on = t > 1, sp = on ? 0.4 : 1;
+    if (on) { c.fillStyle = 'rgba(106,160,255,.10)'; c.fillRect(0, 0, W, H); }
+    for (let i = 0; i < 3; i++) { const bx = 500 - (((t * 200 * sp) + i * 110) % 330); c.fillStyle = '#ff9a3a'; c.fillRect(bx, GY - 70 - i * 12, 18, 5); }
+    txt(on ? '적과 탄환이 40% 속도로 느려짐' : '평소 속도', W / 2, 40, on ? '#8ab8ff' : '#e8a33d');
+  }
+}
+function applyUiScale() { const k = GS.save.uiScale || 1.3; document.documentElement.style.setProperty('--uiz', k); document.documentElement.style.setProperty('--uizh', (1 + (k - 1) * 0.5).toFixed(3)); }
+applyUiScale();
 function buy(id, quiet) {
   const it = SHOP.find(s => s.id === id); if (!it) return false;
   const price = itemPrice(it);

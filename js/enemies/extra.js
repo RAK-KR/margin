@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=30';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { addBox, groundAt, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=30';
-import { UPY, burstSparks, spawnFlash } from '../fx/effects.js?v=30';
-import { player } from '../player/playerState.js?v=30';
-import { partAlive, sensorMult } from '../combat/damage.js?v=30';
-import { alertEnemy, enemyFire } from './ai.js?v=30';
-import { partTick } from '../bosses/rex.js?v=30';
-import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget } from '../modes/coop.js?v=30';
-import { killEnemy } from '../meta/achievements.js?v=30';
-import { addFeed, popup } from '../ui/hud.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=32';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { addBox, groundAt, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=32';
+import { UPY, burstSparks, spawnFlash } from '../fx/effects.js?v=32';
+import { player } from '../player/playerState.js?v=32';
+import { partAlive, sensorMult } from '../combat/damage.js?v=32';
+import { alertEnemy, enemyFire } from './ai.js?v=32';
+import { partTick } from '../bosses/rex.js?v=32';
+import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget } from '../modes/coop.js?v=32';
+import { killEnemy } from '../meta/achievements.js?v=32';
+import { addFeed, popup } from '../ui/hud.js?v=32';
 
 // =====================================================================
 //  추가 적: 드론형 · 저격형 · 중계탑
@@ -257,4 +257,4 @@ function updateRelay(e, dt) {
   }
 }
 
-export { _box3, addSniperLaser, buildDrone, dummyGlow, partKit, rotorsWorking, sniperAttack, spawnDrone, spawnRelay, updateDrone, updateRelay };
+export { ROTORS, _box3, addSniperLaser, buildDrone, dummyGlow, partKit, rotorsWorking, sniperAttack, spawnDrone, spawnRelay, updateDrone, updateRelay };

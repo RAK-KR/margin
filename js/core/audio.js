@@ -1,4 +1,4 @@
-import { clamp } from './utils.js?v=30';
+import { clamp } from './utils.js?v=32';
 
 // =====================================================================
 //  오디오 (Web Audio 합성)
@@ -260,9 +260,14 @@ Object.assign(SFX, {
     gNoiseHold({ f0: 300, f1: 420, q: 2, dur: 0.8, gain: 0.3, att: 0.05, rel: 0.3, drive: true, trem: [26, 0.5], send: 0.65 });
   },
   missile() {
-    gThump(60, 30, 0.35, 0.6, 0, 0.4);
-    gBurst({ type: 'lowpass', f0: 1100, f1: 220, dur: 0.2, gain: 0.55, drive: true, send: 0.5 });
-    gNoiseHold({ f0: 350, f1: 1200, glide: 0.8, q: 1.4, dur: 0.6, gain: 0.32, att: 0.04, rel: 0.35, send: 0.7 });
+    if (actx && actx.currentTime - (this.lastMis || -1) < 0.18) return; if (actx) this.lastMis = actx.currentTime;
+    gThump(60, 30, 0.3, 0.22, 0, 0.25);
+    gBurst({ type: 'lowpass', f0: 1000, f1: 220, dur: 0.18, gain: 0.2, drive: true, send: 0.3 });
+    gNoiseHold({ f0: 350, f1: 1100, glide: 0.8, q: 1.4, dur: 0.5, gain: 0.11, att: 0.04, rel: 0.3, send: 0.4 });
+  },
+  laserCharge(dur) {
+    gNoiseHold({ f0: 160, f1: 900, glide: 1, q: 5, dur: dur + 0.1, gain: 0.32, att: 0.05, rel: 0.12, drive: true, send: 0.5 });
+    gThump(70, 40, dur, 0.35, 0, 0.3);
   },
   shock() {
     gThump(58, 20, 1.1, 1.3, 0, 0.4);

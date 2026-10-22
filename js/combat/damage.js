@@ -1,19 +1,19 @@
-import { GS } from '../core/state.js?v=30';
-import { V3, clamp, rand } from '../core/utils.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { removeHittables } from '../world/world.js?v=30';
-import { UPY, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=30';
-import { updatePartVisual } from '../enemies/robot.js?v=30';
-import { player } from '../player/playerState.js?v=30';
-import { coreExposed } from '../bosses/core.js?v=30';
-import { alertEnemy } from '../enemies/ai.js?v=30';
-import { dragonDown, dragonNodeEvent, dragonNodesOpen } from '../bosses/dragon.js?v=30';
-import { spiderExposed, spiderLegLost } from '../bosses/spider.js?v=30';
-import { NET, coopEv, eIdx, v3a } from '../modes/coop.js?v=30';
-import { HARD_MUL } from '../modes/difficulty.js?v=30';
-import { achEvent, killEnemy } from '../meta/achievements.js?v=30';
-import { createLoot } from '../game/loot.js?v=30';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { V3, clamp, rand } from '../core/utils.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { removeHittables } from '../world/world.js?v=32';
+import { UPY, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=32';
+import { updatePartVisual } from '../enemies/robot.js?v=32';
+import { player } from '../player/playerState.js?v=32';
+import { coreExposed } from '../bosses/core.js?v=32';
+import { alertEnemy } from '../enemies/ai.js?v=32';
+import { dragonDown, dragonNodeEvent, dragonNodesOpen } from '../bosses/dragon.js?v=32';
+import { spiderExposed, spiderLegLost } from '../bosses/spider.js?v=32';
+import { NET, coopEv, eIdx, v3a } from '../modes/coop.js?v=32';
+import { HARD_MUL } from '../modes/difficulty.js?v=32';
+import { achEvent, killEnemy } from '../meta/achievements.js?v=32';
+import { createLoot } from '../game/loot.js?v=32';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=32';
 
 // =====================================================================
 //  부위 피해 처리

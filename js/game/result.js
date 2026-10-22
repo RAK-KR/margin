@@ -1,19 +1,19 @@
-import { GS } from '../core/state.js?v=30';
-import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=30';
-import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=30';
-import { writeSave } from '../core/save.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { camera, controls } from '../core/renderer.js?v=30';
-import { GUNS } from '../player/viewmodel.js?v=30';
-import { player } from '../player/playerState.js?v=30';
-import { clearWorld } from '../world/missions.js?v=30';
-import { coreExposed } from '../bosses/core.js?v=30';
-import { endTutorial } from '../modes/tutorial.js?v=30';
-import { partAlive } from '../combat/damage.js?v=30';
-import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=30';
-import { HARD_MUL, barBoss } from '../modes/difficulty.js?v=30';
-import { achEvent, achUnlock } from '../meta/achievements.js?v=30';
-import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=32';
+import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=32';
+import { writeSave } from '../core/save.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { camera, controls } from '../core/renderer.js?v=32';
+import { GUNS } from '../player/viewmodel.js?v=32';
+import { player } from '../player/playerState.js?v=32';
+import { clearWorld } from '../world/missions.js?v=32';
+import { coreExposed } from '../bosses/core.js?v=32';
+import { endTutorial } from '../modes/tutorial.js?v=32';
+import { partAlive } from '../combat/damage.js?v=32';
+import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=32';
+import { HARD_MUL, barBoss } from '../modes/difficulty.js?v=32';
+import { achEvent, achUnlock } from '../meta/achievements.js?v=32';
+import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=32';
 
 // =====================================================================
 //  임무 종료 / 정산
@@ -139,7 +139,7 @@ function endMission(kind) {
         ${lore ? `<div class="lore"><div class="lbl">무전 기록 ${lore.n} / 7 · ${lore.from}</div>${lore.text}</div>` : ''}
         ${newly.map(m => `<div class="goal" style="margin-top:14px">새 임무 해금 · <b>${m.code} ${m.name}</b></div>`).join('')}
         ${GS.run.objDone && ms.boss && GS.save.stats[id].clears === 1 ? `<div class="goal" style="margin-top:14px"><b>${ms.target[0]} 첫 격파</b> · ${ms.code}는 계속 재출격해 부품을 수급할 수 있습니다.</div>` : ''}
-        <div class="dim" style="font-size:12px;margin-top:12px">명중률 ${GS.run.shots ? Math.round(GS.run.shotsHit / GS.run.shots * 100) : 0}% (${GS.run.shotsHit}/${GS.run.shots}) · 작전 시간 ${Math.round(GS.time - GS.run.startT)}초</div>
+        <div class="dim" style="font-size:14.5px;margin-top:12px">명중률 ${GS.run.shots ? Math.round(GS.run.shotsHit / GS.run.shots * 100) : 0}% (${GS.run.shotsHit}/${GS.run.shots}) · 작전 시간 ${Math.round(GS.time - GS.run.startT)}초</div>
       </div>
       <div class="foot"><button class="primary" id="tohub">거점으로</button></div>`;
   } else {
@@ -155,7 +155,7 @@ function endMission(kind) {
           <span>잃은 계약 보상</span><span class="bad">-${fmt(ms.contract * (GS.run.hard ? HARD_MUL.contract : 1))}</span>
           <span class="tot">보유 자금 (유지)</span><span class="tot">${fmt(GS.save.credits)} CR</span>
         </div>
-        <div class="dim" style="font-size:12px;margin-top:12px">구매한 장비와 기존 자금은 유지됩니다.</div>
+        <div class="dim" style="font-size:14.5px;margin-top:12px">구매한 장비와 기존 자금은 유지됩니다.</div>
       </div>
       <div class="foot"><button class="primary" id="tohub">거점으로</button></div>`;
   }

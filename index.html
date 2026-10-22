@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=30">
+<link rel="stylesheet" href="css/style.css?v=32">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -42,13 +42,14 @@
   </div>
   <div id="feed"></div>
   <div id="tut" class="hidden"></div>
+  <div id="wp"><i class="a"></i><div class="d"></div><span id="wpd"></span><div id="wpl" style="font-size:13px;font-weight:400"></div></div>
   <div id="bossbar" class="hidden"><div class="bn"><span id="bossname">REX-09 · 기계 티라노</span><span id="bossphase" class="mono"></span></div><div class="bb"><i></i></div><div id="bossparts"></div></div>
   <div id="vitals" class="hpanel">
     <div class="lbl" id="armorname">기본 전투복</div>
     <div><span id="hpnum">100</span> <span class="dim mono" id="hpmax">/ 100</span></div>
     <div id="hpbar"><i></i></div>
     <div id="shbar" class="hidden"><i></i></div>
-    <div class="dim" id="medtxt" style="font-size:12px;margin-top:5px"></div>
+    <div class="dim" id="medtxt" style="font-size:14.5px;margin-top:5px"></div>
   </div>
   <div id="wbox" class="hpanel">
     <div id="wname"></div>
@@ -80,7 +81,7 @@
         <b>G / T</b><span>투척물 던지기 / 종류 전환</span><b>H</b><span>응급 키트 · 회복 주사기</span><b>Esc</b><span>일시정지</span>
       </div>
       <div class="sens"><span>마우스 감도</span><input type="range" id="sens" min="0.3" max="2.5" step="0.05"><span class="mono" id="sensv"></span></div>
-      <div class="dim" id="pausemsg" style="font-size:12px;margin-top:10px"></div>
+      <div class="dim" id="pausemsg" style="font-size:14.5px;margin-top:10px"></div>
     </div>
     <div class="foot">
       <button class="danger" id="abandon">임무 포기 (전리품 손실)</button>
@@ -99,6 +100,6 @@
     if(m) m.innerHTML='Three.js를 불러오지 못했습니다. 인터넷 연결을 확인하거나, 이 폴더에서<br><span class="mono acc">python -m http.server 8000</span> 실행 후 <span class="mono acc">http://localhost:8000</span> 으로 접속해 주세요.'; } }, 9000);
 </script>
 
-<script type="module" src="js/main.js?v=30"></script>
+<script type="module" src="js/main.js?v=32"></script>
 </body>
 </html>

@@ -1,13 +1,13 @@
-import { GS } from '../core/state.js?v=30';
-import { V3 } from '../core/utils.js?v=30';
-import { SHOP } from '../data/data.js?v=30';
-import { addBox, crate } from '../world/world.js?v=30';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=30';
-import { spawnBoss } from '../bosses/rex.js?v=30';
-import { spawnDragon } from '../bosses/dragon.js?v=30';
-import { spawnDrone } from '../enemies/extra.js?v=30';
-import { spawnSpider } from '../bosses/spider.js?v=30';
-import { itemOwned } from '../ui/hub.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { V3 } from '../core/utils.js?v=32';
+import { SHOP } from '../data/data.js?v=32';
+import { addBox, crate } from '../world/world.js?v=32';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=32';
+import { spawnBoss } from '../bosses/rex.js?v=32';
+import { spawnDragon } from '../bosses/dragon.js?v=32';
+import { spawnDrone } from '../enemies/extra.js?v=32';
+import { spawnSpider } from '../bosses/spider.js?v=32';
+import { itemOwned } from '../ui/hub.js?v=32';
 
 // =====================================================================
 //  하드 모드

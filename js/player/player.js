@@ -1,21 +1,21 @@
-import { GS } from '../core/state.js?v=30';
-import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=30';
-import { W, maxReserve, utilOn } from '../data/data.js?v=30';
-import { writeSave } from '../core/save.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { BASE_FOV, camera, controls } from '../core/renderer.js?v=30';
-import { groundAt, moveWithCollision } from '../world/world.js?v=30';
-import { UPY, spawnSpark } from '../fx/effects.js?v=30';
-import { GUNS, HIP_POS } from './viewmodel.js?v=30';
-import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=30';
-import { kd } from './input.js?v=30';
-import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=30';
-import { coopDown, coopOn } from '../modes/coop.js?v=30';
-import { HARD_MUL } from '../modes/difficulty.js?v=30';
-import { achEvent } from '../meta/achievements.js?v=30';
-import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=30';
-import { addFeed } from '../ui/hud.js?v=30';
-import { endMission } from '../game/result.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=32';
+import { W, maxReserve, utilOn } from '../data/data.js?v=32';
+import { writeSave } from '../core/save.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { BASE_FOV, camera, controls } from '../core/renderer.js?v=32';
+import { groundAt, moveWithCollision } from '../world/world.js?v=32';
+import { UPY, spawnSpark } from '../fx/effects.js?v=32';
+import { GUNS, HIP_POS } from './viewmodel.js?v=32';
+import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=32';
+import { kd } from './input.js?v=32';
+import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=32';
+import { coopDown, coopOn } from '../modes/coop.js?v=32';
+import { HARD_MUL } from '../modes/difficulty.js?v=32';
+import { achEvent } from '../meta/achievements.js?v=32';
+import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=32';
+import { addFeed } from '../ui/hud.js?v=32';
+import { endMission } from '../game/result.js?v=32';
 
 // =====================================================================
 //  플레이어 피해
@@ -113,7 +113,7 @@ function updatePlayer(dt) {
     else if (!GS.firedThisPress && GS.fireCd <= 0) { if (tryFire() || curWeapon().mag <= 0) GS.firedThisPress = true; }
   }
   // 조기 탈출: 목표 미완료 시 E를 1.5초 누르고 있어야 함 (출발 지점에서의 실수 방지)
-  if (kd('use') && !GS.run.objDone && !coopOn() && inExtraction() && !nearestCrate() && !nearestLoot()) {
+  if (kd('use') && !GS.run.objDone && !GS.run.tut && !coopOn() && inExtraction() && !nearestCrate() && !nearestLoot()) {
     GS.run.exHold = (GS.run.exHold || 0) + dt;
     if (GS.run.exHold >= 1.5) { GS.run.exHold = 0; endMission('extract'); return; }
   } else GS.run.exHold = 0;

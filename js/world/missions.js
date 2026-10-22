@@ -1,28 +1,28 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { $, TEST, V3, rand, setText } from '../core/utils.js?v=30';
-import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, effW, maxReserve } from '../data/data.js?v=30';
-import { writeSave } from '../core/save.js?v=30';
-import { SFX, initAudio } from '../core/audio.js?v=30';
-import { camera, groundTexture, scene } from '../core/renderer.js?v=30';
-import { addBox, crate } from './world.js?v=30';
-import { clearFX, projGeo } from '../fx/effects.js?v=30';
-import { GUNS, HIP_POS } from '../player/viewmodel.js?v=30';
-import { buildRobot } from '../enemies/robot.js?v=30';
-import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=30';
-import { buildFoundry } from '../bosses/core.js?v=30';
-import { buildRange, tutNext } from '../modes/tutorial.js?v=30';
-import { lockPointer, showPause } from '../player/input.js?v=30';
-import { alertEnemy } from '../enemies/ai.js?v=30';
-import { buildArena } from '../bosses/rex.js?v=30';
-import { buildShrine } from '../bosses/dragon.js?v=30';
-import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=30';
-import { buildQuarry } from '../bosses/spider.js?v=30';
-import { NET, buildAvatar, coopEv, coopOn, isHost, makeRemote } from '../modes/coop.js?v=30';
-import { applyHard, buildColosseum, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=30';
-import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=30';
-import { addFeed, popup } from '../ui/hud.js?v=30';
-import { carryList } from '../ui/hub.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { $, TEST, V3, rand, setText } from '../core/utils.js?v=32';
+import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, effW, maxReserve } from '../data/data.js?v=32';
+import { writeSave } from '../core/save.js?v=32';
+import { SFX, initAudio } from '../core/audio.js?v=32';
+import { camera, groundTexture, scene } from '../core/renderer.js?v=32';
+import { addBox, crate } from './world.js?v=32';
+import { clearFX, projGeo } from '../fx/effects.js?v=32';
+import { GUNS, HIP_POS } from '../player/viewmodel.js?v=32';
+import { buildRobot } from '../enemies/robot.js?v=32';
+import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=32';
+import { buildFoundry } from '../bosses/core.js?v=32';
+import { buildRange, tutNext } from '../modes/tutorial.js?v=32';
+import { lockPointer, showPause } from '../player/input.js?v=32';
+import { alertEnemy } from '../enemies/ai.js?v=32';
+import { buildArena } from '../bosses/rex.js?v=32';
+import { buildShrine } from '../bosses/dragon.js?v=32';
+import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=32';
+import { buildQuarry } from '../bosses/spider.js?v=32';
+import { NET, buildAvatar, coopEv, coopOn, isHost, makeRemote } from '../modes/coop.js?v=32';
+import { applyHard, buildColosseum, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=32';
+import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=32';
+import { addFeed, popup } from '../ui/hud.js?v=32';
+import { carryList } from '../ui/hub.js?v=32';
 
 // =====================================================================
 //  임무 생성
@@ -179,6 +179,7 @@ function startMission(id, hardOverride, force) {
   if (!ms || !GS.save.unlocked[id]) return;
   if (ms.extreme && !force && !extremeUnlocked()) { popup('상점 장비를 모두 구매하면 열립니다', 'dim'); return; }
   initAudio();
+  { const sd = document.getElementById('skilldemo'); if (sd) sd.remove(); const tb = document.getElementById('toasts'); if (tb) tb.classList.remove('hubpos'); }
   clearWorld();
   const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry, G: buildColosseum, T: buildRange, H: buildFoundry })[id]();
   GS.MAPB = spawn.bounds || { x: 30, z: 30 };

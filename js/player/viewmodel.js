@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { V3 } from '../core/utils.js?v=30';
-import { WEAPONS } from '../data/data.js?v=30';
-import { GLOW, vmRoot } from '../core/renderer.js?v=30';
+import { V3 } from '../core/utils.js?v=32';
+import { WEAPONS } from '../data/data.js?v=32';
+import { GLOW, vmRoot } from '../core/renderer.js?v=32';
 
 // =====================================================================
 //  1인칭 총기 모델

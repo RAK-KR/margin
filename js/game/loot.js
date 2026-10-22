@@ -1,18 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { V3, _box, _v1, fmt } from '../core/utils.js?v=30';
-import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, maxReserve, partKg } from '../data/data.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { camera } from '../core/renderer.js?v=30';
-import { groundAt, hitsBoxXZ } from '../world/world.js?v=30';
-import { updatePartVisual } from '../enemies/robot.js?v=30';
-import { GRAV, curWeapon, player } from '../player/playerState.js?v=30';
-import { conditionOf, partValue } from '../combat/damage.js?v=30';
-import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=30';
-import { HARD_MUL } from '../modes/difficulty.js?v=30';
-import { achEvent } from '../meta/achievements.js?v=30';
-import { addFeed, popup } from '../ui/hud.js?v=30';
-import { endMission } from './result.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { V3, _box, _v1, fmt } from '../core/utils.js?v=32';
+import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, maxReserve, partKg } from '../data/data.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { camera } from '../core/renderer.js?v=32';
+import { groundAt, hitsBoxXZ } from '../world/world.js?v=32';
+import { updatePartVisual } from '../enemies/robot.js?v=32';
+import { GRAV, curWeapon, player } from '../player/playerState.js?v=32';
+import { TUT_STEPS, tutConfirm } from '../modes/tutorial.js?v=32';
+import { conditionOf, partValue } from '../combat/damage.js?v=32';
+import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=32';
+import { HARD_MUL } from '../modes/difficulty.js?v=32';
+import { achEvent } from '../meta/achievements.js?v=32';
+import { addFeed, popup } from '../ui/hud.js?v=32';
+import { endMission } from './result.js?v=32';
 
 // =====================================================================
 //  부품 낙하 / 회수
@@ -42,7 +43,7 @@ function updateFallers(dt) {
 const lootRingGeo = new THREE.RingGeometry(0.45, 0.58, 28);
 const lootBeamGeo = new THREE.CylinderGeometry(0.035, 0.035, 2.4, 6, 1, true);
 function createLoot(p) {
-  if (!GS.run || GS.state !== 'mission' || isGuest() || GS.run.mission.tut) return;
+  if (!GS.run || GS.state !== 'mission' || isGuest()) return;
   const cond = conditionOf(p);
   if (cond <= 0 || !p.val) return;
   _box.setFromObject(p.group); const c = _box.getCenter(V3());
@@ -128,6 +129,7 @@ function nearestCrate() {
 function inExtraction() { return GS.extraction && Math.hypot(GS.extraction.x - player.pos.x, GS.extraction.z - player.pos.z) < GS.extraction.r; }
 function interact() {
   if (player.downed) return;
+  if (GS.run && GS.run.tut) { const st = TUT_STEPS[GS.run.tut.i]; if (st && (st.info || (st.wait && !GS.run.tut.started))) { tutConfirm(); return; } }
   const l = nearestLoot();
   if (l) { if (isGuest()) { if (l.lid) coopOut({ t: 'fpick', lid: l.lid }); } else pickup(l); return; }
   const c = nearestCrate();

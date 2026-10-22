@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=30';
-import { V3, _v1, _v2, _v3, _v4, angDiff, clamp, lerp, rand } from '../core/utils.js?v=30';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=30';
-import { SFX } from '../core/audio.js?v=30';
-import { camera } from '../core/renderer.js?v=30';
-import { addBox, hitsBoxXZ, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=30';
-import { UPY, burstSparks, projGeo, spawnDebris, spawnFlash, spawnSpark } from '../fx/effects.js?v=30';
-import { updatePartVisual } from '../enemies/robot.js?v=30';
-import { player } from '../player/playerState.js?v=30';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=30';
-import { legFactor, sensorMult } from '../combat/damage.js?v=30';
-import { coopEv, dmgTargets, hurtTarget, hurtTg, isGuest, knockTarget, knockTg, v3a } from '../modes/coop.js?v=30';
-import { achEvent } from '../meta/achievements.js?v=30';
-import { addFeed, popup } from '../ui/hud.js?v=30';
+import { GS } from '../core/state.js?v=32';
+import { V3, _v1, _v2, _v3, _v4, angDiff, clamp, lerp, rand } from '../core/utils.js?v=32';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=32';
+import { SFX } from '../core/audio.js?v=32';
+import { camera } from '../core/renderer.js?v=32';
+import { addBox, hitsBoxXZ, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=32';
+import { UPY, burstSparks, projGeo, spawnDebris, spawnFlash, spawnSpark } from '../fx/effects.js?v=32';
+import { updatePartVisual } from '../enemies/robot.js?v=32';
+import { player } from '../player/playerState.js?v=32';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=32';
+import { legFactor, sensorMult } from '../combat/damage.js?v=32';
+import { coopEv, dmgTargets, hurtTarget, hurtTg, isGuest, knockTarget, knockTg, v3a } from '../modes/coop.js?v=32';
+import { achEvent } from '../meta/achievements.js?v=32';
+import { addFeed, popup } from '../ui/hud.js?v=32';
 
 // =====================================================================
 //  최종 보스: REX-09 기계 티라노
@@ -150,7 +150,8 @@ function bossNext(e, dist, yawErr) {
   if (dist < 8.5 * S && !front && bossWorking(e, 'tail') && B.cd.tail <= 0) { B.state = 'tail'; B.t = 0.8; B.cd.tail = 4; B.spinDir = yawErr > 0 ? -1 : 1; return; }
   if (canCharge && B.cd.charge <= 0 && dist > 9 * S && los) { B.state = 'charge_wind'; B.t = B.phase2 ? 0.85 : 1.15; B.cd.charge = B.phase2 ? 7 : 10; B.secondCharge = false; return; }
   if (bossWorking(e, 'head') && B.cd.laser <= 0 && dist > 9 && dist < 55 && los) {
-    B.state = 'laser_wind'; B.t = B.phase2 ? 0.8 : 1.1; B.cd.laser = B.phase2 ? 7 : 9; B.laserAcc = 0; return;
+    B.state = 'laser_wind'; B.t = B.phase2 ? 1.25 : 1.6; B.windT = B.t; B.cd.laser = B.phase2 ? 7 : 9; B.laserAcc = 0;
+    SFX.laserCharge(B.t); popup('열선 경고 · 붉은 조준선을 피해 옆으로', 'bad'); addFeed('REX-09 열선 충전', 'k'); return;
   }
   if (pods > 0 && B.cd.missile <= 0 && dist > 7 * S) { B.state = 'missile'; B.shots = pods * 3 + (B.phase2 ? 2 : 0); B.fireT = 0.5; B.t = 1.2; B.cd.missile = B.phase2 ? 7 : 9.5; return; }
   if (B.phase2 && B.cd.slam <= 0 && dist < 18 * S) { B.state = 'slam_wind'; B.t = 0.9; B.cd.slam = 8; return; }
@@ -277,12 +278,15 @@ function updateBoss(e, dt) {
     case 'charge': {
       const sx = Math.sin(B.dir), sz = Math.cos(B.dir), step = 15 * dt * (B.phase2 ? 1.15 : 1);
       const nx = pos.x + sx * step, nz = pos.z + sz * step;
-      const wall = GS.boxes.some(b => b.maxY > 1.5 && hitsBoxXZ(b, nx + sx * 2.2 * S, nz + sz * 2.2 * S, 1.3 * S));
+      const ox = pos.x, oz = pos.z;
+      moveWithCollision(pos, sx * step, sz * step, cfg.radius, 0, 8, 1.2);
+      const moved = Math.hypot(pos.x - ox, pos.z - oz);
+      const wall = moved < step * 0.45 || GS.boxes.some(b => b.maxY > 1.5 && hitsBoxXZ(b, nx + sx * 2.2 * S, nz + sz * 2.2 * S, 1.3 * S));
       if (wall) {
         B.state = 'stunned'; B.t = 3.8; GS.shake = Math.max(GS.shake, 0.03);
         _v3.set(pos.x + sx * 3.4 * S, 3.5 * S, pos.z + sz * 3.4 * S); spawnFlash(_v3, 3, 0.2, 0xffc080); burstSparks(_v3, UPY, 24, 0xffb050, 9); SFX.explode(dist);
         addFeed('REX-09 충돌 · 기절 · 동력로 노출', 'd'); achEvent('rexWall'); popup('기절 · 동력로 노출', 'weak');
-      } else { pos.x = nx; pos.z = nz; }
+      }
       if (!B.chargeHit && dist < 3.0 * S) { B.chargeHit = true; hurtTg(38, pos, 'charge'); knockTg(sx * 2 + dx / dist, sz * 2 + dz / dist, 13); }
       B.moveSpeed = 15;
       if (B.state === 'charge' && B.t <= 0) { if (GS.HARD && !B.secondCharge) { B.secondCharge = true; B.state = 'charge_wind'; B.t = 0.6; addFeed('REX-09 연속 돌진', 'k'); } else { B.state = 'recover'; B.t = 0.9 * REC; } }
@@ -400,6 +404,18 @@ function animateRex(e, dt) {
   B.hatchO = lerp(B.hatchO, bossHatchOpen(e) ? 1 : 0, clamp(dt * 6, 0, 1));
   const ht = P.hatch;
   if (ht.attached) { ht.group.position.y = 5.36 + 1.3 * B.hatchO; ht.group.rotation.x = -0.5 * B.hatchO; }
+  // 열선 충전: 입에 붉은 빛이 커지며 모임
+  if (!B.chargeGlow) {
+    B.chargeGlow = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), new THREE.MeshBasicMaterial({ color: 0xff5a20, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    GS.world.add(B.chargeGlow);
+  }
+  if (B.state === 'laser_wind' && P.head.attached) {
+    const k = clamp(1 - B.t / (B.windT || 1.6), 0, 1);
+    rexMouth(e, B.chargeGlow.position); B.chargeGlow.visible = true;
+    B.chargeGlow.scale.setScalar(0.25 + 1.1 * k * (0.9 + 0.1 * Math.sin(GS.time * 50)));
+    B.chargeGlow.material.opacity = 0.35 + 0.5 * k;
+    if (Math.random() < 0.5) burstSparks(B.chargeGlow.position, UPY, 2, 0xff7a30, 2 + 3 * k);
+  } else B.chargeGlow.visible = false;
   // 레이저
   if (B.beam) {
     const on = B.state === 'laser' || B.state === 'laser_wind';
@@ -413,8 +429,8 @@ function animateRex(e, dt) {
         B.beamOuter.scale.set(w, len, w); B.beamInner.scale.set(0.15, len, 0.15); B.beamOuter.material.opacity = 0.5;
         if (Math.random() < 0.5) spawnFlash(m, 2.0, 0.06, 0xff6a2a);
       } else {
-        const lk = B.laserLocked ? 1.8 : 1;
-        B.beamOuter.scale.set(0.05 * lk, len, 0.05 * lk); B.beamInner.scale.set(0.015 * lk, len, 0.015 * lk);
+        const lk = B.laserLocked ? 2.6 : 1.3;
+        B.beamOuter.scale.set(0.06 * lk, len, 0.06 * lk); B.beamInner.scale.set(0.02 * lk, len, 0.02 * lk);
         B.beamOuter.material.opacity = B.laserLocked ? 0.85 : 0.35 + 0.35 * Math.sin(GS.time * 40);
         if (Math.random() < 0.4) spawnFlash(m, 0.6 + (1.1 - Math.max(0, B.t)) * 1.2, 0.06, 0xff5a20);
       }
