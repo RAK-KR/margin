@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=37';
-import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=37';
-import { camera } from '../core/renderer.js?v=37';
-import { curWeapon, player, raycaster } from '../player/playerState.js?v=37';
-import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=37';
-import { TUT_STEPS } from '../modes/tutorial.js?v=37';
-import { currentSpread } from '../combat/shooting.js?v=37';
-import { partAlive } from '../combat/damage.js?v=37';
-import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=37';
-import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=37';
-import { drawRadar, updateBossBar } from '../game/result.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=39';
+import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=39';
+import { camera } from '../core/renderer.js?v=39';
+import { curWeapon, player, raycaster } from '../player/playerState.js?v=39';
+import { BBOX_KG, bboxLeft, capZones, nearestBBox, zonePrompt, zoneText } from '../world/missions.js?v=39';
+import { TUT_STEPS } from '../modes/tutorial.js?v=39';
+import { currentSpread } from '../combat/shooting.js?v=39';
+import { partAlive } from '../combat/damage.js?v=39';
+import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=39';
+import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=39';
+import { drawRadar, updateBossBar } from '../game/result.js?v=39';
 
 // =====================================================================
 //  HUD
@@ -24,7 +24,7 @@ function addFeed(text, cls = '') {
 function showHitmarker(kind) { const h = $('hitmarker'); h.className = kind; GS.hitT = kind === 'kill' ? 0.32 : 0.16; }
 function popup(text, cls) { const p = $('popup'); p.className = cls; p.textContent = text; GS.popupT = 0.9; }
 // 탈출 지점 표지: 3D 위치를 화면에 투영, 화면 밖이면 가장자리에 방향 화살표
-function updateWaypoint(x, z, d) {
+function updateWaypoint(x, z, d, lab) {
   const el = $('wp');
   el.style.display = GS.run.tut && GS.run.tut.i < TUT_STEPS.length - 1 ? 'none' : '';
   const v = _v4.set(x, (GS.extraction.y || 0) + 2.2, z).project(camera);
@@ -38,11 +38,11 @@ function updateWaypoint(x, z, d) {
     const r = Math.min(W, H) * 0.3, ang = Math.atan2(dy, dx);
     sx = W / 2 + Math.cos(ang) * r * 1.35; sy = H / 2 + Math.sin(ang) * r; rot = ang + Math.PI / 2;
   }
-  el.classList.toggle('edge', off); el.classList.toggle('wait', !GS.run.objDone);
+  el.classList.toggle('edge', off); el.classList.toggle('wait', !GS.run.objDone && !lab); el.classList.toggle('obj', !!lab);
   el.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
   el.querySelector('.a').style.transform = `rotate(${rot}rad)`;
   setText($('wpd'), `${Math.round(d)}m`);
-  setText($('wpl'), GS.run.objDone ? '탈출' : '탈출 지점');
+  setText($('wpl'), lab || (GS.run.objDone ? '탈출' : '탈출 지점'));
 }
 function updateHUD(dt) {
   const ws = curWeapon(), w = W(ws.id);
@@ -113,7 +113,7 @@ function updateHUD(dt) {
   setText($('reloadtxt'), GS.run.reloadT > 0 ? '재장전 중' : GS.run.charging ? (chk >= 0.999 ? '최대 충전 · 놓으면 발사' : `충전 ${Math.round(chk * 100)}%`) : (ws.mag === 0 ? (ws.reserve > 0 ? `${keyLabel(bind('reload'))} 재장전` : `탄약 없음 · ${keyLabel(bind('w' + GS.run.ws.length))} 권총 전환`) : ''));
   // 목표
   coopHud();
-  setText($('objtxt'), GS.run.objDone ? '목표 완료 · 탈출 지점으로 귀환' : (GS.run.mission.boss ? `${GS.run.mission.target[0]} 격파` : GS.run.mission.tut ? `훈련 ${GS.run.tut.i + 1} / ${TUT_STEPS.length} · ${TUT_STEPS[GS.run.tut.i].t}` : GS.run.mission.relays ? `구역 점령 ${capZones.filter(z => z.done).length} / 3 · ${zoneText()}` : `적대 기계 제거 ${GS.run.kills} / ${GS.run.total}`));
+  setText($('objtxt'), GS.run.objDone ? '목표 완료 · 탈출 지점으로 귀환' : (GS.run.mission.boss ? `${GS.run.mission.target[0]} 격파` : GS.run.mission.tut ? `훈련 ${GS.run.tut.i + 1} / ${TUT_STEPS.length} · ${TUT_STEPS[GS.run.tut.i].t}` : GS.run.mission.bbox ? `블랙박스 회수 ${GS.run.bbox || 0} / 3` : GS.run.mission.relays ? `구역 점령 ${capZones.filter(z => z.done).length} / 3 · ${zoneText()}` : `적대 기계 제거 ${GS.run.kills} / ${GS.run.total}`));
   updateBossBar(); if (GS.run.mission.tut) $('bossbar').classList.add('hidden');
   $('objtxt').className = 'o' + (GS.run.objDone ? ' ok' : '');
   if (GS.extraction) {
@@ -121,7 +121,10 @@ function updateHUD(dt) {
     const fwd = camera.getWorldDirection(_v1);
     const a = Math.atan2(dx, dz) - Math.atan2(fwd.x, fwd.z);
     setText($('exttxt'), `탈출 지점 ${Math.round(d)}m`);
-    updateWaypoint(GS.extraction.x, GS.extraction.z, d);
+    const left = GS.run.mission.bbox && !GS.run.objDone ? bboxLeft() : [];
+    if (left.length) { const b = left.reduce((a, q) => Math.hypot(q.x - player.pos.x, q.z - player.pos.z) < Math.hypot(a.x - player.pos.x, a.z - player.pos.z) ? q : a);
+      updateWaypoint(b.x, b.z, Math.hypot(b.x - player.pos.x, b.z - player.pos.z), '블랙박스'); }
+    else updateWaypoint(GS.extraction.x, GS.extraction.z, d);
   }
   const lv = GS.run.loot.reduce((a, l) => a + l.val, 0);
   setText($('lootval'), fmt(lv * (1 + GS.run.salvageBonus)) + ' CR'); setText($('lootcnt'), `(${GS.run.loot.length}개)`);
@@ -130,7 +133,9 @@ function updateHUD(dt) {
   const pr = $('prompt'); let msg = '';
   const cp = coopPrompt();
   const nl = player.downed ? null : nearestLoot();
+  const nb = !player.downed && nearestBBox();
   if (cp) msg = cp;
+  else if (nb) msg = `<b>[${UK()}]</b><span class="acc">블랙박스 회수</span> <span class="dim">${BBOX_KG}kg · 버릴 수 없음 · 집으면 증원이 옵니다</span>`;
   else if (nl) msg = `<b>[${UK()}]</b><span class="${(nl.kg || 0) > bagRoom() ? 'bad' : ''}">${(nl.kg || 0) > bagRoom() ? '무게 초과 · 그래도 줍기' : '줍기'}</span> <span class="dim">${nl.name} ${(nl.kg || 0).toFixed(1)}kg · 가방 ${carryKg().toFixed(1)} / ${bagCap()}kg · ${keyLabel(bind('bag'))} 가방</span>`;
   else if (nearestCrate()) msg = `<b>[${UK()}]</b>탄약 보급 · ${WEAPONS[(curWeapon().id !== 'pistol' ? curWeapon() : GS.run.ws[0]).id].name}`;
   else if (inExtraction()) {

@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { V3, _v1, _v2, _v3, angDiff, clamp, lerp, rand } from '../core/utils.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { scene } from '../core/renderer.js?v=37';
-import { moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=37';
-import { FX, UPY, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=37';
-import { updatePartVisual } from './robot.js?v=37';
-import { updateCore } from '../bosses/core.js?v=37';
-import { tutPassiveTick } from '../modes/tutorial.js?v=37';
-import { legFactor, partAlive, sensorMult } from '../combat/damage.js?v=37';
-import { updateBoss } from '../bosses/rex.js?v=37';
-import { updateDragon } from '../bosses/dragon.js?v=37';
-import { sniperAttack, updateDrone, updateRelay } from './extra.js?v=37';
-import { updateMite, updateSpider } from '../bosses/spider.js?v=37';
-import { coopEv, dmgTargets, hurtTarget, isGuest, pickTarget, puppetUpdate, v3a } from '../modes/coop.js?v=37';
-import { applyHard } from '../modes/difficulty.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { V3, _v1, _v2, _v3, angDiff, clamp, lerp, rand } from '../core/utils.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { scene } from '../core/renderer.js?v=39';
+import { moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=39';
+import { FX, UPY, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=39';
+import { updatePartVisual } from './robot.js?v=39';
+import { updateCore } from '../bosses/core.js?v=39';
+import { tutPassiveTick } from '../modes/tutorial.js?v=39';
+import { legFactor, partAlive, sensorMult } from '../combat/damage.js?v=39';
+import { updateBoss } from '../bosses/rex.js?v=39';
+import { updateDragon } from '../bosses/dragon.js?v=39';
+import { sniperAttack, updateDrone, updateRelay } from './extra.js?v=39';
+import { updateMite, updateSpider } from '../bosses/spider.js?v=39';
+import { coopEv, dmgTargets, hurtTarget, isGuest, pickTarget, puppetUpdate, v3a } from '../modes/coop.js?v=39';
+import { applyHard } from '../modes/difficulty.js?v=39';
 
 // =====================================================================
 //  적 AI

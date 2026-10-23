@@ -1,16 +1,16 @@
-import { GS } from '../core/state.js?v=37';
-import { V3, rand } from '../core/utils.js?v=37';
-import { SHOP } from '../data/data.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { addBox, crate } from '../world/world.js?v=37';
-import { player } from '../player/playerState.js?v=37';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=37';
-import { spawnBoss, spawnShock } from '../bosses/rex.js?v=37';
-import { dragonStrike, spawnDragon } from '../bosses/dragon.js?v=37';
-import { spawnDrone } from '../enemies/extra.js?v=37';
-import { spawnMite, spawnSpider } from '../bosses/spider.js?v=37';
-import { addFeed, popup } from '../ui/hud.js?v=37';
-import { itemOwned } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { V3, rand } from '../core/utils.js?v=39';
+import { SHOP } from '../data/data.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { addBox, crate } from '../world/world.js?v=39';
+import { player } from '../player/playerState.js?v=39';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=39';
+import { spawnBoss, spawnShock } from '../bosses/rex.js?v=39';
+import { dragonStrike, spawnDragon } from '../bosses/dragon.js?v=39';
+import { spawnDrone } from '../enemies/extra.js?v=39';
+import { spawnMite, spawnSpider } from '../bosses/spider.js?v=39';
+import { addFeed, popup } from '../ui/hud.js?v=39';
+import { itemOwned } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  하드 모드
@@ -66,7 +66,7 @@ function applyHard(e) {
 function hardExtras(id) {
   if (id === 'A') { spawnEnemy('combat', -6, -18, 0.2); spawnEnemy('combat', 20, 0, -0.8); spawnDrone(-14, -14, 4.6); }
   else if (id === 'B') { spawnEnemy('heavy', 0, -18, 0, { guard: true }); spawnDrone(16, -14, 3.8); spawnEnemy('combat', -26, 2, 0.5); }
-  else if (id === 'E') { spawnEnemy('combat', -20, 4, 0.3, { guard: true }); spawnEnemy('heavy', 20, 6, -0.3, { guard: true }); spawnDrone(0, -6, 4.6); for (const e of GS.enemies) if (e.relay) e.spawnLeft = 6; }
+  else if (id === 'E') { spawnEnemy('combat', -22, 2, 0.3, { guard: true }); spawnEnemy('heavy', 6, -8, -0.3, { guard: true }); spawnDrone(0, -6, 4.6); }
 }
 // =====================================================================
 //  익스트림 모드 · 삼중 위협

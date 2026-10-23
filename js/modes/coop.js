@@ -1,30 +1,30 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=37';
-import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { camera, scene } from '../core/renderer.js?v=37';
-import { removeHittables } from '../world/world.js?v=37';
-import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=37';
-import { updatePartVisual } from '../enemies/robot.js?v=37';
-import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=37';
-import { damagePlayer } from '../player/player.js?v=37';
-import { spawnEnemy, startMission } from '../world/missions.js?v=37';
-import { xrayPart } from './tutorial.js?v=37';
-import { kd } from '../player/input.js?v=37';
-import { launchThrowable } from '../combat/shooting.js?v=37';
-import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=37';
-import { animateLegs } from '../enemies/ai.js?v=37';
-import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=37';
-import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=37';
-import { _box3, spawnDrone } from '../enemies/extra.js?v=37';
-import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=37';
-import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=37';
-import { achEvent, killEnemy } from '../meta/achievements.js?v=37';
-import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=37';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=37';
-import { endMission } from '../game/result.js?v=37';
-import { renderHub } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=39';
+import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { camera, scene } from '../core/renderer.js?v=39';
+import { removeHittables } from '../world/world.js?v=39';
+import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=39';
+import { updatePartVisual } from '../enemies/robot.js?v=39';
+import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=39';
+import { damagePlayer } from '../player/player.js?v=39';
+import { bboxCount, bboxRemove, bboxes, spawnEnemy, startMission } from '../world/missions.js?v=39';
+import { xrayPart } from './tutorial.js?v=39';
+import { kd } from '../player/input.js?v=39';
+import { launchThrowable } from '../combat/shooting.js?v=39';
+import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=39';
+import { animateLegs } from '../enemies/ai.js?v=39';
+import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=39';
+import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=39';
+import { _box3, spawnDrone } from '../enemies/extra.js?v=39';
+import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=39';
+import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=39';
+import { achEvent, killEnemy } from '../meta/achievements.js?v=39';
+import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=39';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=39';
+import { endMission } from '../game/result.js?v=39';
+import { renderHub } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  협동 모드 (2인 · 방장 권위 방식)
@@ -312,6 +312,7 @@ function coopApplyInput(m) {
     } else if (ev.t === 'nade') { NET.remoteShot = true; launchThrowable(ev.k, av3(ev.f), av3(ev.v), !!ev.imp, ev.ex); NET.remoteShot = false; }
     else if (ev.t === 'focus') GS.run.focusT = Math.max(GS.run.focusT, 4);
     else if (ev.t === 'pick') { }
+    else if (ev.t === 'bboxreq') { const b = bboxes[ev.i]; if (b) { if (!b.got) bboxRemove(b); bboxCount(b); } }
     else if (ev.t === 'fpick') { const l = GS.loots.find(x => x.lid === ev.lid); if (l && Math.hypot(l.x - r.pos.x, l.z - r.pos.z) <= l.r + 1) coopGrant(l); }
     else if (ev.t === 'rev') coopRevived();
     else if (ev.t === 'ex') coopTryExtract(true);
@@ -340,6 +341,7 @@ function coopGuestEvent(ev) {
     case 'sh': if (P && P.attached) shatter(P); break;
     case 'kill': if (E && !E.dead) killEnemy(E, ev.c); break;
     case 'loot': coopGuestLoot(ev); break;
+    case 'bbox': { const b = bboxes[ev.i]; if (b && !b.got) bboxRemove(b); GS.run.bbox = ev.n; break; }
     case 'unl': { const l = GS.loots.find(x => x.lid === ev.lid); if (l) { GS.loots.splice(GS.loots.indexOf(l), 1); GS.world.remove(l.obj, l.ring, l.beam); } break; }
     case 'got': {
       const l = GS.loots.find(x => x.lid === ev.lid); if (l) { GS.loots.splice(GS.loots.indexOf(l), 1); GS.world.remove(l.obj, l.ring, l.beam); }
@@ -373,7 +375,7 @@ function coopGuestEvent(ev) {
     case 'knock': knockPlayer(ev.dx, ev.dz, ev.p); break;
     case 'rev': coopRevived(); break;
     case 'obj':
-      if (!GS.run.objDone) { GS.run.objDone = true; GS.run.bossKillT = ev.bt; GS.run.pistolOnly = Object.keys(GS.run.used).every(k => ['pistol', 'emp'].includes(k)); SFX.objective(); addFeed(`${GS.run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); }
+      if (!GS.run.objDone) { GS.run.objDone = true; GS.run.bossKillT = ev.bt; GS.run.pistolOnly = Object.keys(GS.run.used).every(k => ['pistol', 'emp'].includes(k)); SFX.objective(); addFeed(`${GS.run.mission.boss ? GS.run.mission.target[0] + ' 격파' : '목표 완료'} · 탈출 지점으로 귀환해 정산`, 'x'); }
       break;
     case 'end': coopEndLocal(ev.k); break;
     case 'sfx': if (SFX[ev.n]) SFX[ev.n](); break;

@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=37';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=37';
-import { defaultSave, writeSave } from '../core/save.js?v=37';
-import { SFX, initAudio, vol } from '../core/audio.js?v=37';
-import { ALL_GUNS, GUNS, SKINS, SKIN_THEMES, applySkin, skinAch, skinOwned, skinSel, skinsFor } from '../player/viewmodel.js?v=37';
-import { startMission } from '../world/missions.js?v=37';
-import { bindVolume } from '../player/input.js?v=37';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=37';
-import { CHAOS_IDS, chaosUnlocked, extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=37';
-import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=37';
-import { popup } from './hud.js?v=37';
-import { nextGoal } from '../game/result.js?v=37';
-import { hubShow } from './hub3d.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=39';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=39';
+import { defaultSave, writeSave } from '../core/save.js?v=39';
+import { SFX, initAudio, vol } from '../core/audio.js?v=39';
+import { ALL_GUNS, GUNS, SKINS, SKIN_THEMES, applySkin, skinAch, skinOwned, skinSel, skinsFor } from '../player/viewmodel.js?v=39';
+import { startMission } from '../world/missions.js?v=39';
+import { bindVolume } from '../player/input.js?v=39';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=39';
+import { CHAOS_IDS, chaosUnlocked, extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=39';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=39';
+import { popup } from './hud.js?v=39';
+import { nextGoal } from '../game/result.js?v=39';
+import { hubShow } from './hub3d.js?v=39';
 
 // =====================================================================
 //  거점 / 상점
@@ -39,7 +39,7 @@ const GOALS = [
   { t: '상점에서 첫 무기 사기', h: '정산으로 번 돈으로 상점의 무기 탭에서 권총보다 강한 총을 사세요.', ok: () => Object.keys(GS.save.weapons).length > 1, go: () => { GS.hubView = 'shop'; GS.shopTab = '무기'; } },
   { t: 'OP-B 공장 침투 완수', h: '중장갑형이 나옵니다. 다리와 등 뒤 동력 장치를 노리세요.', ok: () => GS.save.stats.B.clears > 0, go: () => { GS.selectedMission = 'B'; } },
   { t: '방어복 사기', h: '상점의 방어복 · 회수 탭에서 방어복을 사면 체력과 피해 감소가 늘어납니다.', ok: () => GS.save.armor >= 1, go: () => { GS.hubView = 'shop'; GS.shopTab = '방어복 · 회수'; } },
-  { t: 'OP-C 변전소 장악 완수', h: '구역 세 곳 안에 머물러 점령하세요. 저격형의 붉은 조준선을 조심하세요.', ok: () => GS.save.stats.E.clears > 0, go: () => { GS.selectedMission = 'E'; } },
+  { t: 'OP-C 추락선 회수 완수', h: '잔해 속 블랙박스 3개를 찾아 E로 회수하세요. 집을 때마다 증원이 옵니다. 가방 무게를 비워 두세요.', ok: () => GS.save.stats.E.clears > 0, go: () => { GS.selectedMission = 'E'; } },
   { t: '보스 REX-09 격파', h: '무릎 관절을 부숴 주저앉히고 등의 동력로를 노리세요. 기둥에 돌진을 유도하면 기절합니다.', ok: () => GS.save.stats.C.clears > 0, go: () => { GS.selectedMission = 'C'; } },
   { t: '보스 ARACHNE 격파', h: '다리 세 개를 부수면 주저앉아 동력로가 드러납니다. 자폭 거미는 다가오기 전에 쏘세요.', ok: () => GS.save.stats.F.clears > 0, go: () => { GS.selectedMission = 'F'; } },
   { t: '보스 청룡 격파', h: '여의주를 먼저 부수고, 동력 마디가 열릴 때 노리세요. EMP를 맞히면 땅으로 떨어집니다.', ok: () => GS.save.stats.D.clears > 0, go: () => { GS.selectedMission = 'D'; } },
@@ -215,7 +215,7 @@ function renderHub() {
           <div class="bname">${sm.name}</div>
           <div class="bsub">${sm.target[1]}</div>
           <p class="bdesc">${sm.desc}</p>
-          <div class="bsec"><span>목표</span><b>${sm.relays ? '구역 3곳 점령 후 탈출' : sm.boss ? `${sm.target[0]} 격파 후 탈출` : '기계를 정리하고 부품을 회수해 탈출'}</b></div>
+          <div class="bsec"><span>목표</span><b>${sm.bbox ? '블랙박스 3개 회수 후 탈출' : sm.relays ? '구역 3곳 점령 후 탈출' : sm.boss ? `${sm.target[0]} 격파 후 탈출` : '기계를 정리하고 부품을 회수해 탈출'}</b></div>
           <div class="bsec"><span>위협</span><b>${sm.enemies}</b></div>
           <div class="bsec"><span>권장 장비</span><b>${sm.rec}</b></div>
           <div class="bsec"><span>보상</span><b><span class="acc mono">${fmt(pay)} CR</span>${chaosOn ? ' <span class="dim">(카오스 ×3)</span>' : hardOn ? ' <span class="dim">(하드 ×2)</span>' : ''} + 회수한 부품${sm.partMult > 1 ? ` <span class="dim">(부품 가치 ×${sm.partMult})</span>` : ''}</b></div>

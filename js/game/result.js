@@ -1,19 +1,19 @@
-import { GS } from '../core/state.js?v=37';
-import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=37';
-import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { camera, controls } from '../core/renderer.js?v=37';
-import { GUNS } from '../player/viewmodel.js?v=37';
-import { player } from '../player/playerState.js?v=37';
-import { clearWorld } from '../world/missions.js?v=37';
-import { coreExposed } from '../bosses/core.js?v=37';
-import { endTutorial } from '../modes/tutorial.js?v=37';
-import { partAlive } from '../combat/damage.js?v=37';
-import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=37';
-import { CHAOS_IDS, HARD_MUL, barBoss } from '../modes/difficulty.js?v=37';
-import { achEvent, achUnlock } from '../meta/achievements.js?v=37';
-import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=39';
+import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { camera, controls } from '../core/renderer.js?v=39';
+import { GUNS } from '../player/viewmodel.js?v=39';
+import { player } from '../player/playerState.js?v=39';
+import { clearWorld } from '../world/missions.js?v=39';
+import { coreExposed } from '../bosses/core.js?v=39';
+import { endTutorial } from '../modes/tutorial.js?v=39';
+import { partAlive } from '../combat/damage.js?v=39';
+import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=39';
+import { CHAOS_IDS, HARD_MUL, barBoss } from '../modes/difficulty.js?v=39';
+import { achEvent, achUnlock } from '../meta/achievements.js?v=39';
+import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  임무 종료 / 정산

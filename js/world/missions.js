@@ -1,28 +1,29 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, TEST, V3, rand, setText } from '../core/utils.js?v=37';
-import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, WEAPONS, effW, maxReserve } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX, initAudio } from '../core/audio.js?v=37';
-import { camera, groundTexture, scene } from '../core/renderer.js?v=37';
-import { addBox, crate } from './world.js?v=37';
-import { clearFX, projGeo } from '../fx/effects.js?v=37';
-import { GUNS, HIP_POS, applySavedSkins } from '../player/viewmodel.js?v=37';
-import { buildRobot } from '../enemies/robot.js?v=37';
-import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=37';
-import { buildFoundry } from '../bosses/core.js?v=37';
-import { buildRange, tutNext } from '../modes/tutorial.js?v=37';
-import { lockPointer, showPause } from '../player/input.js?v=37';
-import { alertEnemy } from '../enemies/ai.js?v=37';
-import { buildArena } from '../bosses/rex.js?v=37';
-import { buildShrine } from '../bosses/dragon.js?v=37';
-import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=37';
-import { buildQuarry } from '../bosses/spider.js?v=37';
-import { NET, buildAvatar, coopEv, coopOn, isHost, makeRemote } from '../modes/coop.js?v=37';
-import { applyHard, buildColosseum, chaosUnlocked, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=37';
-import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=37';
-import { addFeed, popup } from '../ui/hud.js?v=37';
-import { carryList } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, TEST, V3, rand, setText } from '../core/utils.js?v=39';
+import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX, initAudio } from '../core/audio.js?v=39';
+import { GLOW, camera, groundTexture, scene } from '../core/renderer.js?v=39';
+import { addBox, crate } from './world.js?v=39';
+import { clearFX, projGeo } from '../fx/effects.js?v=39';
+import { GUNS, HIP_POS, applySavedSkins } from '../player/viewmodel.js?v=39';
+import { buildRobot } from '../enemies/robot.js?v=39';
+import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=39';
+import { buildFoundry } from '../bosses/core.js?v=39';
+import { buildRange, tutNext } from '../modes/tutorial.js?v=39';
+import { lockPointer, showPause } from '../player/input.js?v=39';
+import { alertEnemy } from '../enemies/ai.js?v=39';
+import { buildArena } from '../bosses/rex.js?v=39';
+import { buildShrine } from '../bosses/dragon.js?v=39';
+import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=39';
+import { buildQuarry } from '../bosses/spider.js?v=39';
+import { NET, buildAvatar, coopEv, coopOn, coopOut, isGuest, isHost, makeRemote } from '../modes/coop.js?v=39';
+import { HARD_MUL, applyHard, buildColosseum, chaosUnlocked, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=39';
+import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=39';
+import { bagCap, carryKg, loadMult, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=39';
+import { addFeed, popup } from '../ui/hud.js?v=39';
+import { carryList } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  임무 생성
@@ -31,7 +32,7 @@ function clearWorld() {
   GS.world.traverse(o => { if (o.geometry && o.geometry !== projGeo) o.geometry.dispose(); });
   scene.remove(GS.world); GS.world = new THREE.Group(); scene.add(GS.world);
   NET.av = null;
-  GS.boxes = []; GS.hittables = []; GS.enemies = []; GS.loots = []; GS.fallers = []; GS.crates = []; GS.extraction = null; capZones = []; GS.missiles = []; GS.shocks = []; GS.throwables = []; GS.fadeRings = []; GS.bolts = [];
+  GS.boxes = []; GS.hittables = []; GS.enemies = []; GS.loots = []; GS.fallers = []; GS.crates = []; GS.extraction = null; capZones = []; bboxes = []; GS.missiles = []; GS.shocks = []; GS.throwables = []; GS.fadeRings = []; GS.bolts = [];
   clearFX();
 }
 function setEnv(o) {
@@ -181,7 +182,7 @@ function startMission(id, hardOverride, force, chaosOverride) {
   initAudio();
   { const sd = document.getElementById('skilldemo'); if (sd) sd.remove(); const tb = document.getElementById('toasts'); if (tb) tb.classList.remove('hubpos'); }
   clearWorld();
-  const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry, G: buildColosseum, T: buildRange, H: buildFoundry })[id]();
+  const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildCrashSite, F: buildQuarry, G: buildColosseum, T: buildRange, H: buildFoundry })[id]();
   GS.MAPB = spawn.bounds || { x: 30, z: 30 };
   GS.HARD = ms.extreme || ms.tut || ms.final ? false : hardOverride !== undefined ? !!hardOverride : (!!GS.save.hardSel && hardUnlocked(id));
   GS.CHAOS = !coopOn() && chaosUnlocked(id) && (chaosOverride !== undefined ? !!chaosOverride : !!GS.save.chaosSel && hardOverride === undefined);
@@ -219,7 +220,7 @@ function startMission(id, hardOverride, force, chaosOverride) {
   if (GS.CHAOS) addFeed('카오스 규정 · 기본 권총만 사용 · 강화 · 스킬 · 소모품 · 방어복 사용 불가', 'x'); setText($('objname'), ms.name); setText($('armorname'), arm.name);
   if (ms.extreme && (GS.save.armor || GS.save.utils.medkit || GS.save.utils.regen || GS.save.utils.radar)) addFeed('익스트림 규정 · 방어복과 보조 장비 사용 불가', 'x');
   if (ms.final) addFeed('작전 개시 · 생산 코어를 멈추고 탈출 지점으로 귀환', 'x');
-  else if (!ms.tut) addFeed(ms.extreme ? '작전 개시 · 세 보스를 모두 격파하고 탈출 지점으로 귀환' : ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : ms.relays ? '작전 개시 · 구역 3곳을 점령하고 탈출 지점으로 귀환' : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');
+  else if (!ms.tut) addFeed(ms.extreme ? '작전 개시 · 세 보스를 모두 격파하고 탈출 지점으로 귀환' : ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : ms.bbox ? '작전 개시 · 잔해 속 블랙박스 3개를 회수하고 탈출 지점으로 귀환' : ms.relays ? '작전 개시 · 구역 3곳을 점령하고 탈출 지점으로 귀환' : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');
   if (!TEST) { showPause(true); lockPointer(); }
 }
 
@@ -289,6 +290,100 @@ function zonePrompt() {
   const z = capZones.find(q => q.inside && !q.done); if (!z) return '';
   return z.contested ? `<span class="bad">구역 ${z.name} · 적이 구역 안에 있어 점령 중단</span>` : `<span class="acc">구역 ${z.name} 점령 중 ${Math.round(z.prog * 100)}%</span> <span class="dim">구역 밖으로 나가면 멈춤</span>`;
 }
+// =====================================================================
+//  임무: 추락선 회수
+// =====================================================================
+let bboxes = [];
+const BBOX_KG = 4, CRASH_EDGES = [[-31, 22], [31, 21], [-31, -6], [31, -8], [-12, -28], [14, -28], [0, 12], [-31, -26], [31, -26]];
+function addBlackBox(x, z, y = 0) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(_box3(0.62, 0.42, 0.78), new THREE.MeshLambertMaterial({ color: 0xff6a10, emissive: 0x5a1e00 })); body.position.y = 0.21; g.add(body);
+  for (const dz of [-0.24, 0.24]) { const st = new THREE.Mesh(_box3(0.64, 0.08, 0.06), new THREE.MeshLambertMaterial({ color: 0x1a1a1a })); st.position.set(0, 0.3, dz); g.add(st); }
+  const lamp = new THREE.Mesh(_box3(0.12, 0.06, 0.12), new THREE.MeshBasicMaterial({ color: 0xffe0a0 })); lamp.position.set(0, 0.45, 0); g.add(lamp);
+  g.position.set(x, y, z); g.rotation.y = (x * 7 + z * 3) % 3; GS.world.add(g);
+  const ring = new THREE.Mesh(lootRingGeo, new THREE.MeshBasicMaterial({ color: 0xff5a2a, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(x, y + 0.03, z); ring.scale.setScalar(2.2);
+  const beam = new THREE.Mesh(lootBeamGeo, new THREE.MeshBasicMaterial({ color: 0xff6a2a, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  beam.scale.set(2.2, 4, 2.2); beam.position.set(x, y + 4.8, z);
+  GS.world.add(ring, beam);
+  bboxes.push({ x, z, y, g, ring, beam, lamp, got: false, i: bboxes.length });
+}
+function nearestBBox() {
+  if (!GS.run || !GS.run.mission.bbox) return null;
+  for (const b of bboxes) if (!b.got && Math.hypot(b.x - player.pos.x, b.z - player.pos.z) < 2.3 && Math.abs(b.y - player.pos.y) < 1.6) return b;
+  return null;
+}
+function bboxLeft() { return bboxes.filter(b => !b.got); }
+function bboxRemove(b) { b.got = true; GS.world.remove(b.g, b.ring, b.beam); }
+function bboxLoot() { const val = Math.round(250 * (GS.run.hard ? HARD_MUL.parts : 1)); GS.run.loot.push({ name: '블랙박스', base: val, val, cond: 1, state: 'intact', src: 'crash', kg: BBOX_KG, obj: true }); }
+// 집기: 혼자이거나 방장이면 바로, 손님이면 자기 가방에 넣고 방장에게 알림
+function takeBBox(b) {
+  if (!b || b.got) return;
+  bboxRemove(b); bboxLoot(); SFX.pickup();
+  if (isGuest()) { coopOut({ t: 'bboxreq', i: b.i }); return; }
+  bboxCount(b);
+}
+function bboxCount(b) {
+  GS.run.bbox = (GS.run.bbox || 0) + 1;
+  SFX.objective(); addFeed(`블랙박스 회수 ${GS.run.bbox} / 3${GS.run.bbox < 3 ? ' · 신호 감지, 증원 접근' : ''}`, 'x'); popup(`블랙박스 ${GS.run.bbox} / 3`, 'weak');
+  coopEv({ t: 'bbox', i: b.i, n: GS.run.bbox });
+  bboxWave(GS.run.bbox); checkObjective();
+  if (carryKg() > bagCap()) popup(`무게 초과 · 이동 -${Math.round((1 - loadMult()) * 100)}% · ${keyLabel(bind('bag'))} 가방에서 부품 버리기`, 'bad');
+}
+function bboxWave(n) {
+  if (n >= 3 && !GS.run.hard) return;
+  const pts = CRASH_EDGES.filter(([x, q]) => Math.hypot(x - player.pos.x, q - player.pos.z) > 18).sort(() => Math.random() - 0.5);
+  const kinds = n === 1 ? ['combat', 'scout'] : n === 2 ? ['heavy', 'combat', 'scout'] : ['combat', 'combat'];
+  if (GS.run.hard) kinds.push('scout');
+  kinds.forEach((k, i) => { const [x, q] = pts[i % pts.length] || [0, -28];
+    const e = spawnEnemy(k, x, q, Math.atan2(player.pos.x - x, player.pos.z - q), {}); alertEnemy(e); e.lastSeen.set(player.pos.x, 0, player.pos.z); GS.run.total++; });
+  if (n === 2) spawnDrone(0, -20, 4.6);
+}
+function updateBBoxes() {
+  for (const b of bboxes) if (!b.got) { const k = 0.5 + 0.5 * Math.sin(GS.time * 5 + b.x); b.ring.material.opacity = 0.55 + 0.4 * k; b.beam.material.opacity = 0.3 + 0.25 * k; b.lamp.visible = Math.sin(GS.time * 9 + b.z) > -0.2; }
+}
+// 잔해 조각 (충돌 없는 장식)
+function wreck(x, y, z, w, h, d, ry, rz, col) { const m = new THREE.Mesh(_box3(w, h, d), new THREE.MeshLambertMaterial({ color: col })); m.position.set(x, y, z); m.rotation.set(0, ry, rz); GS.world.add(m); return m; }
+function fireGlow(x, z, s = 1) {
+  const l = new THREE.PointLight(0xff7a2a, 60 * s, 16, 1.8); l.position.set(x, 1.4, z); GS.world.add(l);
+  for (let i = 0; i < 3; i++) { const f = new THREE.Mesh(new THREE.PlaneGeometry(1.2 * s, 1.8 * s), new THREE.MeshBasicMaterial({ map: GLOW, color: 0xff8a3a, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); f.position.set(x, 0.8 * s, z); f.rotation.y = i * Math.PI / 3; GS.world.add(f); }
+  const sc = new THREE.Mesh(new THREE.CircleGeometry(2.2 * s, 18), new THREE.MeshBasicMaterial({ color: 0x0c0a08, transparent: true, opacity: 0.55, depthWrite: false })); sc.rotation.x = -Math.PI / 2; sc.position.set(x, 0.025, z); GS.world.add(sc);
+}
+function buildCrashSite() {
+  setEnv({ sky: 0x4a3a32, fog: [22, 105], hemi: [0xe0c0a0, 0x2a2018, 1.3], sun: [0xffa060, 1.7, [-40, 16, 30]],
+    ground: '#5a4a3c', groundLine: 'rgba(255,170,110,.12)', size: [70, 62] });
+  const W = 0x4a3e34, HULL = 0x6a6e72, HD = 0x4c5054, BURN = 0x2a2624;
+  addBox(0, -31, 72, 2, 4, W); addBox(0, 31, 72, 2, 4, W); addBox(-35, 0, 2, 64, 4, W); addBox(35, 0, 2, 64, 4, W);
+  // 동체 (높은 엄폐): 가운데 동체 · 앞쪽 조종석 · 뒤쪽 꼬리
+  addBox(-14, -10, 13, 6, 5, HULL); addBox(-14, -10, 13.4, 1, 0.6, HD, 5);
+  wreck(-14, 2.6, -13.2, 13, 0.4, 0.4, 0, 0, BURN); wreck(-20.5, 5.2, -10, 0.6, 0.6, 6, 0, 0.3, HD);
+  addBox(10, -21, 8, 5, 4, HULL); wreck(14.8, 2.4, -21, 2, 3.2, 4.6, 0, 0.35, HD); wreck(10, 4.3, -21, 6, 0.3, 3, 0.2, 0.1, 0x8a9aa8);
+  addBox(19, 5, 8, 7, 4.5, HULL); addBox(21, 8, 2, 2, 6.5, HD, 4.5);   // 꼬리 날개 (저격 위치)
+  // 날개 (낮은 엄폐)
+  addBox(-2, 4, 16, 2.4, 1.2, HD); wreck(-2, 1.25, 4, 16, 0.12, 2.6, 0, 0, 0x7a7e82);
+  addBox(-26, 12, 3, 9, 1.2, HD);
+  // 흩어진 화물 · 파편
+  const CR = 0x7a6040;
+  for (const [x, z, st] of [[-6, -18, 1], [4, -10, 0], [-24, -20, 1], [26, -14, 0], [-28, 2, 1], [6, 16, 0], [-12, 18, 1], [24, 20, 0], [-4, -26, 0], [14, -6, 1], [-18, 6, 0]]) {
+    crate(x, z, CR); if (st) crate(x + 0.2, z - 0.1, 0x6a5236, 1.1, 1.2);
+  }
+  for (const [x, z, w, d] of [[2, -2, 3, 0.6], [-8, 10, 0.6, 3], [10, 10, 3, 0.6], [-20, -24, 3, 0.6], [26, -2, 0.6, 3], [-30, -12, 3, 0.6], [16, 20, 0.6, 3]]) addBox(x, z, w, d, 1.1, 0x5c5248);
+  for (let k = 0; k < 26; k++) { const a = k * 2.39, r = 6 + (k * 7) % 24; wreck(Math.cos(a) * r, 0.12, Math.sin(a) * r - 4, 0.4 + (k % 3) * 0.3, 0.2, 0.3 + (k % 4) * 0.2, a, 0.2, k % 2 ? HD : BURN); }
+  // 불길
+  for (const [x, z, s] of [[-7, -7, 1.2], [-20, -14, 1], [13, -17, 1.1], [16, 1, 0.9], [-1, 6, 0.8], [5, -24, 0.7]]) fireGlow(x, z, s);
+  addExtraction(0, 26);
+  addAmmoCrate(4, 24); addAmmoCrate(-31, 6); addAmmoCrate(31, 4);
+  // 블랙박스 3개
+  addBlackBox(-21, -16); addBlackBox(9, -27); addBlackBox(25, 11);
+  // 경비
+  { const s = spawnEnemy('sniper', 21, 8, -0.4, { guard: true }); s.root.position.y = 11; s.perch = true; }
+  spawnEnemy('combat', -18, -18, 0.3, { guard: true }); spawnEnemy('combat', -24, -15, -0.4, { guard: true });
+  spawnEnemy('heavy', 8, -25, 0, { guard: true }); spawnEnemy('combat', 13, -26, -0.3, { guard: true });
+  spawnEnemy('combat', 24, 14, -1.2, { guard: true }); spawnEnemy('scout', 27, 9, -0.8, { guard: true });
+  spawnEnemy('scout', -4, -4, 0.2);
+  spawnDrone(-10, -20, 4.6); spawnDrone(16, -10, 4.6);
+  return { spawn: V3(0, 0, 26), yaw: 0, bounds: { x: 33, z: 29 } };
+}
 function buildSubstation() {
   setEnv({ sky: 0x3b4150, fog: [22, 105], hemi: [0xb8c4d8, 0x2a2622, 1.3], sun: [0xffb27a, 1.6, [-40, 18, 30]],
     ground: '#4a4c4a', groundLine: 'rgba(140,170,200,.16)', size: [70, 62] });
@@ -333,4 +428,4 @@ function buildSubstation() {
   return { spawn: V3(0, 0, 26), yaw: 0, bounds: { x: 33, z: 29 } };
 }
 
-export { addAmmoCrate, addExtraction, capZones, clearWorld, setEnv, showGun, spawnEnemy, startMission, updateZones, zonePrompt, zoneText };
+export { BBOX_KG, addAmmoCrate, addExtraction, bboxCount, bboxLeft, bboxRemove, bboxes, capZones, clearWorld, nearestBBox, setEnv, showGun, spawnEnemy, startMission, takeBBox, updateBBoxes, updateZones, zonePrompt, zoneText };

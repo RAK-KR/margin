@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { V3, _v1, _v3, lerp, rand } from '../core/utils.js?v=37';
-import { buildRobot } from '../enemies/robot.js?v=37';
-import { buildCore } from '../bosses/core.js?v=37';
-import { buildRex } from '../bosses/rex.js?v=37';
-import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=37';
-import { buildDrone } from '../enemies/extra.js?v=37';
-import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { V3, _v1, _v3, lerp, rand } from '../core/utils.js?v=39';
+import { buildRobot } from '../enemies/robot.js?v=39';
+import { buildCore } from '../bosses/core.js?v=39';
+import { buildRex } from '../bosses/rex.js?v=39';
+import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=39';
+import { buildDrone } from '../enemies/extra.js?v=39';
+import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=39';
 
 // =====================================================================
 //  거점 3D 배경 (격납고 + 임무별 대상 기계)
@@ -102,6 +102,10 @@ function updateHub3D(dt) {
   HUB.camPos.lerp(f.cam, Math.min(1, dt * 3)); HUB.camLook.lerp(f.look, Math.min(1, dt * 3));
   hubCam.position.copy(HUB.camPos).add(_v1.set(Math.sin(GS.time * 0.23) * 0.35, Math.sin(GS.time * 0.31) * 0.12, 0));
   hubCam.lookAt(HUB.camLook);
+  // 멀리서 찍는 보스 장면이 안개에 묻히지 않게: 카메라 거리에 맞춰 안개 범위를 늘리고 주변광도 올림
+  { const dist = hubCam.position.distanceTo(HUB.camLook);
+    hubScene.fog.near = Math.max(16, dist * 0.85); hubScene.fog.far = Math.max(52, dist * 2.6);
+    if (HUB.hemi) HUB.hemi.intensity = lerp(HUB.hemi.intensity, f.cone >= 0.6 ? 1.1 : 0.55, Math.min(1, dt * 3)); }
   // 작전 목록과 브리핑 사이 빈 공간 가운데에 기계가 오도록 화면을 옆으로 밀기
   {
     const L = GS.state === 'hub' && GS.hubView === 'main' ? document.querySelector('#hub .mlist') : null, R = L && document.querySelector('#hub .mbrief');

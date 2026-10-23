@@ -1,20 +1,21 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, V3, _box, _v1, fmt } from '../core/utils.js?v=37';
-import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, bind, keyLabel, maxReserve, partKg } from '../data/data.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { camera } from '../core/renderer.js?v=37';
-import { groundAt, hitsBoxXZ } from '../world/world.js?v=37';
-import { updatePartVisual } from '../enemies/robot.js?v=37';
-import { GRAV, curWeapon, player } from '../player/playerState.js?v=37';
-import { TUT_STEPS, tutConfirm } from '../modes/tutorial.js?v=37';
-import { renderBagUI } from '../player/input.js?v=37';
-import { conditionOf, partValue } from '../combat/damage.js?v=37';
-import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=37';
-import { HARD_MUL } from '../modes/difficulty.js?v=37';
-import { achEvent } from '../meta/achievements.js?v=37';
-import { addFeed, popup } from '../ui/hud.js?v=37';
-import { endMission } from './result.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, V3, _box, _v1, fmt } from '../core/utils.js?v=39';
+import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, bind, keyLabel, maxReserve, partKg } from '../data/data.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { camera } from '../core/renderer.js?v=39';
+import { groundAt, hitsBoxXZ } from '../world/world.js?v=39';
+import { updatePartVisual } from '../enemies/robot.js?v=39';
+import { GRAV, curWeapon, player } from '../player/playerState.js?v=39';
+import { nearestBBox, takeBBox } from '../world/missions.js?v=39';
+import { TUT_STEPS, tutConfirm } from '../modes/tutorial.js?v=39';
+import { renderBagUI } from '../player/input.js?v=39';
+import { conditionOf, partValue } from '../combat/damage.js?v=39';
+import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=39';
+import { HARD_MUL } from '../modes/difficulty.js?v=39';
+import { achEvent } from '../meta/achievements.js?v=39';
+import { addFeed, popup } from '../ui/hud.js?v=39';
+import { endMission } from './result.js?v=39';
 
 // =====================================================================
 //  부품 낙하 / 회수
@@ -108,13 +109,15 @@ function loadMult() { const r = carryKg() / bagCap(); return r <= 0.5 ? 1 : r <=
 function dropWorst() {
   if (!GS.run || GS.state !== 'mission' || !GS.run.loot.length || player.downed) return;
   const eff = l => l.val / Math.max(0.1, l.kg || 0.1);
-  let wi = 0; GS.run.loot.forEach((l, i) => { if (eff(l) < eff(GS.run.loot[wi])) wi = i; });
+  let wi = -1; GS.run.loot.forEach((l, i) => { if (!l.obj && (wi < 0 || eff(l) < eff(GS.run.loot[wi]))) wi = i; });
+  if (wi < 0) { popup('버릴 수 있는 부품이 없습니다', 'dim'); return; }
   dropLootAt(wi);
 }
 // 가방의 i번째 부품을 발 앞에 내려놓음 (다시 주울 수 있음)
 const dropBoxGeo = new THREE.BoxGeometry(0.42, 0.3, 0.42);
 function dropLootAt(i) {
   if (!GS.run || GS.state !== 'mission' || player.downed || !GS.run.loot[i]) return;
+  if (GS.run.loot[i].obj) { popup('블랙박스는 버릴 수 없습니다', 'dim'); return; }
   const l = GS.run.loot.splice(i, 1)[0]; SFX.ui();
   const fwd = camera.getWorldDirection(_v1); fwd.y = 0; if (fwd.lengthSq() < 1e-4) fwd.set(0, 0, -1); fwd.normalize();
   let x = player.pos.x + fwd.x * 1.1, z = player.pos.z + fwd.z * 1.1;
@@ -159,6 +162,7 @@ function inExtraction() { return GS.extraction && Math.hypot(GS.extraction.x - p
 function interact() {
   if (player.downed) return;
   if (GS.run && GS.run.tut) { const st = TUT_STEPS[GS.run.tut.i]; if (st && (st.info || (st.wait && !GS.run.tut.started))) { tutConfirm(); return; } }
+  const bb = nearestBBox(); if (bb) { takeBBox(bb); return; }
   const l = nearestLoot();
   if (l) { if (isGuest() && l.lid) coopOut({ t: 'fpick', lid: l.lid }); else if (!isGuest() || l.dropped) pickup(l); return; }
   const c = nearestCrate();

@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, V3, _v4, clamp, lerp, setHTML } from '../core/utils.js?v=37';
-import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { controls, scene } from '../core/renderer.js?v=37';
-import { addBox, crate, removeHittables } from '../world/world.js?v=37';
-import { player } from '../player/playerState.js?v=37';
-import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=37';
-import { animateLegs } from '../enemies/ai.js?v=37';
-import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=37';
-import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=37';
-import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=37';
-import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=37';
-import { spiderPose } from './coop.js?v=37';
-import { achUnlock } from '../meta/achievements.js?v=37';
-import { addFeed, popup } from '../ui/hud.js?v=37';
-import { goHub } from '../game/result.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, V3, _v4, clamp, lerp, setHTML } from '../core/utils.js?v=39';
+import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { controls, scene } from '../core/renderer.js?v=39';
+import { addBox, crate, removeHittables } from '../world/world.js?v=39';
+import { player } from '../player/playerState.js?v=39';
+import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=39';
+import { animateLegs } from '../enemies/ai.js?v=39';
+import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=39';
+import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=39';
+import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=39';
+import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=39';
+import { spiderPose } from './coop.js?v=39';
+import { achUnlock } from '../meta/achievements.js?v=39';
+import { addFeed, popup } from '../ui/hud.js?v=39';
+import { goHub } from '../game/result.js?v=39';
 
 // =====================================================================
 //  훈련장 (튜토리얼)

@@ -1,5 +1,5 @@
-import { GS } from './state.js?v=37';
-import { clamp } from './utils.js?v=37';
+import { GS } from './state.js?v=39';
+import { clamp } from './utils.js?v=39';
 
 // =====================================================================
 //  오디오 (Web Audio 합성)

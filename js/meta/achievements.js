@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=37';
-import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { camera } from '../core/renderer.js?v=37';
-import { removeHittables } from '../world/world.js?v=37';
-import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=37';
-import { player } from '../player/playerState.js?v=37';
-import { capZones } from '../world/missions.js?v=37';
-import { legFactor } from '../combat/damage.js?v=37';
-import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=37';
-import { createLoot } from '../game/loot.js?v=37';
-import { addFeed, popup } from '../ui/hud.js?v=37';
-import { WLV_MAX } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=39';
+import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { camera } from '../core/renderer.js?v=39';
+import { removeHittables } from '../world/world.js?v=39';
+import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=39';
+import { player } from '../player/playerState.js?v=39';
+import { capZones } from '../world/missions.js?v=39';
+import { legFactor } from '../combat/damage.js?v=39';
+import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=39';
+import { createLoot } from '../game/loot.js?v=39';
+import { addFeed, popup } from '../ui/hud.js?v=39';
+import { WLV_MAX } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  업적
@@ -68,7 +68,7 @@ const ACH = [
   { id: 'drone30', cat: '전투', name: '대공 사격', desc: '드론형을 30기 격추한다.', cr: 300, prog: () => [GS.save.ach.c.drones || 0, 30] },
   { id: 'mite20', cat: '전투', name: '해충 방제', desc: '자폭 거미를 터지기 전에 20기 부순다.', cr: 500, prog: () => [GS.save.ach.c.mites || 0, 20] },
   { id: 'counterSnipe', cat: '전투', name: '역저격', desc: '조준선을 겨누고 있는 저격형의 센서를 부숴 저격을 끊는다.', cr: 250 },
-  { id: 'relayFast', cat: '전투', name: '정전 사고', desc: '변전소에서 출격 150초 안에 구역 3곳을 모두 점령한다.', cr: 400 },
+  { id: 'relayFast', cat: '전투', name: '블랙박스 속공', desc: '추락선 회수에서 출격 150초 안에 블랙박스 3개를 모두 회수한다.', cr: 400 },
   { id: 'hardFirst', cat: '보스', name: '지옥의 문턱', desc: '하드 모드 작전을 처음으로 완수한다.', cr: 500 },
   { id: 'hardRex', cat: '보스', name: '멸종 3회차', desc: '하드 모드로 REX-09를 격파한다.', cr: 1500, skin: 'rex_shotgun' },
   { id: 'hardSpider', cat: '보스', name: '독거미 사냥꾼', desc: '하드 모드로 ARACHNE를 격파한다.', cr: 1800, skin: 'spider_smg' },
@@ -316,6 +316,10 @@ function checkObjective() {
       GS.run.bossKillT = GS.time - (GS.run.boss.bs.engageT || GS.run.startT);
       GS.run.pistolOnly = Object.keys(GS.run.used).every(k => ['pistol', 'emp'].includes(k));
       GS.run.objDone = true; SFX.objective(); NET.mute = true; addFeed(`${GS.run.mission.target[0]} 격파 · 탈출 지점으로 귀환해 정산`, 'x'); NET.mute = false; coopEv({ t: 'obj', bt: GS.run.bossKillT }); }
+    return;
+  }
+  if (GS.run.mission.bbox) {
+    if (!GS.run.objDone && (GS.run.bbox || 0) >= 3) { GS.run.objDone = true; GS.run.relayT = GS.time - GS.run.startT; SFX.objective(); addFeed('블랙박스 3개 회수 완료 · 탈출 지점으로 귀환해 정산', 'x'); achEvent('relays', { t: GS.run.relayT }); coopEv({ t: 'obj', bt: 0 }); }
     return;
   }
   if (GS.run.mission.relays) {

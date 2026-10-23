@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=37';
-import { V3 } from '../core/utils.js?v=37';
-import { W } from '../data/data.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { V3 } from '../core/utils.js?v=39';
+import { W } from '../data/data.js?v=39';
 
 // =====================================================================
 //  플레이어 / 실행 상태

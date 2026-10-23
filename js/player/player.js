@@ -1,21 +1,21 @@
-import { GS } from '../core/state.js?v=37';
-import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=37';
-import { W, maxReserve, utilOn } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX } from '../core/audio.js?v=37';
-import { BASE_FOV, camera, controls } from '../core/renderer.js?v=37';
-import { groundAt, moveWithCollision } from '../world/world.js?v=37';
-import { UPY, spawnSpark } from '../fx/effects.js?v=37';
-import { GUNS, HIP_POS } from './viewmodel.js?v=37';
-import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=37';
-import { kd } from './input.js?v=37';
-import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=37';
-import { coopDown, coopOn } from '../modes/coop.js?v=37';
-import { HARD_MUL } from '../modes/difficulty.js?v=37';
-import { achEvent } from '../meta/achievements.js?v=37';
-import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=37';
-import { addFeed } from '../ui/hud.js?v=37';
-import { endMission } from '../game/result.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=39';
+import { W, maxReserve, utilOn } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX } from '../core/audio.js?v=39';
+import { BASE_FOV, camera, controls } from '../core/renderer.js?v=39';
+import { groundAt, moveWithCollision } from '../world/world.js?v=39';
+import { UPY, spawnSpark } from '../fx/effects.js?v=39';
+import { GUNS, HIP_POS } from './viewmodel.js?v=39';
+import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=39';
+import { kd } from './input.js?v=39';
+import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=39';
+import { coopDown, coopOn } from '../modes/coop.js?v=39';
+import { HARD_MUL } from '../modes/difficulty.js?v=39';
+import { achEvent } from '../meta/achievements.js?v=39';
+import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=39';
+import { addFeed } from '../ui/hud.js?v=39';
+import { endMission } from '../game/result.js?v=39';
 
 // =====================================================================
 //  플레이어 피해

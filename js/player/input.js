@@ -1,17 +1,17 @@
-import { GS } from '../core/state.js?v=37';
-import { $, TEST, fmt, setText } from '../core/utils.js?v=37';
-import { BAGS, GUN_KG, KEYDEF, STATE_KO, WEAPONS, bind, keyLabel } from '../data/data.js?v=37';
-import { writeSave } from '../core/save.js?v=37';
-import { SFX, applyVolume, initAudio, vol } from '../core/audio.js?v=37';
-import { controls } from '../core/renderer.js?v=37';
-import { keys, player } from './playerState.js?v=37';
-import { startMission } from '../world/missions.js?v=37';
-import { tutNext } from '../modes/tutorial.js?v=37';
-import { cycleGrenade, startReload, switchWeapon, throwGrenade, useMedkit, useSkill } from '../combat/shooting.js?v=37';
-import { achEvent } from '../meta/achievements.js?v=37';
-import { bagCap, carryKg, dropLootAt, dropWorst, interact, loadMult } from '../game/loot.js?v=37';
-import { endMission } from '../game/result.js?v=37';
-import { renderHub } from '../ui/hub.js?v=37';
+import { GS } from '../core/state.js?v=39';
+import { $, TEST, fmt, setText } from '../core/utils.js?v=39';
+import { BAGS, GUN_KG, KEYDEF, STATE_KO, WEAPONS, bind, keyLabel } from '../data/data.js?v=39';
+import { writeSave } from '../core/save.js?v=39';
+import { SFX, applyVolume, initAudio, vol } from '../core/audio.js?v=39';
+import { controls } from '../core/renderer.js?v=39';
+import { keys, player } from './playerState.js?v=39';
+import { startMission } from '../world/missions.js?v=39';
+import { tutNext } from '../modes/tutorial.js?v=39';
+import { cycleGrenade, startReload, switchWeapon, throwGrenade, useMedkit, useSkill } from '../combat/shooting.js?v=39';
+import { achEvent } from '../meta/achievements.js?v=39';
+import { bagCap, carryKg, dropLootAt, dropWorst, interact, loadMult } from '../game/loot.js?v=39';
+import { endMission } from '../game/result.js?v=39';
+import { renderHub } from '../ui/hub.js?v=39';
 
 // =====================================================================
 //  입력
@@ -39,7 +39,7 @@ function renderBagUI() {
   if (!GS.run || GS.state !== 'mission') { el.innerHTML = ''; return; }
   const kg = carryKg(), cap = bagCap(), lm = loadMult();
   const guns = GS.run.ws.filter(w => GUN_KG[w.id]).map(w => `<div class="bi gun"><i></i><span>${WEAPONS[w.id].name} <span class="dim">· 휴대 무기</span></span><span class="k">${GUN_KG[w.id].toFixed(1)}kg</span><span class="v"></span></div>`).join('');
-  const items = GS.run.loot.map((l, i) => `<div class="bi" draggable="true" data-bi="${i}"><i>⋮⋮</i><span>${l.name} <span class="dim">${STATE_KO[l.state] || ''} ${Math.round((l.cond || 0) * 100)}%</span></span><span class="k">${(l.kg || 0).toFixed(1)}kg</span><span class="v">${fmt(l.val)} CR</span></div>`).join('');
+  const items = GS.run.loot.map((l, i) => l.obj ? `<div class="bi gun"><i></i><span>${l.name} <span class="acc">· 작전 목표 · 버릴 수 없음</span></span><span class="k">${(l.kg || 0).toFixed(1)}kg</span><span class="v">${fmt(l.val)} CR</span></div>` : `<div class="bi" draggable="true" data-bi="${i}"><i>⋮⋮</i><span>${l.name} <span class="dim">${STATE_KO[l.state] || ''} ${Math.round((l.cond || 0) * 100)}%</span></span><span class="k">${(l.kg || 0).toFixed(1)}kg</span><span class="v">${fmt(l.val)} CR</span></div>`).join('');
   el.innerHTML = `<div class="bh"><span class="lbl">가방 · ${BAGS[GS.save.bag || 0].name}</span><span><b class="${kg > cap ? 'bad' : ''}">${kg.toFixed(1)} / ${cap} kg</b>${lm < 0.999 ? ` <span class="${kg > cap ? 'bad' : 'acc'}">이동 -${Math.round((1 - lm) * 100)}%</span>` : ''}</span></div>
     <div class="bl">${guns}${items || '<div class="dim" style="padding:8px 2px">회수한 부품이 없습니다.</div>'}</div>
     <div class="bdrop" id="bagdrop">버릴 부품을 여기로 끌어 놓으세요 · 버린 부품은 발밑에 떨어지고, 다시 가서 ${keyLabel(bind('use'))} 로 주울 수 있습니다</div>`;
