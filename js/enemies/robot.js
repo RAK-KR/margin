@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE, RDIM } from '../data/data.js?v=34';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE, RDIM } from '../data/data.js?v=35';
 
 // =====================================================================
 //  로봇 생성 (부위별 독립 메시)

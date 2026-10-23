@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { V3, _v1, lerp, rand } from '../core/utils.js?v=34';
-import { buildRobot } from '../enemies/robot.js?v=34';
-import { buildCore } from '../bosses/core.js?v=34';
-import { buildRex } from '../bosses/rex.js?v=34';
-import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=34';
-import { buildDrone } from '../enemies/extra.js?v=34';
-import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { V3, _v1, _v3, lerp, rand } from '../core/utils.js?v=35';
+import { buildRobot } from '../enemies/robot.js?v=35';
+import { buildCore } from '../bosses/core.js?v=35';
+import { buildRex } from '../bosses/rex.js?v=35';
+import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=35';
+import { buildDrone } from '../enemies/extra.js?v=35';
+import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=35';
 
 // =====================================================================
 //  거점 3D 배경 (격납고 + 임무별 대상 기계)
@@ -28,7 +28,7 @@ const HUB_FRAME = {
 };
 function buildHubScene() {
   if (HUB.built) return; HUB.built = true;
-  hubScene.add(new THREE.HemisphereLight(0x9a948a, 0x14110e, 0.55));
+  HUB.hemi = new THREE.HemisphereLight(0x9a948a, 0x14110e, 0.55); hubScene.add(HUB.hemi);
   const key = new THREE.SpotLight(0xffc27a, 520, 60, 0.42, 0.6, 1.5); key.position.set(-7, 13, 11); key.target.position.set(1, 1, 0);
   hubScene.add(key, key.target); HUB.key = key;
   const rim = new THREE.SpotLight(0xdad4ca, 260, 40, 0.6, 0.7, 1.6); rim.position.set(8, 9, -9); rim.target.position.set(1, 2, 0);
@@ -93,13 +93,27 @@ function updateHub3D(dt) {
   const f = HUB_FRAME[HUB.cur] || HUB_FRAME.A;
   HUB.fade = Math.min(1, HUB.fade + dt * 1.6);
   const fl = HUB.fade < 0.35 ? (Math.random() < 0.5 ? 0.2 : 1) * HUB.fade / 0.35 : 1;   // 조명 점등 깜빡임
-  HUB.key.intensity = 520 * f.light * fl; HUB.rim.intensity = 260 * f.light * fl; HUB.under.intensity = 18 * fl;
+  const lb = 1; HUB.key.intensity = 520 * f.light * fl * lb; HUB.rim.intensity = 260 * f.light * fl * lb; HUB.under.intensity = 18 * fl;
   HUB.ring.material.opacity = 0.45 + 0.25 * Math.sin(GS.time * 2);
   HUB.key.target.position.lerp(f.aim, Math.min(1, dt * 3)); HUB.key.angle = lerp(HUB.key.angle, f.cone, Math.min(1, dt * 3));
   HUB.eye.intensity = HUB.cur === 'C' ? (40 + 25 * Math.sin(GS.time * 3)) * fl : 0;
+  // 보스는 화각을 넓혀 화면 위로 넘치지 않게 (카메라를 멀리 빼면 안개에 묻힘)
+  HUB.zoom = lerp(HUB.zoom || 1, HUB.cur === 'C' ? 0.62 : f.cone >= 0.6 ? 0.82 : 1, Math.min(1, dt * 3)); hubCam.zoom = HUB.zoom;
   HUB.camPos.lerp(f.cam, Math.min(1, dt * 3)); HUB.camLook.lerp(f.look, Math.min(1, dt * 3));
   hubCam.position.copy(HUB.camPos).add(_v1.set(Math.sin(GS.time * 0.23) * 0.35, Math.sin(GS.time * 0.31) * 0.12, 0));
   hubCam.lookAt(HUB.camLook);
+  // 작전 목록과 브리핑 사이 빈 공간 가운데에 기계가 오도록 화면을 옆으로 밀기
+  {
+    const L = GS.state === 'hub' && GS.hubView === 'main' ? document.querySelector('#hub .mlist') : null, R = L && document.querySelector('#hub .mbrief');
+    let want = 0;
+    if (L && R && innerWidth > 900) {
+      const cx = (L.getBoundingClientRect().right + R.getBoundingClientRect().left) / 2;
+      hubCam.aspect = innerWidth / innerHeight; hubCam.clearViewOffset(); hubCam.updateMatrixWorld();
+      const v = _v3.copy(f.aim).project(hubCam);
+      want = (v.x * 0.5 + 0.5) * innerWidth - cx;
+    }
+    HUB.offX = lerp(HUB.offX || 0, want, Math.min(1, dt * 4));
+  }
   // 먼지
   const a = HUB.dust.geometry.attributes.position;
   for (let i = 0; i < a.count; i++) { let y = a.getY(i) + dt * 0.12; if (y > 12) y = 0; a.setY(i, y); a.setX(i, a.getX(i) + Math.sin(GS.time * 0.5 + i) * dt * 0.05); }
@@ -138,4 +152,4 @@ function updateHub3D(dt) {
   }
 }
 
-export { hubCam, hubScene, hubShow, updateHub3D };
+export { HUB, hubCam, hubScene, hubShow, updateHub3D };

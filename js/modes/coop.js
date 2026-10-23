@@ -1,29 +1,30 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=34';
-import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { camera, scene } from '../core/renderer.js?v=34';
-import { removeHittables } from '../world/world.js?v=34';
-import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=34';
-import { updatePartVisual } from '../enemies/robot.js?v=34';
-import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=34';
-import { damagePlayer } from '../player/player.js?v=34';
-import { spawnEnemy, startMission } from '../world/missions.js?v=34';
-import { kd } from '../player/input.js?v=34';
-import { launchThrowable } from '../combat/shooting.js?v=34';
-import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=34';
-import { animateLegs } from '../enemies/ai.js?v=34';
-import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=34';
-import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=34';
-import { _box3, spawnDrone } from '../enemies/extra.js?v=34';
-import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=34';
-import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=34';
-import { achEvent, killEnemy } from '../meta/achievements.js?v=34';
-import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=34';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=34';
-import { endMission } from '../game/result.js?v=34';
-import { renderHub } from '../ui/hub.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { $, V3, _v1, _v2, angDiff, clamp, fmt, lerp, rand } from '../core/utils.js?v=35';
+import { MISSIONS, STATE_KO, UK } from '../data/data.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { camera, scene } from '../core/renderer.js?v=35';
+import { removeHittables } from '../world/world.js?v=35';
+import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnDebris, spawnFlash, spawnTracer } from '../fx/effects.js?v=35';
+import { updatePartVisual } from '../enemies/robot.js?v=35';
+import { EYE, P_HEIGHT, curWeapon, player, raycaster } from '../player/playerState.js?v=35';
+import { damagePlayer } from '../player/player.js?v=35';
+import { spawnEnemy, startMission } from '../world/missions.js?v=35';
+import { xrayPart } from './tutorial.js?v=35';
+import { kd } from '../player/input.js?v=35';
+import { launchThrowable } from '../combat/shooting.js?v=35';
+import { detachPart, hitPart, partAlive, shatter } from '../combat/damage.js?v=35';
+import { animateLegs } from '../enemies/ai.js?v=35';
+import { animateRex, knockPlayer, markerGeo, partTick, shockGeo, spawnShock } from '../bosses/rex.js?v=35';
+import { DR, applyDragonPose, dragonNodesOpen, dragonStrike } from '../bosses/dragon.js?v=35';
+import { _box3, spawnDrone } from '../enemies/extra.js?v=35';
+import { animateMite, legIK, spawnMite, spiderExposed } from '../bosses/spider.js?v=35';
+import { extremeUnlocked, hardUnlocked } from './difficulty.js?v=35';
+import { achEvent, killEnemy } from '../meta/achievements.js?v=35';
+import { bagRoom, lootBeamGeo, lootRingGeo } from '../game/loot.js?v=35';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=35';
+import { endMission } from '../game/result.js?v=35';
+import { renderHub } from '../ui/hub.js?v=35';
 
 // =====================================================================
 //  협동 모드 (2인 · 방장 권위 방식)
@@ -466,6 +467,7 @@ function spiderPose(e, dt) {
   }
   const ex = spiderExposed(e);
   if (P.reactor.attached && P.reactor.flash <= 0) P.reactor.meshes[0].material.emissive.setHex(0xff7a1a).multiplyScalar(ex ? 1.1 + 0.4 * Math.sin(GS.time * 14) : 0.25);
+  if (P.reactor.attached) xrayPart(P.reactor, ex ? 0xffc040 : 0xff7a1a, ex ? 0.8 + 0.2 * Math.sin(GS.time * 12) : 0.65, ex ? 1.9 : 1.35, ex ? '동력로 · 지금 쏘세요' : '동력로');
   if (P.head.attached && P.head.flash <= 0) for (const m of e.eyes) m.material.emissive.setHex(0xff3020).multiplyScalar(B.state === 'lunge_wind' || B.state === 'stomp_wind' ? 1.5 : 0.8);
   if (B.state === 'stunned' && Math.random() < 0.3) { _v1.copy(pos).setY(e.H); burstSparks(_v1, UPY, 3, 0x6ac8ff, 4); }
 }

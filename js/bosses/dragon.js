@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { V3, _v1, _v2, clamp, lerp, rand } from '../core/utils.js?v=34';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { GLOW, scene } from '../core/renderer.js?v=34';
-import { addBox, crate, groundAt, hitsBoxXZ } from '../world/world.js?v=34';
-import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=34';
-import { updatePartVisual } from '../enemies/robot.js?v=34';
-import { player } from '../player/playerState.js?v=34';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=34';
-import { partAlive, sensorMult } from '../combat/damage.js?v=34';
-import { markerGeo, partTick } from './rex.js?v=34';
-import { coopEv, dmgTargets, hurtTarget, isGuest, knockTarget, v3a } from '../modes/coop.js?v=34';
-import { killEnemy } from '../meta/achievements.js?v=34';
-import { addFeed, popup } from '../ui/hud.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { V3, _v1, _v2, clamp, lerp, rand } from '../core/utils.js?v=35';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { GLOW, scene } from '../core/renderer.js?v=35';
+import { addBox, crate, groundAt, hitsBoxXZ } from '../world/world.js?v=35';
+import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=35';
+import { updatePartVisual } from '../enemies/robot.js?v=35';
+import { player } from '../player/playerState.js?v=35';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=35';
+import { partAlive, sensorMult } from '../combat/damage.js?v=35';
+import { markerGeo, partTick } from './rex.js?v=35';
+import { coopEv, dmgTargets, hurtTarget, isGuest, knockTarget, v3a } from '../modes/coop.js?v=35';
+import { killEnemy } from '../meta/achievements.js?v=35';
+import { addFeed, popup } from '../ui/hud.js?v=35';
 
 // =====================================================================
 //  공중 보스: 청룡 (기계 용)

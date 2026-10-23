@@ -1,4 +1,4 @@
-import { GS } from '../core/state.js?v=34';
+import { GS } from '../core/state.js?v=35';
 
 // =====================================================================
 //  데이터: 무기 / 장비 / 적 / 임무
@@ -290,4 +290,4 @@ const MISSIONS = {
     enemies: '생산 코어 · 조립 기계', rec: '상점 전 장비 · 무기 강화 · EMP · 단독 출격', target: ['생산 코어', '근원지 · 지하 공장'] },
 };
 
-export { ARMORS, BAGS, CONSUMABLES, ENDING, ETYPES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, PART_MULT, PART_NAMES, PART_TYPE, PRECISE, RDIM, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STATE_KO, STORY, UK, UTILS, W, WEAPONS, bind, effW, keyLabel, maxReserve, partKg, utilOn };
+export { ARMORS, BAGS, CONSUMABLES, ENDING, ETYPES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, PART_MULT, PART_NAMES, PART_TYPE, PRECISE, RDIM, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STATE_KO, UK, UTILS, W, WEAPONS, bind, effW, keyLabel, maxReserve, partKg, utilOn };

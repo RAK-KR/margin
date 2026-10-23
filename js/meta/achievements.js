@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=34';
-import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=34';
-import { writeSave } from '../core/save.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { camera } from '../core/renderer.js?v=34';
-import { removeHittables } from '../world/world.js?v=34';
-import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=34';
-import { player } from '../player/playerState.js?v=34';
-import { capZones } from '../world/missions.js?v=34';
-import { legFactor } from '../combat/damage.js?v=34';
-import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=34';
-import { createLoot } from '../game/loot.js?v=34';
-import { addFeed, popup } from '../ui/hud.js?v=34';
-import { WLV_MAX } from '../ui/hub.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=35';
+import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=35';
+import { writeSave } from '../core/save.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { camera } from '../core/renderer.js?v=35';
+import { removeHittables } from '../world/world.js?v=35';
+import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=35';
+import { player } from '../player/playerState.js?v=35';
+import { capZones } from '../world/missions.js?v=35';
+import { legFactor } from '../combat/damage.js?v=35';
+import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=35';
+import { createLoot } from '../game/loot.js?v=35';
+import { addFeed, popup } from '../ui/hud.js?v=35';
+import { WLV_MAX } from '../ui/hub.js?v=35';
 
 // =====================================================================
 //  업적

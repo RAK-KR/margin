@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=34';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { addBox, groundAt, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=34';
-import { UPY, burstSparks, spawnFlash } from '../fx/effects.js?v=34';
-import { player } from '../player/playerState.js?v=34';
-import { partAlive, sensorMult } from '../combat/damage.js?v=34';
-import { alertEnemy, enemyFire } from './ai.js?v=34';
-import { partTick } from '../bosses/rex.js?v=34';
-import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget } from '../modes/coop.js?v=34';
-import { killEnemy } from '../meta/achievements.js?v=34';
-import { addFeed, popup } from '../ui/hud.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=35';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { addBox, groundAt, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=35';
+import { UPY, burstSparks, spawnFlash } from '../fx/effects.js?v=35';
+import { player } from '../player/playerState.js?v=35';
+import { partAlive, sensorMult } from '../combat/damage.js?v=35';
+import { alertEnemy, enemyFire } from './ai.js?v=35';
+import { partTick } from '../bosses/rex.js?v=35';
+import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget } from '../modes/coop.js?v=35';
+import { killEnemy } from '../meta/achievements.js?v=35';
+import { addFeed, popup } from '../ui/hud.js?v=35';
 
 // =====================================================================
 //  추가 적: 드론형 · 저격형 · 중계탑

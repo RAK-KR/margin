@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { $, V3, clamp, lerp, setHTML } from '../core/utils.js?v=34';
-import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=34';
-import { writeSave } from '../core/save.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { controls } from '../core/renderer.js?v=34';
-import { addBox, crate, removeHittables } from '../world/world.js?v=34';
-import { player } from '../player/playerState.js?v=34';
-import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=34';
-import { animateLegs } from '../enemies/ai.js?v=34';
-import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=34';
-import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=34';
-import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=34';
-import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=34';
-import { spiderPose } from './coop.js?v=34';
-import { achUnlock } from '../meta/achievements.js?v=34';
-import { addFeed, popup } from '../ui/hud.js?v=34';
-import { goHub } from '../game/result.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { $, V3, _v4, clamp, lerp, setHTML } from '../core/utils.js?v=35';
+import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=35';
+import { writeSave } from '../core/save.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { controls, scene } from '../core/renderer.js?v=35';
+import { addBox, crate, removeHittables } from '../world/world.js?v=35';
+import { player } from '../player/playerState.js?v=35';
+import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=35';
+import { animateLegs } from '../enemies/ai.js?v=35';
+import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=35';
+import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=35';
+import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=35';
+import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=35';
+import { spiderPose } from './coop.js?v=35';
+import { achUnlock } from '../meta/achievements.js?v=35';
+import { addFeed, popup } from '../ui/hud.js?v=35';
+import { goHub } from '../game/result.js?v=35';
 
 // =====================================================================
 //  훈련장 (튜토리얼)
@@ -121,12 +121,37 @@ function tutClear() {
   if (GS.run.tut.marker) { GS.world.remove(GS.run.tut.marker); GS.run.tut.marker = null; }
   for (const l of GS.loots) GS.world.remove(l.obj, l.ring, l.beam); GS.loots.length = 0;
 }
+// ---- 투시 표지: 몸에 가려도 보이는 약점 표시 (매 프레임 다시 찍음) ----
+const XRAY = { pool: [], n: 0, tex: {} };
+// 마름모 + 아래 글자 (글자별로 한 번만 그림)
+function xrayTex(label) {
+  if (XRAY.tex[label]) return XRAY.tex[label];
+  const c = document.createElement('canvas'); c.width = 256; c.height = 160; const g = c.getContext('2d');
+  g.save(); g.translate(128, 56); g.strokeStyle = '#fff'; g.lineWidth = 8; g.shadowColor = '#000'; g.shadowBlur = 6;
+  g.beginPath(); g.moveTo(0, -44); g.lineTo(44, 0); g.lineTo(0, 44); g.lineTo(-44, 0); g.closePath(); g.stroke();
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 10, 0, Math.PI * 2); g.fill(); g.restore();
+  if (label) { g.font = "bold 34px 'Noto Sans KR', sans-serif"; g.textAlign = 'center'; g.fillStyle = '#fff'; g.shadowColor = '#000'; g.shadowBlur = 8; g.fillText(label, 128, 148); }
+  return (XRAY.tex[label] = new THREE.CanvasTexture(c));
+}
+function xrayMark(pos, color, alpha = 1, size = 1, label = '') {
+  let sp = XRAY.pool[XRAY.n];
+  if (!sp) {
+    sp = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false, depthWrite: false, sizeAttenuation: false }));
+    sp.renderOrder = 999; sp.center.set(0.5, 0.65); scene.add(sp); XRAY.pool.push(sp);
+  }
+  XRAY.n++; sp.visible = true; sp.position.copy(pos);
+  const t = xrayTex(label); if (sp.material.map !== t) { sp.material.map = t; sp.material.needsUpdate = true; }
+  sp.material.color.setHex(color); sp.material.opacity = alpha; sp.scale.set(0.11 * size * 1.6, 0.11 * size, 1);
+}
+function xrayPart(q, color, alpha, size, label = '') { if (!q || !q.attached || !q.meshes || !q.meshes[0]) return; q.meshes[0].getWorldPosition(_v4); xrayMark(_v4, color, alpha, size, label); }
+function xrayFlush() { for (let i = XRAY.n; i < XRAY.pool.length; i++) XRAY.pool[i].visible = false; XRAY.n = 0; }
 function tutHighlight(on) {
   const T = GS.run.tut, st = TUT_STEPS[T.i];
   const list = on && st && st.hl ? (() => { try { return st.hl().filter(q => q && q.attached && q.state !== 'destroyed' && q.state !== 'disabled'); } catch (e) { return []; } })() : [];
   for (const q of T.hlParts || []) if (!list.includes(q)) { for (const m of q.meshes) if (m.userData.baseE) m.material.emissive.copy(m.userData.baseE); }
   const k = 0.45 + 0.45 * Math.sin(GS.time * 7);
   for (const q of list) if (q.flash <= 0) for (const m of q.meshes) m.material.emissive.setRGB(0.15 * k, 0.85 * k, 0.55 * k);
+  for (const q of list) xrayPart(q, 0x5cffb0, 0.55 + 0.4 * k, 0.9);
   T.hlParts = list;
 }
 function tutConfirm() {
@@ -165,4 +190,4 @@ function endTutorial(done) {
   if (first) achUnlock('graduate');
 }
 
-export { TUT_STEPS, buildRange, endTutorial, tutConfirm, tutNext, tutPassiveTick, updateTutorial };
+export { TUT_STEPS, buildRange, endTutorial, tutConfirm, tutNext, tutPassiveTick, updateTutorial, xrayFlush, xrayPart };

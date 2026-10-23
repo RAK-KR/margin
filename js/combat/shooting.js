@@ -1,25 +1,25 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { V3, clamp, lerp, rand } from '../core/utils.js?v=34';
-import { CONSUMABLES, GRENADES, SKILLS, W } from '../data/data.js?v=34';
-import { writeSave } from '../core/save.js?v=34';
-import { SFX } from '../core/audio.js?v=34';
-import { camera } from '../core/renderer.js?v=34';
-import { groundAt, segFirstHit } from '../world/world.js?v=34';
-import { UPY, blastLight, burstSparks, muzzleLight, spawnBeam, spawnDebris, spawnFlash, spawnSpark, spawnTracer } from '../fx/effects.js?v=34';
-import { GUNS } from '../player/viewmodel.js?v=34';
-import { curW, curWeapon, player, raycaster, recoil } from '../player/playerState.js?v=34';
-import { damagePlayer } from '../player/player.js?v=34';
-import { showGun } from '../world/missions.js?v=34';
-import { coreExposed } from '../bosses/core.js?v=34';
-import { kd } from '../player/input.js?v=34';
-import { damagePart, handlePartEvent, hitPart, partAlive } from './damage.js?v=34';
-import { alertEnemy } from '../enemies/ai.js?v=34';
-import { bossHatchOpen, shockGeo } from '../bosses/rex.js?v=34';
-import { spiderExposed } from '../bosses/spider.js?v=34';
-import { NET, coopEv, coopHostShotFx, coopOut, guestRay, hurtTarget, isGuest, isHost, v3a } from '../modes/coop.js?v=34';
-import { achEvent } from '../meta/achievements.js?v=34';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { V3, clamp, lerp, rand } from '../core/utils.js?v=35';
+import { CONSUMABLES, GRENADES, SKILLS, W } from '../data/data.js?v=35';
+import { writeSave } from '../core/save.js?v=35';
+import { SFX } from '../core/audio.js?v=35';
+import { camera } from '../core/renderer.js?v=35';
+import { groundAt, segFirstHit } from '../world/world.js?v=35';
+import { UPY, blastLight, burstSparks, muzzleLight, spawnBeam, spawnDebris, spawnFlash, spawnSpark, spawnTracer } from '../fx/effects.js?v=35';
+import { GUNS } from '../player/viewmodel.js?v=35';
+import { curW, curWeapon, player, raycaster, recoil } from '../player/playerState.js?v=35';
+import { damagePlayer } from '../player/player.js?v=35';
+import { showGun } from '../world/missions.js?v=35';
+import { coreExposed } from '../bosses/core.js?v=35';
+import { kd } from '../player/input.js?v=35';
+import { damagePart, handlePartEvent, hitPart, partAlive } from './damage.js?v=35';
+import { alertEnemy } from '../enemies/ai.js?v=35';
+import { bossHatchOpen, shockGeo } from '../bosses/rex.js?v=35';
+import { spiderExposed } from '../bosses/spider.js?v=35';
+import { NET, coopEv, coopHostShotFx, coopOut, guestRay, hurtTarget, isGuest, isHost, v3a } from '../modes/coop.js?v=35';
+import { achEvent } from '../meta/achievements.js?v=35';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=35';
 
 // =====================================================================
 //  사격

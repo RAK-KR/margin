@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=34';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STORY, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=34';
-import { defaultSave, writeSave } from '../core/save.js?v=34';
-import { SFX, initAudio, vol } from '../core/audio.js?v=34';
-import { GUNS } from '../player/viewmodel.js?v=34';
-import { startMission } from '../world/missions.js?v=34';
-import { bindVolume } from '../player/input.js?v=34';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=34';
-import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=34';
-import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=34';
-import { nextGoal } from '../game/result.js?v=34';
-import { hubShow } from './hub3d.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=35';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=35';
+import { defaultSave, writeSave } from '../core/save.js?v=35';
+import { SFX, initAudio, vol } from '../core/audio.js?v=35';
+import { GUNS } from '../player/viewmodel.js?v=35';
+import { startMission } from '../world/missions.js?v=35';
+import { bindVolume } from '../player/input.js?v=35';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=35';
+import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=35';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=35';
+import { nextGoal } from '../game/result.js?v=35';
+import { hubShow } from './hub3d.js?v=35';
 
 // =====================================================================
 //  거점 / 상점
@@ -166,36 +166,79 @@ function renderHub() {
   const goalTxt = goal ? `<div class="nextgoal">${row('다음 목표', itemName(goal))}
       <div class="bar"><i style="width:${clamp(GS.save.credits / itemPrice(goal) * 100, 0, 100)}%"></i></div>
       <div class="dim mono" style="font-size:14px;margin-top:6px">${GS.save.credits >= itemPrice(goal) ? '<span class="ok">구매 가능</span>' : fmt(itemPrice(goal) - GS.save.credits) + ' CR 부족'}</div></div>` : '';
-  const opRows = Object.values(MISSIONS).filter(m => !m.tut).map(m => `<div class="op ${GS.selectedMission === m.id ? 'sel' : ''} ${m.boss ? 'boss' : ''}" data-mis="${m.id}">
-      <span class="opc mono">${m.code}</span><span class="opn">${m.name}${GS.save.stats[m.id] && GS.save.stats[m.id].hard ? ' <span class="hardtag">H</span>' : ''}</span>
-      <span class="pips">${[1, 2, 3].map(i => `<i class="${i <= DIFF[m.diff] ? 'on' : ''}"></i>`).join('')}</span><span class="opr mono">${!GS.save.unlocked[m.id] ? '<span class="dim">잠김</span>' : m.extreme && !extremeUnlocked() ? `<span class="dim">잠김 ${extremeProgress().join('/')}</span>` : fmt(m.contract)}</span></div>
-      ${GS.selectedMission === m.id ? `<div class="opd">${m.desc}<div class="dim">권장 · ${m.rec}</div></div>` : ''}`).join('');
-  const mainView = `<div class="hubhome">
-      <div class="hleft">
-        <div class="logo">MARGIN<small>기계 부품 회수 계약 · 용병 거점</small></div>
-        <div class="story">${GS.save.ended ? STORY.after : STORY.intro}</div>
-        <div class="lbl" style="margin:24px 0 10px">작전 선택</div>
-        <div class="ophead"><span>코드</span><span>작전</span><span>위험도</span><span>계약금</span></div>
-        <div class="ops">${opRows}</div>
-        ${sm.final ? `<div class="extag">${GS.save.unlocked.H ? '최종 작전 · 단독 출격 · 계약금 20,000 CR' : '익스트림 작전을 완수하면 근원지의 좌표가 열립니다'}</div>` : sm.extreme ? (extremeUnlocked() ? '<div class="extag">세 보스 동시 출현 · 방어복 · 보조 장비 사용 불가 · 계약금 12,000 CR</div>' : `<div class="dim" style="font-size:15px;margin-top:14px;line-height:1.6">상점의 장비를 모두 구매하면 열립니다 (소모품 · 무기 강화 제외). 현재 <b class="acc">${extremeProgress().join(' / ')}</b></div>`) : `<div class="diffsel"><button data-diff="0" class="${!GS.save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${GS.save.hardSel ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
-        ${!hardUnlocked(GS.selectedMission) ? '<div class="dim" style="font-size:14.5px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}`}
-        <button class="primary deploy ${sm.extreme || sm.final || (GS.save.hardSel && hardUnlocked(GS.selectedMission)) ? 'hard' : ''}" id="deploy" ${(sm.extreme && !extremeUnlocked()) || !GS.save.unlocked[sm.id] ? 'disabled' : ''}>${sm.final ? '최종 출격' : sm.extreme ? '익스트림 출격' : GS.save.hardSel && hardUnlocked(GS.selectedMission) ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
-      </div>
-      <div class="target ${sm.boss ? 'boss' : ''}"><div class="lbl">작전 목표 · ${sm.code}</div><div class="tname">${sm.target[0]}</div><div class="tsub">${sm.target[1]}</div></div>
-      <div class="hload">
+  // 작전 카드 (목록) · 오른쪽 브리핑 · 출격 — 작전 목록에서 고르고, 브리핑을 읽고, 오른쪽 아래에서 출격
+  const misState = m => {
+    const st2 = GS.save.stats[m.id] || {};
+    if (!GS.save.unlocked[m.id]) return '<span class="mst lock">잠김</span>';
+    if (m.extreme && !extremeUnlocked()) return `<span class="mst lock">잠김 ${extremeProgress().join('/')}</span>`;
+    if (st2.hard) return '<span class="mst hard">하드 클리어</span>';
+    if (st2.clears) return '<span class="mst ok">클리어</span>';
+    return '<span class="mst new">미완료</span>';
+  };
+  const opCard = m => `<div class="op ${GS.selectedMission === m.id ? 'sel' : ''} ${m.boss ? 'boss' : ''} ${!GS.save.unlocked[m.id] || (m.extreme && !extremeUnlocked()) ? 'locked' : ''}" data-mis="${m.id}">
+      <div class="r1"><span class="opc mono">${m.code}</span><span class="pips">${[1, 2, 3].map(i => `<i class="${i <= DIFF[m.diff] ? 'on' : ''}"></i>`).join('')}</span>${misState(m)}</div>
+      <div class="opn">${m.name.replace(/^최종 작전( [IV]+)? · /, '')}</div>
+      <div class="r2"><span>${m.target[0]}</span><span class="mono acc">${fmt(m.contract)} CR</span></div></div>`;
+  const MGROUPS = [['일반 작전', ['A', 'B', 'E']], ['보스 작전', ['C', 'F', 'D']], ['특수 작전', ['G', 'H']]];
+  const opList = MGROUPS.map(([g, ids]) => `<div class="mgrp"><div class="mgh">${g}</div>${ids.map(id => opCard(MISSIONS[id])).join('')}</div>`).join('');
+  const hardOn = GS.save.hardSel && hardUnlocked(GS.selectedMission);
+  const diffBlock = sm.final ? `<div class="extag">${GS.save.unlocked.H ? '최종 작전 · 단독 출격 · 계약금 20,000 CR' : '익스트림 작전을 완수하면 근원지의 좌표가 열립니다'}</div>`
+    : sm.extreme ? (extremeUnlocked() ? '<div class="extag">세 보스 동시 출현 · 방어복 · 보조 장비 사용 불가</div>' : `<div class="extag dimtag">상점의 장비를 모두 구매하면 열립니다 (소모품 · 무기 강화 제외). 현재 <b class="acc">${extremeProgress().join(' / ')}</b></div>`)
+    : `<div class="diffsel"><button data-diff="0" class="${!GS.save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${GS.save.hardSel ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
+       ${!hardUnlocked(GS.selectedMission) ? '<div class="dim" style="font-size:13.5px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}`;
+  const pay = sm.contract * (hardOn ? 2 : 1);
+  const mainView = `<div class="hubhome msel">
+      <aside class="mlist">
         ${(() => { const cg = curGoal(); const done = GOALS.filter(g => g.ok()).length;
           return cg ? `<div class="goalbox" id="goalbox"><div class="lbl">지금 할 일 · ${cg.i + 1} / ${GOALS.length}</div><div class="gt">${cg.g.t}</div><div class="gh">${cg.g.h}</div><div class="gb"><i style="width:${done / GOALS.length * 100}%"></i></div></div>`
             : `<div class="goalbox"><div class="lbl">모든 목표 달성</div><div class="gt">근원지를 멈췄습니다</div><div class="gh">하드 모드와 업적에 도전해 보세요.</div></div>`; })()}
-        <div class="lbl" style="margin-bottom:6px">현재 장비</div>
-        ${row('휴대 무기', [...carryList(), 'pistol'].map(id => WEAPONS[id].name).join('<br>'))}${row('방어복', sm.extreme ? '<span class="dim">익스트림 · 사용 불가</span>' : arm.name)}${row('가방', `${BAGS[GS.save.bag || 0].name} · ${BAGS[GS.save.bag || 0].cap}kg <span class="dim">(총 ${[...carryList()].reduce((a, id) => a + GUN_KG[id], 0)}kg)</span>`)}${row('스킬', skillTxt)}${row('투척물', nadeTxt)}
-        ${goalTxt}
-        <button class="wide" data-view="shop">상점</button>
-      </div>
+        <div class="ops">${opList}</div>
+      </aside>
+      <aside class="mbrief ${sm.boss ? 'boss' : ''}">
+        <div class="bscroll">
+          <div class="lbl">작전 브리핑 · ${sm.code}</div>
+          <div class="bname">${sm.name}</div>
+          <div class="bsub">${sm.target[1]}</div>
+          <p class="bdesc">${sm.desc}</p>
+          <div class="bsec"><span>목표</span><b>${sm.relays ? '구역 3곳 점령 후 탈출' : sm.boss ? `${sm.target[0]} 격파 후 탈출` : '기계를 정리하고 부품을 회수해 탈출'}</b></div>
+          <div class="bsec"><span>위협</span><b>${sm.enemies}</b></div>
+          <div class="bsec"><span>권장 장비</span><b>${sm.rec}</b></div>
+          <div class="bsec"><span>보상</span><b><span class="acc mono">${fmt(pay)} CR</span>${hardOn ? ' <span class="dim">(하드 ×2)</span>' : ''} + 회수한 부품${sm.partMult > 1 ? ` <span class="dim">(부품 가치 ×${sm.partMult})</span>` : ''}</b></div>
+          ${st && st.runs ? `<div class="bsec"><span>내 기록</span><b>클리어 ${st.clears} / 출격 ${st.runs}${st.hard ? ` · 하드 ${st.hard}` : ''} · 최고 ${fmt(st.best)} CR</b></div>` : ''}
+          <div class="bsec"><span>내 장비</span><b>${WEAPONS[GS.save.equipped].name}${carryList().length > 1 ? ` 외 ${carryList().length - 1}정` : ''} · ${sm.extreme ? '방어복 사용 불가' : arm.name} · ${BAGS[GS.save.bag || 0].cap}kg <button class="mini" data-view="inv">인벤토리</button></b></div>
+        </div>
+        <div class="bfoot">
+          ${diffBlock}
+          <button class="primary deploy ${sm.extreme || sm.final || hardOn ? 'hard' : ''}" id="deploy" ${(sm.extreme && !extremeUnlocked()) || !GS.save.unlocked[sm.id] ? 'disabled' : ''}>${sm.final ? '최종 출격' : sm.extreme ? '익스트림 출격' : hardOn ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
+        </div>
+      </aside>
+    </div>`;
+  // ---------- 인벤토리 ----------
+  const ownedOf = kind => SHOP.filter(it => it.kind === kind && itemOwned(it));
+  const invRow = (k, v) => `<div class="lo"><span>${k}</span><b>${v}</b></div>`;
+  const achGotList = ACH.filter(a => achGot(a.id));
+  const invView = `<div class="invview">
+      <section><h3>무기 · 주무기 1정 + 함께 휴대 최대 ${MAX_CARRY - 1}정</h3><div class="shop">
+        <div class="item owned"><img class="gimg" alt="" src="${gunThumb('pistol')}"><div class="hd"><span class="nm">${WEAPONS.pistol.name}<span class="eqtag">보조</span></span><span class="pr">기본</span></div><div class="ds">${WEAPONS.pistol.desc || '항상 휴대하는 보조 권총. 탄약이 무한하다.'}</div><div class="act"><span class="note ok">항상 휴대</span></div></div>
+        ${ownedOf('weapon').map(card).join('')}</div></section>
+      <section><h3>장비</h3><div class="invgrid">
+        ${invRow('방어복', `${arm.name} <span class="dim">· 체력 ${arm.hp} · 피해 감소 ${Math.round(arm.dr * 100)}%</span>`)}
+        ${invRow('가방', `${BAGS[GS.save.bag || 0].name} <span class="dim">· ${BAGS[GS.save.bag || 0].cap}kg</span>`)}
+        ${invRow('회수 장비', `${sal.name} <span class="dim">· 회수 보너스 ${Math.round(sal.bonus * 100)}%</span>`)}
+        ${invRow('보조 장비', ownedOf('util').map(it => itemName(it)).join(' · ') || '<span class="dim">없음</span>')}
+        ${invRow('투척물 · 소모품', Object.values(CONSUMABLES).map(c => `${c.name} ${GS.save.inv[c.id] || 0}/${c.max}`).join(' · '))}
+      </div></section>
+      <section><h3>스킬 · ${SLOT_KEYS[0]} / ${SLOT_KEYS[1]} 슬롯</h3>${ownedOf('skill').length ? `<div class="shop">${ownedOf('skill').map(card).join('')}</div>` : '<div class="dim">보유한 스킬이 없습니다. 상점의 스킬 탭에서 살 수 있습니다.</div>'}</section>
+      <section><h3>업적 보상 · ${achGotList.length} / ${ACH.length}</h3>
+        <div class="skins">${[0, 1, 2, 3].map(() => '<div class="skin"><i></i><span>스킨 준비 중</span></div>').join('')}</div>
+        <div class="dim" style="font-size:14px;margin:8px 0 12px">업적 보상으로 받는 스킨은 이곳에 표시됩니다. 지금은 달성한 업적의 보상 크레딧이 표시됩니다.</div>
+        ${achGotList.length ? `<div class="achgot">${achGotList.map(a => `<div><span>${a.name}</span><b class="acc mono">+${fmt(a.cr)} CR</b></div>`).join('')}</div>` : '<div class="dim">아직 달성한 업적이 없습니다.</div>'}
+      </section>
     </div>`;
   const shopView = `<div class="shopview">${shopHtml}</div>`;
   let modal = '';
   if (GS.hubModal === 'rec') {
-    modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(460px,94vw)"><header><h2>기록</h2></header><div class="body">
+    modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(620px,94vw)"><header><div class="mtabs"><button class="sel" data-modal="rec">작전 기록</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(GS.save.ach.done).length}/${ACH.length}</span></button></div></header><div class="body">
       <div class="rec"><span>누적 처치</span><span>${fmt(GS.save.kills)}</span><span>누적 수익</span><span>${fmt(GS.save.totalEarned)} CR</span><span>사망</span><span>${GS.save.deaths}</span>
       ${[['', 'REX-09'], ['F', 'ARACHNE'], ['D', '청룡'], ['G', '삼중 위협'], ['H', '생산 코어']].map(([k, nm]) => `<span>${nm} 최단 격파</span><span>${GS.save.records['bossTime' + k] ? GS.save.records['bossTime' + k].toFixed(1) + '초' : '-'}</span><span>${nm} 권총 격파</span><span>${GS.save.records['pistolBoss' + k] ? '<span class="acc">달성</span>' : '미달성'}</span>`).join('')}</div>
       <div class="rec" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">${Object.values(MISSIONS).filter(m => !m.tut).map(m => `<span>${m.code} ${m.name}</span><span>${GS.save.stats[m.id].clears} / ${GS.save.stats[m.id].runs}${GS.save.stats[m.id].hard ? ` · 하드 ${GS.save.stats[m.id].hard}` : ''} · 최고 ${fmt(GS.save.stats[m.id].best)}</span>`).join('')}</div>
@@ -221,7 +264,7 @@ function renderHub() {
       return `<div class="achgrp ${open ? 'open' : ''}"><div class="gh" data-achg="${nm}"><b>${open ? '▾' : '▸'} ${nm}</b><span class="c ${n === list.length ? 'ok' : ''}">${n} / ${list.length}</span>
         <span class="pb"><i style="width:${n / Math.max(1, list.length) * 100}%"></i></span></div>${open ? `<div class="gb">${shown.map(rowOf).join('')}</div>` : ''}</div>`;
     }).join('');
-    modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(620px,94vw)"><header><h2>업적</h2><span class="lbl">${got} / ${ACH.length} · 보상 ${fmt(earned)} CR</span></header>
+    modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(620px,94vw)"><header><div class="mtabs"><button data-modal="rec">작전 기록</button><button class="sel" data-modal="ach">업적</button></div><span class="lbl">${got} / ${ACH.length} · 보상 ${fmt(earned)} CR</span></header>
       <div class="body">${rows}</div><div class="foot"><button class="primary" data-close>닫기</button></div></div></div>`;
   } else if (GS.hubModal === 'guide' || GS.hubModal === 'intro') {
     const first = GS.hubModal === 'intro';
@@ -238,17 +281,23 @@ function renderHub() {
       <div class="lbl" style="margin:18px 0 10px">키 설정 · 버튼을 누른 뒤 원하는 키를 누르세요 (Esc 취소 · 겹치는 키는 서로 바뀜)</div>
       <div class="kbind">${kb}</div>
       <div class="dim" style="font-size:15px;margin-top:14px;line-height:1.6">마우스: 좌클릭 사격 · 우클릭 정조준 · 휠 무기 전환. 부품은 밟으면 가방 여유만큼 자동으로 줍고, 무거운 부품은 상호작용 키로 직접 줍습니다.</div>
-      </div><div class="foot"><button class="danger" id="reset">저장 데이터 초기화</button><button id="kbreset">키 기본값</button><button class="primary" data-close>닫기</button></div></div></div>`;
+      </div><div class="foot"><button class="danger" id="reset">저장 데이터 초기화</button><button data-modal="guide">게임 안내 보기</button><button id="kbreset">키 기본값</button><button class="primary" data-close>닫기</button></div></div></div>`;
   }
   hubShow(GS.selectedMission);
-  $('hub').classList.toggle('solid', GS.hubView === 'shop');
+  const keepSc = (() => { const b = $('hub').querySelector('.hubbody'), m = $('hub').querySelector('#hmodal .sheet');
+    return { view: renderHub.lastView, b: b ? b.scrollTop : 0, modal: renderHub.lastModal, m: m ? m.scrollTop : 0, ml: $('hub').querySelector('.mlist') ? $('hub').querySelector('.mlist').scrollTop : 0 }; })();
+  $('hub').classList.toggle('solid', GS.hubView === 'shop' || GS.hubView === 'inv');
   $('hub').innerHTML = `
     <div class="hubshade"></div>
     <div class="top"><div class="brand">MARGIN</div>
-      <nav class="hnav"><button data-view="main" class="${GS.hubView === 'main' ? 'sel' : ''}">거점</button><button data-view="shop" class="${GS.hubView === 'shop' ? 'sel' : ''}">상점</button><button data-modal="ach">업적 <span class="mono dim">${Object.keys(GS.save.ach.done).length}/${ACH.length}</span></button><button data-modal="coop">협동${NET.status === 'connected' ? ' <span class="ok">●</span>' : NET.status === 'waiting' ? ' <span class="acc">●</span>' : ''}</button><button data-modal="rec">기록</button><button data-tut class="${GS.save.tutDone ? '' : 'new'}">훈련장</button><button data-modal="guide">안내</button><button data-modal="set">설정</button></nav>
-      <div class="credits"><div class="v">${fmt(GS.save.credits)} CR</div></div></div>
-    <div class="hubbody">${GS.hubView === 'shop' ? shopView : mainView}</div>${modal}`;
+      <nav class="hnav"><button data-view="main" class="${GS.hubView === 'main' && !GS.hubModal ? 'sel' : ''}">싱글 플레이</button><button data-modal="coop" class="${GS.hubModal === 'coop' ? 'sel' : ''}">멀티 플레이${NET.status === 'connected' ? ' <span class="ok">●</span>' : NET.status === 'waiting' ? ' <span class="acc">●</span>' : ''}</button><button data-tut class="${GS.save.tutDone ? '' : 'new'}">훈련장</button><button data-modal="rec" class="${GS.hubModal === 'rec' || GS.hubModal === 'ach' ? 'sel' : ''}">기록</button><button data-view="shop" class="${GS.hubView === 'shop' && !GS.hubModal ? 'sel' : ''}">상점</button><button data-view="inv" class="${GS.hubView === 'inv' && !GS.hubModal ? 'sel' : ''}">인벤토리</button></nav>
+      <div class="credits"><div class="v">${fmt(GS.save.credits)} CR</div></div>
+      <button class="gear ${GS.hubModal === 'set' ? 'sel' : ''}" data-modal="set" title="설정" aria-label="설정"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+    <div class="hubbody">${GS.hubView === 'shop' ? shopView : GS.hubView === 'inv' ? invView : mainView}</div>${modal}`;
   const H = $('hub');
+  if (keepSc.view === GS.hubView) { const b = H.querySelector('.hubbody'); if (b) b.scrollTop = keepSc.b; const ml = H.querySelector('.mlist'); if (ml) ml.scrollTop = keepSc.ml; }
+  if (keepSc.modal === GS.hubModal && GS.hubModal) { const m = H.querySelector('#hmodal .sheet'); if (m) m.scrollTop = keepSc.m; }
+  renderHub.lastView = GS.hubView; renderHub.lastModal = GS.hubModal;
   coopBindModal(H);
   H.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(b.dataset.buy));
   H.querySelectorAll('[data-fill]').forEach(b => b.onclick = () => { const c = CONSUMABLES[b.dataset.fill]; while ((GS.save.inv[c.id] || 0) < c.max && buy(c.id, true)); renderHub(); });

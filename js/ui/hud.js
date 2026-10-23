@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=34';
-import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=34';
-import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=34';
-import { camera } from '../core/renderer.js?v=34';
-import { curWeapon, player, raycaster } from '../player/playerState.js?v=34';
-import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=34';
-import { TUT_STEPS } from '../modes/tutorial.js?v=34';
-import { currentSpread } from '../combat/shooting.js?v=34';
-import { partAlive } from '../combat/damage.js?v=34';
-import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=34';
-import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=34';
-import { drawRadar, updateBossBar } from '../game/result.js?v=34';
+import { GS } from '../core/state.js?v=35';
+import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=35';
+import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=35';
+import { camera } from '../core/renderer.js?v=35';
+import { curWeapon, player, raycaster } from '../player/playerState.js?v=35';
+import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=35';
+import { TUT_STEPS } from '../modes/tutorial.js?v=35';
+import { currentSpread } from '../combat/shooting.js?v=35';
+import { partAlive } from '../combat/damage.js?v=35';
+import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=35';
+import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=35';
+import { drawRadar, updateBossBar } from '../game/result.js?v=35';
 
 // =====================================================================
 //  HUD
@@ -78,7 +78,12 @@ function updateHUD(dt) {
   $('popup').style.transform = `translateY(${-(0.9 - GS.popupT) * 16}px)`;
   // 체력
   setText($('hpnum'), Math.ceil(player.hp) + ''); setText($('hpmax'), `/ ${player.maxHp}` + (player.dr ? `  · 피해 감소 ${Math.round(player.dr * 100)}%` : ''));
-  setText($('medtxt'), [utilOn('medkit') ? `응급 키트 ${GS.run.medkits}회` : '', GS.save.inv.stim ? `주사기 ${GS.save.inv.stim}` : ''].filter(Boolean).join(' · ') + ((utilOn('medkit') || GS.save.inv.stim) ? ' · ' + keyLabel(bind('heal')) : ''));
+  setText($('medtxt'), '');
+  // 회복: 스킬처럼 아래 막대에 표시 (응급 키트를 먼저 쓰고, 없으면 주사기)
+  { const el = $('healsk'), mk = utilOn('medkit') ? GS.run.medkits : 0, st = GS.save.inv.stim || 0;
+    if (!mk && !st) el.className = 'sk heal empty';
+    else { el.className = 'sk heal' + (player.hp >= player.maxHp ? ' off' : '');
+      setHTML(el, `<b>${keyLabel(bind('heal'))}</b>${[mk ? `응급 키트<span class="n">x${mk}</span>` : '', st ? `주사기<span class="n">x${st}</span>` : ''].filter(Boolean).join(' · ')}`); } }
   $('shbar').classList.toggle('hidden', !(GS.run.shield > 0));
   if (GS.run.shield > 0) $('shbar').firstChild.style.width = (GS.run.shield / 80 * 100) + '%';
   $('focusfx').style.opacity = GS.run.focusT > 0 ? 1 : 0;
