@@ -1,19 +1,19 @@
-import { GS } from '../core/state.js?v=35';
-import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=35';
-import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=35';
-import { writeSave } from '../core/save.js?v=35';
-import { SFX } from '../core/audio.js?v=35';
-import { camera, controls } from '../core/renderer.js?v=35';
-import { GUNS } from '../player/viewmodel.js?v=35';
-import { player } from '../player/playerState.js?v=35';
-import { clearWorld } from '../world/missions.js?v=35';
-import { coreExposed } from '../bosses/core.js?v=35';
-import { endTutorial } from '../modes/tutorial.js?v=35';
-import { partAlive } from '../combat/damage.js?v=35';
-import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=35';
-import { HARD_MUL, barBoss } from '../modes/difficulty.js?v=35';
-import { achEvent, achUnlock } from '../meta/achievements.js?v=35';
-import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=36';
+import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=36';
+import { writeSave } from '../core/save.js?v=36';
+import { SFX } from '../core/audio.js?v=36';
+import { camera, controls } from '../core/renderer.js?v=36';
+import { GUNS } from '../player/viewmodel.js?v=36';
+import { player } from '../player/playerState.js?v=36';
+import { clearWorld } from '../world/missions.js?v=36';
+import { coreExposed } from '../bosses/core.js?v=36';
+import { endTutorial } from '../modes/tutorial.js?v=36';
+import { partAlive } from '../combat/damage.js?v=36';
+import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=36';
+import { CHAOS_IDS, HARD_MUL, barBoss } from '../modes/difficulty.js?v=36';
+import { achEvent, achUnlock } from '../meta/achievements.js?v=36';
+import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=36';
 
 // =====================================================================
 //  임무 종료 / 정산
@@ -87,7 +87,7 @@ function endMission(kind) {
   GS.save.kills += GS.run.kills;
   let html;
   if (kind === 'extract') {
-    const contract = GS.run.objDone ? ms.contract * (GS.run.hard ? HARD_MUL.contract : 1) : 0;
+    const contract = GS.run.objDone ? ms.contract * (GS.run.chaos ? 3 : GS.run.hard ? HARD_MUL.contract : 1) : 0;
     const partsBase = GS.run.loot.reduce((a, l) => a + l.base, 0);
     const partsVal = GS.run.loot.reduce((a, l) => a + l.val, 0);
     const bonus = Math.round(partsVal * GS.run.salvageBonus);
@@ -96,6 +96,8 @@ function endMission(kind) {
     const newly = [];
     if (GS.run.objDone) {
       GS.save.stats[id].clears++; if (GS.run.hard) GS.save.stats[id].hard = (GS.save.stats[id].hard || 0) + 1;
+      if (GS.run.chaos) { GS.save.stats[id].chaos = (GS.save.stats[id].chaos || 0) + 1; achUnlock({ C: 'chaosRex', F: 'chaosSpider', D: 'chaosDragon' }[id]);
+        if (CHAOS_IDS.every(k => GS.save.stats[k].chaos)) achUnlock('chaosAll'); }
       for (const m of Object.values(MISSIONS)) if (m.req === id && !GS.save.unlocked[m.id]) { GS.save.unlocked[m.id] = true; newly.push(m); }
     }
     GS.save.stats[id].best = Math.max(GS.save.stats[id].best, total);

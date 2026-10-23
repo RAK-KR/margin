@@ -1,19 +1,58 @@
-import { GS } from '../core/state.js?v=35';
-import { V3 } from '../core/utils.js?v=35';
-import { SHOP } from '../data/data.js?v=35';
-import { addBox, crate } from '../world/world.js?v=35';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=35';
-import { spawnBoss } from '../bosses/rex.js?v=35';
-import { spawnDragon } from '../bosses/dragon.js?v=35';
-import { spawnDrone } from '../enemies/extra.js?v=35';
-import { spawnSpider } from '../bosses/spider.js?v=35';
-import { itemOwned } from '../ui/hub.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { V3, rand } from '../core/utils.js?v=36';
+import { SHOP } from '../data/data.js?v=36';
+import { SFX } from '../core/audio.js?v=36';
+import { addBox, crate } from '../world/world.js?v=36';
+import { player } from '../player/playerState.js?v=36';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=36';
+import { spawnBoss, spawnShock } from '../bosses/rex.js?v=36';
+import { dragonStrike, spawnDragon } from '../bosses/dragon.js?v=36';
+import { spawnDrone } from '../enemies/extra.js?v=36';
+import { spawnMite, spawnSpider } from '../bosses/spider.js?v=36';
+import { addFeed, popup } from '../ui/hud.js?v=36';
+import { itemOwned } from '../ui/hub.js?v=36';
 
 // =====================================================================
 //  하드 모드
 // =====================================================================
 GS.HARD = false;
 const HARD_MUL = { hp: 1.4, dmg: 1.3, contract: 2, parts: 1.5, kill: 1.5 };
+// 카오스: 보스 작전 전용. 보통 난이도를 한 번 클리어하면 열림. 계약금 ×3
+GS.CHAOS = false;
+const CHAOS_IDS = ['C', 'F', 'D'];
+function chaosUnlocked(id) { return CHAOS_IDS.includes(id) && !!(GS.save.stats[id] && GS.save.stats[id].clears > 0); }
+// 카오스 특수 패턴: 모든 공격이 빨라지고, 붉은 균열 낙뢰 + 보스별 추가 패턴
+function chaosTick(dt) {
+  const e = GS.run.boss; if (!e || e.dead || !e.bs || !e.bs.started) return;
+  const B = e.bs, C = GS.run.chaosS || (GS.run.chaosS = { t: 5, t2: 8, q: [], rage: false });
+  if (B.cd) for (const k in B.cd) B.cd[k] -= dt * 0.4;
+  if (!C.rage && (B.phase2 || GS.time - (B.engageT || GS.time) > 75)) { C.rage = true; SFX.roar(); GS.shake = Math.max(GS.shake, 0.025); addFeed('카오스 각성 · 균열 낙뢰가 거세집니다', 'k'); popup('카오스 각성', 'bad'); }
+  for (let i = C.q.length - 1; i >= 0; i--) { C.q[i].t -= dt; if (C.q[i].t <= 0) { const f = C.q[i].fn; C.q.splice(i, 1); f(); } }
+  const tg = player;
+  C.t -= dt;
+  if (C.t <= 0) {
+    C.t = C.rage ? 6 : 8.5;
+    const n = C.rage ? 5 : 3, px = tg.pos.x + tg.vel.x * 0.9, pz = tg.pos.z + tg.vel.z * 0.9;
+    dragonStrike(px, pz, 0xff2a50);
+    for (let i = 1; i < n; i++) { const a = i / (n - 1) * Math.PI * 2 + rand(0, 1), r = rand(3, 6); dragonStrike(px + Math.cos(a) * r, pz + Math.sin(a) * r, 0xff2a50); }
+    popup('카오스 균열 · 붉은 원에서 벗어나세요', 'bad');
+  }
+  C.t2 -= dt;
+  if (C.t2 <= 0) {
+    const id = GS.run.mission.id, p = e.root.position;
+    if (id === 'C') {   // REX: 지면 강타 3연타 (점프로 넘기)
+      C.t2 = C.rage ? 9 : 12; addFeed('REX-09 연속 지진 · 점프로 넘기세요', 'k');
+      for (let i = 0; i < (C.rage ? 4 : 3); i++) C.q.push({ t: 0.75 * i, fn: () => { if (!e.dead) { spawnShock(e.root.position.x, e.root.position.z); SFX.shock(); GS.shake = Math.max(GS.shake, 0.02); } } });
+    } else if (id === 'F') {   // 거미: 자폭 거미 무리
+      C.t2 = C.rage ? 8 : 11; addFeed('ARACHNE 자폭 거미 방출', 'k');
+      for (let i = 0; i < (C.rage ? 4 : 2); i++) { const a = rand(0, Math.PI * 2); spawnMite(p.x + Math.cos(a) * 3, p.z + Math.sin(a) * 3); }
+    } else if (id === 'D') {   // 청룡: 십자 낙뢰
+      C.t2 = C.rage ? 7 : 10; addFeed('청룡 십자 낙뢰', 'k');
+      const px = tg.pos.x, pz = tg.pos.z;
+      for (const [dx, dz] of [[0, 0], [3.2, 0], [-3.2, 0], [0, 3.2], [0, -3.2], [6.4, 0], [-6.4, 0], [0, 6.4], [0, -6.4]]) C.q.push({ t: Math.hypot(dx, dz) * 0.06, fn: () => dragonStrike(px + dx, pz + dz) });
+    }
+  }
+}
 function hardUnlocked(id) { return !!(GS.save.stats[id] && GS.save.stats[id].clears > 0); }
 function applyHard(e) {
   e.hardDone = true;
@@ -62,4 +101,4 @@ function barBoss() {
   return live.reduce((a, b) => (b.lastHitT || 0) > (a.lastHitT || 0) ? b : a);
 }
 
-export { HARD_MUL, applyHard, barBoss, buildColosseum, extremeProgress, extremeUnlocked, hardExtras, hardUnlocked };
+export { CHAOS_IDS, HARD_MUL, applyHard, barBoss, buildColosseum, chaosTick, chaosUnlocked, extremeProgress, extremeUnlocked, hardExtras, hardUnlocked };

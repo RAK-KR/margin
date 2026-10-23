@@ -1,4 +1,4 @@
-import { GS } from '../core/state.js?v=35';
+import { GS } from '../core/state.js?v=36';
 
 // =====================================================================
 //  데이터: 무기 / 장비 / 적 / 임무
@@ -90,7 +90,7 @@ function keyLabel(c) {
   return c;
 }
 const UK = () => keyLabel(bind('use'));
-const utilOn = id => !!GS.save.utils[id] && !(GS.run && GS.run.mission && GS.run.mission.extreme);
+const utilOn = id => !!GS.save.utils[id] && !(GS.run && GS.run.mission && GS.run.mission.extreme) && !(GS.run && GS.run.chaos);
 // 이야기 · 무전 기록 (작전을 처음 완수하면 정산 화면에서 수신)
 const STORY = {
   intro: '도시를 버린 기계들이 아직도 돌아다닌다. 거점은 부품을 사들이고, 용병은 기계를 사냥한다. 누가 그 기계를 만드는지는 아무도 묻지 않는다.',

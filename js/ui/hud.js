@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=35';
-import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=35';
-import { camera } from '../core/renderer.js?v=35';
-import { curWeapon, player, raycaster } from '../player/playerState.js?v=35';
-import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=35';
-import { TUT_STEPS } from '../modes/tutorial.js?v=35';
-import { currentSpread } from '../combat/shooting.js?v=35';
-import { partAlive } from '../combat/damage.js?v=35';
-import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=35';
-import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=35';
-import { drawRadar, updateBossBar } from '../game/result.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=36';
+import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=36';
+import { camera } from '../core/renderer.js?v=36';
+import { curWeapon, player, raycaster } from '../player/playerState.js?v=36';
+import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=36';
+import { TUT_STEPS } from '../modes/tutorial.js?v=36';
+import { currentSpread } from '../combat/shooting.js?v=36';
+import { partAlive } from '../combat/damage.js?v=36';
+import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=36';
+import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=36';
+import { drawRadar, updateBossBar } from '../game/result.js?v=36';
 
 // =====================================================================
 //  HUD

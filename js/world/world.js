@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { _v4 } from '../core/utils.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { _v4 } from '../core/utils.js?v=36';
 
 // =====================================================================
 //  월드 / 충돌

@@ -1,5 +1,5 @@
-import { GS } from './state.js?v=35';
-import { GRENADES } from '../data/data.js?v=35';
+import { GS } from './state.js?v=36';
+import { GRENADES } from '../data/data.js?v=36';
 
 // =====================================================================
 //  저장

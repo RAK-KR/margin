@@ -1,25 +1,25 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { V3, clamp, lerp, rand } from '../core/utils.js?v=35';
-import { CONSUMABLES, GRENADES, SKILLS, W } from '../data/data.js?v=35';
-import { writeSave } from '../core/save.js?v=35';
-import { SFX } from '../core/audio.js?v=35';
-import { camera } from '../core/renderer.js?v=35';
-import { groundAt, segFirstHit } from '../world/world.js?v=35';
-import { UPY, blastLight, burstSparks, muzzleLight, spawnBeam, spawnDebris, spawnFlash, spawnSpark, spawnTracer } from '../fx/effects.js?v=35';
-import { GUNS } from '../player/viewmodel.js?v=35';
-import { curW, curWeapon, player, raycaster, recoil } from '../player/playerState.js?v=35';
-import { damagePlayer } from '../player/player.js?v=35';
-import { showGun } from '../world/missions.js?v=35';
-import { coreExposed } from '../bosses/core.js?v=35';
-import { kd } from '../player/input.js?v=35';
-import { damagePart, handlePartEvent, hitPart, partAlive } from './damage.js?v=35';
-import { alertEnemy } from '../enemies/ai.js?v=35';
-import { bossHatchOpen, shockGeo } from '../bosses/rex.js?v=35';
-import { spiderExposed } from '../bosses/spider.js?v=35';
-import { NET, coopEv, coopHostShotFx, coopOut, guestRay, hurtTarget, isGuest, isHost, v3a } from '../modes/coop.js?v=35';
-import { achEvent } from '../meta/achievements.js?v=35';
-import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { V3, clamp, lerp, rand } from '../core/utils.js?v=36';
+import { CONSUMABLES, GRENADES, SKILLS, W } from '../data/data.js?v=36';
+import { writeSave } from '../core/save.js?v=36';
+import { SFX } from '../core/audio.js?v=36';
+import { camera } from '../core/renderer.js?v=36';
+import { groundAt, segFirstHit } from '../world/world.js?v=36';
+import { UPY, blastLight, burstSparks, muzzleLight, spawnBeam, spawnDebris, spawnFlash, spawnSpark, spawnTracer } from '../fx/effects.js?v=36';
+import { GUNS } from '../player/viewmodel.js?v=36';
+import { curW, curWeapon, player, raycaster, recoil } from '../player/playerState.js?v=36';
+import { damagePlayer } from '../player/player.js?v=36';
+import { showGun } from '../world/missions.js?v=36';
+import { coreExposed } from '../bosses/core.js?v=36';
+import { kd } from '../player/input.js?v=36';
+import { damagePart, handlePartEvent, hitPart, partAlive } from './damage.js?v=36';
+import { alertEnemy } from '../enemies/ai.js?v=36';
+import { bossHatchOpen, shockGeo } from '../bosses/rex.js?v=36';
+import { spiderExposed } from '../bosses/spider.js?v=36';
+import { NET, coopEv, coopHostShotFx, coopOut, guestRay, hurtTarget, isGuest, isHost, v3a } from '../modes/coop.js?v=36';
+import { achEvent } from '../meta/achievements.js?v=36';
+import { addFeed, popup, showHitmarker } from '../ui/hud.js?v=36';
 
 // =====================================================================
 //  사격
@@ -29,7 +29,7 @@ function useMedkit() {
   if (GS.run.medkits > 0) {
     GS.run.medkits--; player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.6);
     SFX.pickup(); addFeed(`응급 키트 사용 · 남은 ${GS.run.medkits}회`, 'p');
-  } else if (GS.save.inv.stim > 0) {
+  } else if (GS.save.inv.stim > 0 && !GS.run.chaos) {
     GS.save.inv.stim--; writeSave(); player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.5);
     SFX.pickup(); addFeed(`회복 주사기 사용 · 남은 ${GS.save.inv.stim}개`, 'p');
   }
@@ -46,6 +46,7 @@ function launchThrowable(type, from, vel, impact, ex) {
   if (!NET.remoteShot) { const ne = { t: 'nade', k: type, f: v3a(from), v: v3a(vel), imp: impact ? 1 : 0, ex }; if (isHost()) coopEv(ne); else if (isGuest()) coopOut(ne); }
 }
 function throwGrenade() {
+  if (GS.run && GS.run.chaos) { popup('카오스 · 투척물 사용 불가', 'dim'); return; }
   if (player.downed) return;
   if (GS.run.throwCd > 0) return;
   let type = GS.save.grenadeSel;
@@ -175,6 +176,7 @@ function updateFadeRings(dt) {
 }
 // ---------- 스킬 ----------
 function useSkill(slot) {
+  if (GS.run && GS.run.chaos) { popup('카오스 · 스킬 사용 불가', 'dim'); return; }
   if (player.downed) return;
   const id = GS.save.slots[slot]; if (!id || !GS.save.skills[id]) return;
   if (GS.run.skillCd[slot] > 0) { SFX.empty(); return; }

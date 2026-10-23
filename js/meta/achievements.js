@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=35';
-import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=35';
-import { writeSave } from '../core/save.js?v=35';
-import { SFX } from '../core/audio.js?v=35';
-import { camera } from '../core/renderer.js?v=35';
-import { removeHittables } from '../world/world.js?v=35';
-import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=35';
-import { player } from '../player/playerState.js?v=35';
-import { capZones } from '../world/missions.js?v=35';
-import { legFactor } from '../combat/damage.js?v=35';
-import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=35';
-import { createLoot } from '../game/loot.js?v=35';
-import { addFeed, popup } from '../ui/hud.js?v=35';
-import { WLV_MAX } from '../ui/hub.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, V3, angDiff, fmt, rand } from '../core/utils.js?v=36';
+import { LORE, MISSIONS, MODS, WEAPONS } from '../data/data.js?v=36';
+import { writeSave } from '../core/save.js?v=36';
+import { SFX } from '../core/audio.js?v=36';
+import { camera } from '../core/renderer.js?v=36';
+import { removeHittables } from '../world/world.js?v=36';
+import { UPY, blastLight, burstSparks, spawnDebris, spawnFlash } from '../fx/effects.js?v=36';
+import { player } from '../player/playerState.js?v=36';
+import { capZones } from '../world/missions.js?v=36';
+import { legFactor } from '../combat/damage.js?v=36';
+import { NET, coopEv, eIdx, isGuest } from '../modes/coop.js?v=36';
+import { createLoot } from '../game/loot.js?v=36';
+import { addFeed, popup } from '../ui/hud.js?v=36';
+import { WLV_MAX } from '../ui/hub.js?v=36';
 
 // =====================================================================
 //  업적
@@ -26,6 +26,7 @@ const ACH_GROUPS = [
   ['ARACHNE', ['spider', 'spiderPistol', 'spiderLegs', 'hardSpider', 'underSpider']],
   ['청룡', ['dragon', 'dragonPistol', 'pearl', 'barber', 'hardDragon', 'lightning3']],
   ['종합 · 하드 · 최종', ['both', 'trio', 'hardFirst', 'hardAll', 'hardPistol', 'extreme', 'extremeCoop', 'extremePistol', 'ending']],
+  ['카오스', ['chaosRex', 'chaosSpider', 'chaosDragon', 'chaosAll']],
   ['성장 · 장비', ['graduate', 'wlvMax', 'wlvAll', 'shop30', 'allguns', 'maxmods', 'rich', 'broke']],
 ];
 // 같은 종류의 단계형 업적은 한 줄로 (앞 단계를 달성하면 다음 단계가 보임)
@@ -50,36 +51,36 @@ const ACH = [
   { id: 'speed5', cat: '회수', name: '광속 회수', desc: '10초 안에 부품 5개를 회수한다.', cr: 150 },
   // 보스
   { id: 'rex', cat: '보스', name: '멸종 2회차', desc: 'REX-09를 격파한다.', cr: 600 },
-  { id: 'rexPistol', cat: '보스', name: '공룡 사냥에 권총', desc: '기본 권총만으로 REX-09를 격파한다.', cr: 1500 },
+  { id: 'rexPistol', cat: '보스', name: '공룡 사냥에 권총', desc: '기본 권총만으로 REX-09를 격파한다.', cr: 1500, skin: 'rex_pistol' },
   { id: 'rexCore', cat: '보스', name: '티라노 재활용', desc: 'REX-09에서 떨어진 부품 8개 이상을 들고 탈출한다.', cr: 450 },
   { id: 'rexCrawl', cat: '보스', name: '하체 붕괴', desc: 'REX-09의 두 다리를 완전히 망가뜨려 기어 다니게 만든다.', cr: 300 },
   { id: 'rexWall', cat: '보스', name: '기둥 박치기 3연속', desc: '한 전투에서 REX-09를 기둥에 세 번 들이받게 한다.', cr: 350 },
   { id: 'dragon', cat: '보스', name: '용 사냥꾼', desc: '청룡을 격파한다.', cr: 900 },
-  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 2200 },
+  { id: 'dragonPistol', cat: '보스', name: '용 잡는 권총', desc: '기본 권총만으로 청룡을 격파한다.', cr: 2200, skin: 'dragon_pistol' },
   { id: 'pearl', cat: '보스', name: '여의주 도둑', desc: '상태 90% 이상의 여의주를 회수한다.', cr: 600 },
   { id: 'barber', cat: '보스', name: '청룡 이발소', desc: '한 전투에서 청룡의 양쪽 뿔을 온전히 떼어 낸다.', cr: 350 },
   { id: 'both', cat: '보스', name: '용과 공룡', desc: 'REX-09와 청룡을 모두 격파한다.', cr: 900 },
   { id: 'spider', cat: '보스', name: '거미 퇴치', desc: 'ARACHNE를 격파한다.', cr: 700 },
-  { id: 'spiderPistol', cat: '보스', name: '권총 한 자루 vs 다리 여섯 개', desc: '기본 권총만으로 ARACHNE를 격파한다.', cr: 1600 },
+  { id: 'spiderPistol', cat: '보스', name: '권총 한 자루 vs 다리 여섯 개', desc: '기본 권총만으로 ARACHNE를 격파한다.', cr: 1600, skin: 'spider_pistol' },
   { id: 'spiderLegs', cat: '보스', name: '다리 여섯 개 수거', desc: '한 전투에서 ARACHNE의 다리 여섯 개를 모두 무너뜨린다.', cr: 600 },
-  { id: 'trio', cat: '보스', name: '최종 작전 완수', desc: '세 보스를 모두 격파한다.', cr: 1500 },
+  { id: 'trio', cat: '보스', name: '최종 작전 완수', desc: '세 보스를 모두 격파한다.', cr: 1500, skin: 'trio_burst' },
   // 성장
   { id: 'drone30', cat: '전투', name: '대공 사격', desc: '드론형을 30기 격추한다.', cr: 300, prog: () => [GS.save.ach.c.drones || 0, 30] },
   { id: 'mite20', cat: '전투', name: '해충 방제', desc: '자폭 거미를 터지기 전에 20기 부순다.', cr: 500, prog: () => [GS.save.ach.c.mites || 0, 20] },
   { id: 'counterSnipe', cat: '전투', name: '역저격', desc: '조준선을 겨누고 있는 저격형의 센서를 부숴 저격을 끊는다.', cr: 250 },
   { id: 'relayFast', cat: '전투', name: '정전 사고', desc: '변전소에서 출격 150초 안에 구역 3곳을 모두 점령한다.', cr: 400 },
   { id: 'hardFirst', cat: '보스', name: '지옥의 문턱', desc: '하드 모드 작전을 처음으로 완수한다.', cr: 500 },
-  { id: 'hardRex', cat: '보스', name: '멸종 3회차', desc: '하드 모드로 REX-09를 격파한다.', cr: 1500 },
-  { id: 'hardSpider', cat: '보스', name: '독거미 사냥꾼', desc: '하드 모드로 ARACHNE를 격파한다.', cr: 1800 },
-  { id: 'hardDragon', cat: '보스', name: '용의 비늘을 벗기다', desc: '하드 모드로 청룡을 격파한다.', cr: 2400 },
-  { id: 'hardAll', cat: '보스', name: '모든 작전 · 하드', desc: '여섯 작전을 모두 하드 모드로 완수한다.', cr: 4000, prog: () => [Object.values(MISSIONS).filter(m => !m.extreme && !m.tut && !m.final && GS.save.stats[m.id] && GS.save.stats[m.id].hard).length, Object.values(MISSIONS).filter(m => !m.extreme && !m.tut && !m.final).length] },
-  { id: 'extreme', cat: '보스', name: '삼중 위협 제압', desc: '익스트림 작전을 완수한다.', cr: 5000 },
+  { id: 'hardRex', cat: '보스', name: '멸종 3회차', desc: '하드 모드로 REX-09를 격파한다.', cr: 1500, skin: 'rex_shotgun' },
+  { id: 'hardSpider', cat: '보스', name: '독거미 사냥꾼', desc: '하드 모드로 ARACHNE를 격파한다.', cr: 1800, skin: 'spider_smg' },
+  { id: 'hardDragon', cat: '보스', name: '용의 비늘을 벗기다', desc: '하드 모드로 청룡을 격파한다.', cr: 2400, skin: 'dragon_rifle' },
+  { id: 'hardAll', cat: '보스', name: '모든 작전 · 하드', desc: '여섯 작전을 모두 하드 모드로 완수한다.', cr: 4000, prog: () => [Object.values(MISSIONS).filter(m => !m.extreme && !m.tut && !m.final && GS.save.stats[m.id] && GS.save.stats[m.id].hard).length, Object.values(MISSIONS).filter(m => !m.extreme && !m.tut && !m.final).length], skin: 'core_lmg' },
+  { id: 'extreme', cat: '보스', name: '삼중 위협 제압', desc: '익스트림 작전을 완수한다.', cr: 5000, skin: 'trio_amr' },
   { id: 'extremeCoop', cat: '보스', name: '둘이라서 다행', desc: '협동으로 익스트림 작전을 완수한다.', cr: 2000 },
-  { id: 'ending', cat: '보스', name: '근원 차단', desc: '최종 작전에서 생산 코어를 멈추고 탈출한다.', cr: 10000 },
+  { id: 'ending', cat: '보스', name: '근원 차단', desc: '최종 작전에서 생산 코어를 멈추고 탈출한다.', cr: 10000, skin: 'core_railgun' },
   { id: 'loreAll', cat: '회수', name: '무전 수집가', desc: '무전 기록 7개를 모두 받는다.', cr: 1500, prog: () => [Object.keys(LORE).filter(k => GS.save.lore[k]).length, Object.keys(LORE).length] },
   { id: 'graduate', cat: '성장', name: '훈련 수료', desc: '훈련장의 모든 단계를 마치고 탈출한다.', cr: 1500 },
   { id: 'wlvMax', cat: '성장', name: '장인의 총', desc: '총 한 자루를 5단계까지 강화한다.', cr: 800 },
-  { id: 'wlvAll', cat: '성장', name: '완전 무장', desc: '모든 총을 5단계까지 강화한다.', cr: 6000, prog: () => [Object.keys(WEAPONS).filter(k => (GS.save.wlv[k] || 0) >= WLV_MAX).length, Object.keys(WEAPONS).length] },
+  { id: 'wlvAll', cat: '성장', name: '완전 무장', desc: '모든 총을 5단계까지 강화한다.', cr: 6000, prog: () => [Object.keys(WEAPONS).filter(k => (GS.save.wlv[k] || 0) >= WLV_MAX).length, Object.keys(WEAPONS).length], skin: 'gold_all' },
   { id: 'shop30', cat: '성장', name: '쇼핑 중독', desc: '상점에서 30번 구매한다.', cr: 250, prog: () => [GS.save.ach.c.buys || 0, 30] },
   { id: 'allguns', cat: '성장', name: '무기고', desc: '모든 무기를 보유한다.', cr: 900, prog: () => [Object.keys(WEAPONS).filter(k => GS.save.weapons[k]).length, Object.keys(WEAPONS).length] },
   { id: 'maxmods', cat: '성장', name: '풀 개조', desc: '무기 개조를 모든 단계까지 마친다.', cr: 900, prog: () => [Object.values(MODS).reduce((a, m) => a + GS.save.mods[m.id], 0), Object.values(MODS).reduce((a, m) => a + m.prices.length, 0)] },
@@ -105,7 +106,11 @@ const ACH = [
   { id: 'crushed', cat: '기상천외', hidden: true, hint: '하늘에서 무언가 떨어진다.', name: '추락 주의', desc: '격추한 드론의 잔해에 깔린다.', cr: 150 },
   { id: 'underSpider', cat: '기상천외', hidden: true, hint: '가장 안전한 곳은 어디일까.', name: '등잔 밑', desc: 'ARACHNE의 몸 아래에서 10초 동안 버틴다.', cr: 250 },
   { id: 'hardPistol', cat: '기상천외', hidden: true, hint: '하드 모드에서도 그 권총을?', name: '광기의 사수', desc: '하드 모드 보스를 혼자서 기본 권총만으로 격파한다.', cr: 3000 },
-  { id: 'extremePistol', cat: '기상천외', hidden: true, hint: '세 마리를 권총 한 자루로?', name: '전설의 권총잡이', desc: '익스트림 작전을 혼자 기본 권총만으로 완수한다.', cr: 9000 },
+  { id: 'extremePistol', cat: '기상천외', hidden: true, hint: '세 마리를 권총 한 자루로?', name: '전설의 권총잡이', desc: '익스트림 작전을 혼자 기본 권총만으로 완수한다.', cr: 9000, skin: 'trio_pistol' },
+  { id: 'chaosRex', cat: '보스', name: '혼돈의 멸종', desc: '카오스 모드로 REX-09를 격파한다. (기본 권총 · 무강화 · 스킬 없음)', cr: 6000, skin: 'rexC_all' },
+  { id: 'chaosSpider', cat: '보스', name: '혼돈의 거미줄', desc: '카오스 모드로 ARACHNE를 격파한다. (기본 권총 · 무강화 · 스킬 없음)', cr: 6500, skin: 'spiderC_all' },
+  { id: 'chaosDragon', cat: '보스', name: '혼돈의 승천', desc: '카오스 모드로 청룡을 격파한다. (기본 권총 · 무강화 · 스킬 없음)', cr: 7500, skin: 'dragonC_all' },
+  { id: 'chaosAll', cat: '보스', name: '혼돈의 군주', desc: '세 보스를 모두 카오스 모드로 격파한다.', cr: 15000, skin: 'lord_all' },
   { id: 'tank300', cat: '기상천외', hidden: true, hint: '아프지만 괜찮아.', name: '인간 방패', desc: '한 임무에서 피해를 300 이상 받고도 살아서 탈출한다.', cr: 250 },
 ];
 const ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));

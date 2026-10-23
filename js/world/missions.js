@@ -1,28 +1,28 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { $, TEST, V3, rand, setText } from '../core/utils.js?v=35';
-import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, effW, maxReserve } from '../data/data.js?v=35';
-import { writeSave } from '../core/save.js?v=35';
-import { SFX, initAudio } from '../core/audio.js?v=35';
-import { camera, groundTexture, scene } from '../core/renderer.js?v=35';
-import { addBox, crate } from './world.js?v=35';
-import { clearFX, projGeo } from '../fx/effects.js?v=35';
-import { GUNS, HIP_POS } from '../player/viewmodel.js?v=35';
-import { buildRobot } from '../enemies/robot.js?v=35';
-import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=35';
-import { buildFoundry } from '../bosses/core.js?v=35';
-import { buildRange, tutNext } from '../modes/tutorial.js?v=35';
-import { lockPointer, showPause } from '../player/input.js?v=35';
-import { alertEnemy } from '../enemies/ai.js?v=35';
-import { buildArena } from '../bosses/rex.js?v=35';
-import { buildShrine } from '../bosses/dragon.js?v=35';
-import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=35';
-import { buildQuarry } from '../bosses/spider.js?v=35';
-import { NET, buildAvatar, coopEv, coopOn, isHost, makeRemote } from '../modes/coop.js?v=35';
-import { applyHard, buildColosseum, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=35';
-import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=35';
-import { addFeed, popup } from '../ui/hud.js?v=35';
-import { carryList } from '../ui/hub.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, TEST, V3, rand, setText } from '../core/utils.js?v=36';
+import { ARMORS, ETYPES, GRENADES, MISSIONS, SALVAGES, WEAPONS, effW, maxReserve } from '../data/data.js?v=36';
+import { writeSave } from '../core/save.js?v=36';
+import { SFX, initAudio } from '../core/audio.js?v=36';
+import { camera, groundTexture, scene } from '../core/renderer.js?v=36';
+import { addBox, crate } from './world.js?v=36';
+import { clearFX, projGeo } from '../fx/effects.js?v=36';
+import { GUNS, HIP_POS, applySavedSkins } from '../player/viewmodel.js?v=36';
+import { buildRobot } from '../enemies/robot.js?v=36';
+import { EYE, P_HEIGHT, curWeapon, player, recoil } from '../player/playerState.js?v=36';
+import { buildFoundry } from '../bosses/core.js?v=36';
+import { buildRange, tutNext } from '../modes/tutorial.js?v=36';
+import { lockPointer, showPause } from '../player/input.js?v=36';
+import { alertEnemy } from '../enemies/ai.js?v=36';
+import { buildArena } from '../bosses/rex.js?v=36';
+import { buildShrine } from '../bosses/dragon.js?v=36';
+import { _box3, addSniperLaser, spawnDrone, spawnRelay } from '../enemies/extra.js?v=36';
+import { buildQuarry } from '../bosses/spider.js?v=36';
+import { NET, buildAvatar, coopEv, coopOn, isHost, makeRemote } from '../modes/coop.js?v=36';
+import { applyHard, buildColosseum, chaosUnlocked, extremeUnlocked, hardExtras, hardUnlocked } from '../modes/difficulty.js?v=36';
+import { achEvent, checkObjective, killEnemy } from '../meta/achievements.js?v=36';
+import { addFeed, popup } from '../ui/hud.js?v=36';
+import { carryList } from '../ui/hub.js?v=36';
 
 // =====================================================================
 //  임무 생성
@@ -174,7 +174,7 @@ function spawnEnemy(type, x, z, yaw, opts = {}) {
   return e;
 }
 
-function startMission(id, hardOverride, force) {
+function startMission(id, hardOverride, force, chaosOverride) {
   const ms = MISSIONS[id];
   if (!ms || !GS.save.unlocked[id]) return;
   if (ms.extreme && !force && !extremeUnlocked()) { popup('상점 장비를 모두 구매하면 열립니다', 'dim'); return; }
@@ -184,19 +184,21 @@ function startMission(id, hardOverride, force) {
   const spawn = ({ A: buildScrapyard, B: buildFactory, C: buildArena, D: buildShrine, E: buildSubstation, F: buildQuarry, G: buildColosseum, T: buildRange, H: buildFoundry })[id]();
   GS.MAPB = spawn.bounds || { x: 30, z: 30 };
   GS.HARD = ms.extreme || ms.tut || ms.final ? false : hardOverride !== undefined ? !!hardOverride : (!!GS.save.hardSel && hardUnlocked(id));
+  GS.CHAOS = !coopOn() && chaosUnlocked(id) && (chaosOverride !== undefined ? !!chaosOverride : !!GS.save.chaosSel && hardOverride === undefined);
+  if (GS.CHAOS) GS.HARD = false;
   if (ms.extreme) for (const e of GS.enemies) if (e.boss) for (const p of Object.values(e.parts)) { p.maxHp *= 0.85; p.hp = p.maxHp; p.brkMax *= 0.85; p.brk = p.brkMax; }
   if (GS.HARD && !ms.boss) hardExtras(id);
   for (const e of GS.enemies) applyHard(e);
   if (coopOn()) for (const e of GS.enemies) if (e.boss) for (const p of Object.values(e.parts)) { p.maxHp *= 1.6; p.hp = p.maxHp; p.brkMax *= 1.6; p.brk = p.brkMax; }
-  const arm = ms.extreme ? ARMORS[0] : ARMORS[GS.save.armor];
+  const arm = ms.extreme || GS.CHAOS ? ARMORS[0] : ARMORS[GS.save.armor];
   player.pos.copy(spawn.spawn); player.vel.set(0, 0, 0); player.vy = 0; player.onGround = true;
   player.maxHp = arm.hp; player.hp = arm.hp; player.dr = arm.dr; player.lastHurt = -99; player.downed = false; player.out = false; player.crouch = 0; player.eye = EYE; player.height = P_HEIGHT;
   camera.position.set(player.pos.x, EYE, player.pos.z);
   camera.quaternion.setFromEuler(new THREE.Euler(0, spawn.yaw, 0, 'YXZ'));
-  const ids = [...carryList(), 'pistol'];
-  const wst = {}; for (const w of ids) wst[w] = effW(w);
+  const ids = GS.CHAOS ? ['pistol'] : [...carryList(), 'pistol'];
+  const wst = {}; for (const w of ids) wst[w] = GS.CHAOS ? Object.assign({}, WEAPONS[w]) : effW(w);
   if (!(GS.save.inv[GS.save.grenadeSel] > 0)) GS.save.grenadeSel = GRENADES.find(g => GS.save.inv[g] > 0) || 'emp';
-  GS.run = { mission: ms, wst, ws: ids.map(w => ({ id: w, mag: wst[w].mag, reserve: maxReserve(w) })), cur: 0, lastCur: ids.length - 1, medkits: GS.save.utils.medkit && !ms.extreme ? 2 : 0, charging: false, chargeT: 0, chargeK: null,
+  GS.run = { mission: ms, wst, ws: ids.map(w => ({ id: w, mag: wst[w].mag, reserve: maxReserve(w) })), cur: 0, lastCur: ids.length - 1, medkits: GS.save.utils.medkit && !ms.extreme && !GS.CHAOS ? 2 : 0, chaos: GS.CHAOS, charging: false, chargeT: 0, chargeK: null,
     skillCd: [0, 0], shield: 0, shieldT: 0, nanoT: 0, ocT: 0, focusT: 0, dashT: 0, iframeT: 0, burstLeft: 0, burstT: 0, throwCd: 0,
     reloadT: 0, switchT: 0, loot: [], kills: 0, killReward: 0, killsByType: {}, total: GS.enemies.length, objDone: false,
     hard: GS.HARD, coop: coopOn(), shots: 0, hitsN: 0, shotsHit: 0, startT: GS.time, used: {}, bossKillT: 0, salvageBonus: SALVAGES[GS.save.salvage].bonus, boss: GS.enemies.find(e => e.boss) || null };
@@ -207,13 +209,14 @@ function startMission(id, hardOverride, force) {
     NET.rp = makeRemote(); NET.rp.tpos.set(player.pos.x - off * 2, 0, player.pos.z); NET.rp.pos.copy(NET.rp.tpos);
     NET.av = buildAvatar(); NET.av.g.position.copy(NET.rp.pos); NET.evq = []; NET.outq = []; NET.sendT = 0; NET.fullT = 0; NET.lid = 0; NET.revT = 0;
   }
-  showGun(); $('feed').innerHTML = '';
+  applySavedSkins(); showGun(); $('feed').innerHTML = '';
   $('tut').classList.toggle('hidden', !ms.tut);
   if (ms.tut) { GS.run.tut = { i: -1, okT: 0, marker: null }; tutNext(); }
   GS.save.stats[id].runs++; writeSave();
   GS.state = 'mission';
   $('hub').classList.add('hidden'); $('result').classList.add('hidden'); $('hud').classList.remove('hidden');
-  setText($('objcode'), ms.code + (GS.HARD ? ' · 하드' : '')); $('objcode').classList.toggle('bad', GS.HARD); setText($('objname'), ms.name); setText($('armorname'), arm.name);
+  setText($('objcode'), ms.code + (GS.CHAOS ? ' · 카오스' : GS.HARD ? ' · 하드' : '')); $('objcode').classList.toggle('bad', GS.HARD || GS.CHAOS);
+  if (GS.CHAOS) addFeed('카오스 규정 · 기본 권총만 사용 · 강화 · 스킬 · 소모품 · 방어복 사용 불가', 'x'); setText($('objname'), ms.name); setText($('armorname'), arm.name);
   if (ms.extreme && (GS.save.armor || GS.save.utils.medkit || GS.save.utils.regen || GS.save.utils.radar)) addFeed('익스트림 규정 · 방어복과 보조 장비 사용 불가', 'x');
   if (ms.final) addFeed('작전 개시 · 생산 코어를 멈추고 탈출 지점으로 귀환', 'x');
   else if (!ms.tut) addFeed(ms.extreme ? '작전 개시 · 세 보스를 모두 격파하고 탈출 지점으로 귀환' : ms.boss ? `작전 개시 · 목표 ${ms.target[0]} 격파 후 탈출 지점으로 귀환` : ms.relays ? '작전 개시 · 구역 3곳을 점령하고 탈출 지점으로 귀환' : '작전 개시 · 모든 적대 기계를 제거하고 탈출 지점으로 귀환', 'x');

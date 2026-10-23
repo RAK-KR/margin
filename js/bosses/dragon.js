@@ -1,19 +1,19 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { V3, _v1, _v2, clamp, lerp, rand } from '../core/utils.js?v=35';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=35';
-import { SFX } from '../core/audio.js?v=35';
-import { GLOW, scene } from '../core/renderer.js?v=35';
-import { addBox, crate, groundAt, hitsBoxXZ } from '../world/world.js?v=35';
-import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=35';
-import { updatePartVisual } from '../enemies/robot.js?v=35';
-import { player } from '../player/playerState.js?v=35';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=35';
-import { partAlive, sensorMult } from '../combat/damage.js?v=35';
-import { markerGeo, partTick } from './rex.js?v=35';
-import { coopEv, dmgTargets, hurtTarget, isGuest, knockTarget, v3a } from '../modes/coop.js?v=35';
-import { killEnemy } from '../meta/achievements.js?v=35';
-import { addFeed, popup } from '../ui/hud.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { V3, _v1, _v2, clamp, lerp, rand } from '../core/utils.js?v=36';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=36';
+import { SFX } from '../core/audio.js?v=36';
+import { GLOW, scene } from '../core/renderer.js?v=36';
+import { addBox, crate, groundAt, hitsBoxXZ } from '../world/world.js?v=36';
+import { FX, UPY, blastLight, burstSparks, poolGet, projGeo, spawnFlash } from '../fx/effects.js?v=36';
+import { updatePartVisual } from '../enemies/robot.js?v=36';
+import { player } from '../player/playerState.js?v=36';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=36';
+import { partAlive, sensorMult } from '../combat/damage.js?v=36';
+import { markerGeo, partTick } from './rex.js?v=36';
+import { coopEv, dmgTargets, hurtTarget, isGuest, knockTarget, v3a } from '../modes/coop.js?v=36';
+import { killEnemy } from '../meta/achievements.js?v=36';
+import { addFeed, popup } from '../ui/hud.js?v=36';
 
 // =====================================================================
 //  공중 보스: 청룡 (기계 용)
@@ -173,11 +173,11 @@ function dragonDown(e, cause) {
   SFX.dragonRoar(); GS.shake = Math.max(GS.shake, 0.02);
   addFeed('청룡 추락', 'k');
 }
-function dragonStrike(x, z) {
+function dragonStrike(x, z, col = 0x8af4ff) {
   coopEv({ t: 'bolt', x, z });
-  const mk = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x8af4ff, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
+  const mk = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
   const gy = groundAt(x, z, 0.1, 10, 0) ; mk.rotation.x = -Math.PI / 2; mk.position.set(x, gy + 0.04, z); GS.world.add(mk);
-  GS.bolts.push({ x, z, y: gy, t: 1.35, mk, hit: false });
+  GS.bolts.push({ x, z, y: gy, t: 1.35, mk, hit: false, col });
 }
 function updateBolts(dt) {
   for (let i = GS.bolts.length - 1; i >= 0; i--) {
@@ -185,7 +185,7 @@ function updateBolts(dt) {
     if (b.t > 0) { b.mk.material.opacity = 0.35 + 0.45 * (1 - b.t / 1.35) + 0.15 * Math.sin(GS.time * 30); b.mk.scale.setScalar(0.85 + 0.15 * (b.t / 1.35)); continue; }
     if (!b.hit) {
       b.hit = true;
-      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.35, 44, 6, 1, true), new THREE.MeshBasicMaterial({ color: 0xdafcff, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.35, 44, 6, 1, true), new THREE.MeshBasicMaterial({ color: b.col && b.col !== 0x8af4ff ? b.col : 0xdafcff, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
       beam.position.set(b.x, b.y + 22, b.z); GS.world.add(beam); b.beam = beam;
       _v1.set(b.x, b.y + 0.3, b.z); spawnFlash(_v1, 5, 0.25, 0xbaf8ff); burstSparks(_v1, UPY, 22, 0x9af0ff, 9);
       blastLight.color.setHex(0xaaf0ff); blastLight.position.copy(_v1); blastLight.intensity = 90;

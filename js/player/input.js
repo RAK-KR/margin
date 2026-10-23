@@ -1,17 +1,17 @@
-import { GS } from '../core/state.js?v=35';
-import { $, TEST, fmt, setText } from '../core/utils.js?v=35';
-import { BAGS, GUN_KG, KEYDEF, STATE_KO, WEAPONS, bind, keyLabel } from '../data/data.js?v=35';
-import { writeSave } from '../core/save.js?v=35';
-import { SFX, applyVolume, initAudio, vol } from '../core/audio.js?v=35';
-import { controls } from '../core/renderer.js?v=35';
-import { keys, player } from './playerState.js?v=35';
-import { startMission } from '../world/missions.js?v=35';
-import { tutNext } from '../modes/tutorial.js?v=35';
-import { cycleGrenade, startReload, switchWeapon, throwGrenade, useMedkit, useSkill } from '../combat/shooting.js?v=35';
-import { achEvent } from '../meta/achievements.js?v=35';
-import { bagCap, carryKg, dropLootAt, dropWorst, interact, loadMult } from '../game/loot.js?v=35';
-import { endMission } from '../game/result.js?v=35';
-import { renderHub } from '../ui/hub.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, TEST, fmt, setText } from '../core/utils.js?v=36';
+import { BAGS, GUN_KG, KEYDEF, STATE_KO, WEAPONS, bind, keyLabel } from '../data/data.js?v=36';
+import { writeSave } from '../core/save.js?v=36';
+import { SFX, applyVolume, initAudio, vol } from '../core/audio.js?v=36';
+import { controls } from '../core/renderer.js?v=36';
+import { keys, player } from './playerState.js?v=36';
+import { startMission } from '../world/missions.js?v=36';
+import { tutNext } from '../modes/tutorial.js?v=36';
+import { cycleGrenade, startReload, switchWeapon, throwGrenade, useMedkit, useSkill } from '../combat/shooting.js?v=36';
+import { achEvent } from '../meta/achievements.js?v=36';
+import { bagCap, carryKg, dropLootAt, dropWorst, interact, loadMult } from '../game/loot.js?v=36';
+import { endMission } from '../game/result.js?v=36';
+import { renderHub } from '../ui/hub.js?v=36';
 
 // =====================================================================
 //  입력

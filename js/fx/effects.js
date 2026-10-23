@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { V3, _v1, rand } from '../core/utils.js?v=35';
-import { GLOW, scene } from '../core/renderer.js?v=35';
+import { V3, _v1, rand } from '../core/utils.js?v=36';
+import { GLOW, scene } from '../core/renderer.js?v=36';
 
 // =====================================================================
 //  이펙트

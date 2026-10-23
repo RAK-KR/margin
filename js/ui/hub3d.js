@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { V3, _v1, _v3, lerp, rand } from '../core/utils.js?v=35';
-import { buildRobot } from '../enemies/robot.js?v=35';
-import { buildCore } from '../bosses/core.js?v=35';
-import { buildRex } from '../bosses/rex.js?v=35';
-import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=35';
-import { buildDrone } from '../enemies/extra.js?v=35';
-import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { V3, _v1, _v3, lerp, rand } from '../core/utils.js?v=36';
+import { buildRobot } from '../enemies/robot.js?v=36';
+import { buildCore } from '../bosses/core.js?v=36';
+import { buildRex } from '../bosses/rex.js?v=36';
+import { buildDragon, dragonCoilPose } from '../bosses/dragon.js?v=36';
+import { buildDrone } from '../enemies/extra.js?v=36';
+import { SPI, buildSpider, legIK } from '../bosses/spider.js?v=36';
 
 // =====================================================================
 //  거점 3D 배경 (격납고 + 임무별 대상 기계)

@@ -1,17 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=35';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=35';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=35';
-import { defaultSave, writeSave } from '../core/save.js?v=35';
-import { SFX, initAudio, vol } from '../core/audio.js?v=35';
-import { GUNS } from '../player/viewmodel.js?v=35';
-import { startMission } from '../world/missions.js?v=35';
-import { bindVolume } from '../player/input.js?v=35';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=35';
-import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=35';
-import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=35';
-import { nextGoal } from '../game/result.js?v=35';
-import { hubShow } from './hub3d.js?v=35';
+import { GS } from '../core/state.js?v=36';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=36';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=36';
+import { defaultSave, writeSave } from '../core/save.js?v=36';
+import { SFX, initAudio, vol } from '../core/audio.js?v=36';
+import { ALL_GUNS, GUNS, SKINS, SKIN_THEMES, applySkin, skinAch, skinOwned, skinSel, skinsFor } from '../player/viewmodel.js?v=36';
+import { startMission } from '../world/missions.js?v=36';
+import { bindVolume } from '../player/input.js?v=36';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=36';
+import { CHAOS_IDS, chaosUnlocked, extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=36';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=36';
+import { popup } from './hud.js?v=36';
+import { nextGoal } from '../game/result.js?v=36';
+import { hubShow } from './hub3d.js?v=36';
 
 // =====================================================================
 //  거점 / 상점
@@ -61,6 +62,18 @@ const GUIDE_HTML = () => `<div class="guide">
   <li><b>하드 모드</b>: 작전을 보통으로 한 번 깨면 열립니다. 적이 강해지는 대신 보상이 커집니다.</li></ul>
   <h3>죽으면</h3><p>그 작전에서 주운 부품과 보상을 잃습니다. 산 장비와 가진 돈은 그대로 남습니다.</p></div>`;
 // 출격 때 들고 가는 주무기 (장착 무기 + 함께 휴대, 최대 3정)
+// 무기 슬롯 3칸: [주무기, 휴대 1, 휴대 2] (비어 있으면 null)
+function invSlots() { const c = GS.save.carry || []; const L = [GS.save.equipped && GS.save.equipped !== 'pistol' && GS.save.weapons[GS.save.equipped] ? GS.save.equipped : null, c[0] || null, c[1] || null]; return L.map(id => id && GS.save.weapons[id] ? id : null); }
+function invPut(gid, k) {
+  if (!gid || gid === 'pistol' || !GS.save.weapons[gid]) return;
+  const L = invSlots(), i = L.indexOf(gid);
+  if (k == null) { if (i >= 0) return; k = L.indexOf(null); if (k < 0) { popup('슬롯이 가득 찼습니다 · 끌어서 바꾸세요', 'dim'); return; } }
+  const prev = L[k]; L[k] = gid; if (i >= 0 && i !== k) L[i] = prev;
+  invSave(L);
+}
+function invRemove(gid) { const L = invSlots(), i = L.indexOf(gid); if (i < 0) return; L[i] = null; invSave(L); }
+function invSave(L) { GS.save.equipped = L[0] || 'pistol'; GS.save.carry = [L[1], L[2]].filter(Boolean); writeSave(); SFX.ui(); renderHub(); }
+let invSkinGun = '';
 function carryList() { return [GS.save.equipped, ...(GS.save.carry || [])].filter((id, i, a) => id && id !== 'pistol' && GS.save.weapons[id] && a.indexOf(id) === i).slice(0, MAX_CARRY); }
 let rebindA = '', achOpen = new Set(), demoSkill = '';
 function itemPrice(it) {
@@ -181,12 +194,14 @@ function renderHub() {
       <div class="r2"><span>${m.target[0]}</span><span class="mono acc">${fmt(m.contract)} CR</span></div></div>`;
   const MGROUPS = [['일반 작전', ['A', 'B', 'E']], ['보스 작전', ['C', 'F', 'D']], ['특수 작전', ['G', 'H']]];
   const opList = MGROUPS.map(([g, ids]) => `<div class="mgrp"><div class="mgh">${g}</div>${ids.map(id => opCard(MISSIONS[id])).join('')}</div>`).join('');
-  const hardOn = GS.save.hardSel && hardUnlocked(GS.selectedMission);
+  const chaosOn = !!GS.save.chaosSel && chaosUnlocked(GS.selectedMission), hardOn = !chaosOn && GS.save.hardSel && hardUnlocked(GS.selectedMission);
+  const chaosAch = { C: 'chaosRex', F: 'chaosSpider', D: 'chaosDragon' }[GS.selectedMission];
   const diffBlock = sm.final ? `<div class="extag">${GS.save.unlocked.H ? '최종 작전 · 단독 출격 · 계약금 20,000 CR' : '익스트림 작전을 완수하면 근원지의 좌표가 열립니다'}</div>`
     : sm.extreme ? (extremeUnlocked() ? '<div class="extag">세 보스 동시 출현 · 방어복 · 보조 장비 사용 불가</div>' : `<div class="extag dimtag">상점의 장비를 모두 구매하면 열립니다 (소모품 · 무기 강화 제외). 현재 <b class="acc">${extremeProgress().join(' / ')}</b></div>`)
-    : `<div class="diffsel"><button data-diff="0" class="${!GS.save.hardSel ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${GS.save.hardSel ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>보상 ×2 · 부품 ×1.5</span></button></div>
-       ${!hardUnlocked(GS.selectedMission) ? '<div class="dim" style="font-size:13.5px;margin-top:6px">하드 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>' : ''}`;
-  const pay = sm.contract * (hardOn ? 2 : 1);
+    : `<div class="diffsel"><button data-diff="0" class="${!hardOn && !chaosOn ? 'sel' : ''}">보통</button><button data-diff="1" class="hard ${hardOn ? 'sel' : ''}" ${hardUnlocked(GS.selectedMission) ? '' : 'disabled'}>하드 <span>×2</span></button>${CHAOS_IDS.includes(GS.selectedMission) ? `<button data-diff="2" class="chaos ${chaosOn ? 'sel' : ''}" ${chaosUnlocked(GS.selectedMission) ? '' : 'disabled'}>카오스 <span>×3</span></button>` : ''}</div>
+       ${!hardUnlocked(GS.selectedMission) ? `<div class="dim" style="font-size:13.5px;margin-top:6px">하드${CHAOS_IDS.includes(GS.selectedMission) ? ' · 카오스' : ''} 모드는 이 작전을 보통으로 한 번 클리어하면 열립니다.</div>` : ''}
+       ${chaosOn ? `<div class="chaosrule"><b>카오스 규정</b> 기본 권총 하나만 · 강화 · 개조 · 스킬 · 소모품 · 방어복 · 보조 장비 없음<br><b>특수 패턴</b> 모든 공격이 빨라지고 붉은 균열 낙뢰와 보스 전용 패턴이 추가됩니다<br><b>첫 클리어 보상</b> ${achGot(chaosAch) ? '<span class="ok">획득 완료</span>' : `${SKIN_THEMES[SKINS[ACH_BY[chaosAch].skin].theme].name} 스킨 세트 · 모든 총`}</div>` : ''}`;
+  const pay = sm.contract * (chaosOn ? 3 : hardOn ? 2 : 1);
   const mainView = `<div class="hubhome msel">
       <aside class="mlist">
         ${(() => { const cg = curGoal(); const done = GOALS.filter(g => g.ok()).length;
@@ -203,38 +218,67 @@ function renderHub() {
           <div class="bsec"><span>목표</span><b>${sm.relays ? '구역 3곳 점령 후 탈출' : sm.boss ? `${sm.target[0]} 격파 후 탈출` : '기계를 정리하고 부품을 회수해 탈출'}</b></div>
           <div class="bsec"><span>위협</span><b>${sm.enemies}</b></div>
           <div class="bsec"><span>권장 장비</span><b>${sm.rec}</b></div>
-          <div class="bsec"><span>보상</span><b><span class="acc mono">${fmt(pay)} CR</span>${hardOn ? ' <span class="dim">(하드 ×2)</span>' : ''} + 회수한 부품${sm.partMult > 1 ? ` <span class="dim">(부품 가치 ×${sm.partMult})</span>` : ''}</b></div>
+          <div class="bsec"><span>보상</span><b><span class="acc mono">${fmt(pay)} CR</span>${chaosOn ? ' <span class="dim">(카오스 ×3)</span>' : hardOn ? ' <span class="dim">(하드 ×2)</span>' : ''} + 회수한 부품${sm.partMult > 1 ? ` <span class="dim">(부품 가치 ×${sm.partMult})</span>` : ''}</b></div>
           ${st && st.runs ? `<div class="bsec"><span>내 기록</span><b>클리어 ${st.clears} / 출격 ${st.runs}${st.hard ? ` · 하드 ${st.hard}` : ''} · 최고 ${fmt(st.best)} CR</b></div>` : ''}
-          <div class="bsec"><span>내 장비</span><b>${WEAPONS[GS.save.equipped].name}${carryList().length > 1 ? ` 외 ${carryList().length - 1}정` : ''} · ${sm.extreme ? '방어복 사용 불가' : arm.name} · ${BAGS[GS.save.bag || 0].cap}kg <button class="mini" data-view="inv">인벤토리</button></b></div>
+          <div class="bsec"><span>내 장비</span><b>${chaosOn ? '<span style="color:#ff8a9c">카오스 · 기본 권총만 (강화 · 스킬 · 방어복 없음)</span>' : `${WEAPONS[GS.save.equipped].name}${carryList().length > 1 ? ` 외 ${carryList().length - 1}정` : ''} · ${sm.extreme ? '방어복 사용 불가' : arm.name} · ${BAGS[GS.save.bag || 0].cap}kg`} <button class="mini" data-view="inv">인벤토리</button></b></div>
         </div>
         <div class="bfoot">
           ${diffBlock}
-          <button class="primary deploy ${sm.extreme || sm.final || hardOn ? 'hard' : ''}" id="deploy" ${(sm.extreme && !extremeUnlocked()) || !GS.save.unlocked[sm.id] ? 'disabled' : ''}>${sm.final ? '최종 출격' : sm.extreme ? '익스트림 출격' : hardOn ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
+          <button class="primary deploy ${chaosOn ? 'chaos' : sm.extreme || sm.final || hardOn ? 'hard' : ''}" id="deploy" ${(sm.extreme && !extremeUnlocked()) || !GS.save.unlocked[sm.id] ? 'disabled' : ''}>${sm.final ? '최종 출격' : sm.extreme ? '익스트림 출격' : chaosOn ? '카오스 출격' : hardOn ? '하드 출격' : '출격'} <span class="mono">ENTER</span></button>
         </div>
       </aside>
     </div>`;
-  // ---------- 인벤토리 ----------
-  const ownedOf = kind => SHOP.filter(it => it.kind === kind && itemOwned(it));
-  const invRow = (k, v) => `<div class="lo"><span>${k}</span><b>${v}</b></div>`;
-  const achGotList = ACH.filter(a => achGot(a.id));
-  const invView = `<div class="invview">
-      <section><h3>무기 · 주무기 1정 + 함께 휴대 최대 ${MAX_CARRY - 1}정</h3><div class="shop">
-        <div class="item owned"><img class="gimg" alt="" src="${gunThumb('pistol')}"><div class="hd"><span class="nm">${WEAPONS.pistol.name}<span class="eqtag">보조</span></span><span class="pr">기본</span></div><div class="ds">${WEAPONS.pistol.desc || '항상 휴대하는 보조 권총. 탄약이 무한하다.'}</div><div class="act"><span class="note ok">항상 휴대</span></div></div>
-        ${ownedOf('weapon').map(card).join('')}</div></section>
-      <section><h3>장비</h3><div class="invgrid">
-        ${invRow('방어복', `${arm.name} <span class="dim">· 체력 ${arm.hp} · 피해 감소 ${Math.round(arm.dr * 100)}%</span>`)}
-        ${invRow('가방', `${BAGS[GS.save.bag || 0].name} <span class="dim">· ${BAGS[GS.save.bag || 0].cap}kg</span>`)}
-        ${invRow('회수 장비', `${sal.name} <span class="dim">· 회수 보너스 ${Math.round(sal.bonus * 100)}%</span>`)}
-        ${invRow('보조 장비', ownedOf('util').map(it => itemName(it)).join(' · ') || '<span class="dim">없음</span>')}
-        ${invRow('투척물 · 소모품', Object.values(CONSUMABLES).map(c => `${c.name} ${GS.save.inv[c.id] || 0}/${c.max}`).join(' · '))}
-      </div></section>
-      <section><h3>스킬 · ${SLOT_KEYS[0]} / ${SLOT_KEYS[1]} 슬롯</h3>${ownedOf('skill').length ? `<div class="shop">${ownedOf('skill').map(card).join('')}</div>` : '<div class="dim">보유한 스킬이 없습니다. 상점의 스킬 탭에서 살 수 있습니다.</div>'}</section>
-      <section><h3>업적 보상 · ${achGotList.length} / ${ACH.length}</h3>
-        <div class="skins">${[0, 1, 2, 3].map(() => '<div class="skin"><i></i><span>스킨 준비 중</span></div>').join('')}</div>
-        <div class="dim" style="font-size:14px;margin:8px 0 12px">업적 보상으로 받는 스킨은 이곳에 표시됩니다. 지금은 달성한 업적의 보상 크레딧이 표시됩니다.</div>
-        ${achGotList.length ? `<div class="achgot">${achGotList.map(a => `<div><span>${a.name}</span><b class="acc mono">+${fmt(a.cr)} CR</b></div>`).join('')}</div>` : '<div class="dim">아직 달성한 업적이 없습니다.</div>'}
+  // ---------- 인벤토리 (배틀그라운드식) ----------
+  const L = invSlots();
+  const ownedGuns = ALL_GUNS.filter(id => id !== 'pistol' && GS.save.weapons[id]);
+  const skinCnt = gid => skinsFor(gid).filter(skinOwned).length;
+  const skinName = gid => { const sid = skinSel(gid); return sid ? SKIN_THEMES[SKINS[sid].theme].name : '기본'; };
+  const gunRow = gid => { const si = L.indexOf(gid);
+    return `<div class="prow ${si >= 0 ? 'on' : ''}" draggable="true" data-ig="${gid}"><img alt="" src="${gunThumb(gid)}"><div class="pn"><b>${WEAPONS[gid].name}</b><span>Lv ${GS.save.wlv[gid] || 0} · ${GUN_KG[gid]}kg · 스킨 ${skinCnt(gid)}/${skinsFor(gid).length}</span></div><span class="pst">${si === 0 ? '주무기' : si > 0 ? `휴대 ${si}` : ''}</span></div>`; };
+  const slotCard = (k, label) => { const gid = k < 3 ? L[k] : 'pistol';
+    return `<div class="pslot ${gid ? '' : 'empty'} ${k === 3 ? 'fixed' : ''}" data-islot="${k}" ${gid && k < 3 ? `draggable="true" data-ig="${gid}"` : ''}>
+      <div class="sl"><span class="mono">${k + 1}</span>${label}</div>
+      ${gid ? `<img alt="" src="${gunThumb(gid)}"><div class="sn"><b>${WEAPONS[gid].name}</b><span>Lv ${GS.save.wlv[gid] || 0} · ${GUN_KG[gid]}kg</span></div>
+        <button class="skinbtn" data-skinpick="${gid}"><i class="sw ${skinSel(gid) ? 'th-' + SKINS[skinSel(gid)].theme : ''}"></i>${skinName(gid)} <span class="dim">· 스킨 ${skinCnt(gid)}/${skinsFor(gid).length}</span></button>`
+        : `<div class="ph">왼쪽 목록에서 총을 끌어 놓으세요</div>`}</div>`; };
+  const eqBox = (cls, label, val, sub = '') => `<div class="peq ${cls}"><span>${label}</span><b>${val}</b>${sub ? `<i>${sub}</i>` : ''}</div>`;
+  const totKg = L.filter(Boolean).reduce((a, id) => a + GUN_KG[id], 0);
+  const allSk = Object.keys(SKINS), gotSk = allSk.filter(skinOwned);
+  let picker = '';
+  if (invSkinGun) {
+    const gid = invSkinGun, cur = skinSel(gid);
+    const opt = sid => { const own = !sid || skinOwned(sid), T = sid ? SKIN_THEMES[SKINS[sid].theme] : null, a = sid ? skinAch(sid) : null;
+      return `<div class="skc ${cur === sid ? 'sel' : ''} ${own ? '' : 'lock'} ${T && T.chaos ? 'chaos' : ''}" ${own ? `data-skinset="${sid}"` : ''}>
+        <img alt="" src="${gunThumb(gid, sid)}">
+        <div class="skn"><b>${T ? T.name : '기본'}</b>${T && T.chaos ? '<span class="ctag">카오스</span>' : ''}${SKINS[sid] && SKINS[sid].guns === 'all' ? '<span class="stag">세트</span>' : ''}</div>
+        <div class="skd">${T ? T.desc : '공장에서 막 나온 기본 도색.'}</div>
+        <div class="ska">${!sid ? '' : own ? `<span class="ok">획득</span> · ${a.name}` : `<span class="lk">잠김</span> · 업적 「${a.hidden && !achGot(a.id) ? '???' : a.name}」 ${a.hidden && !achGot(a.id) ? a.hint : a.desc}`}</div>
+        <div class="skb">${cur === sid ? '<span class="ok">장착 중</span>' : own ? '<button class="primary">장착</button>' : ''}</div></div>`; };
+    picker = `<div class="overlay" id="skinov"><div class="sheet skinsheet"><header><h2>${WEAPONS[gid].name} · 스킨</h2><span class="lbl">획득 ${skinCnt(gid)} / ${skinsFor(gid).length}</span></header>
+      <div class="body"><div class="skgrid">${['', ...skinsFor(gid)].map(opt).join('')}</div></div><div class="foot"><button class="primary" data-skinclose>닫기</button></div></div></div>`;
+  }
+  const invView = `<div class="pinv">
+      <section class="pcol plist" data-idrop="list"><div class="ph3">보유 무기 <span class="dim">${ownedGuns.length + 1}</span></div>
+        <div class="prow fixedrow"><img alt="" src="${gunThumb('pistol')}"><div class="pn"><b>${WEAPONS.pistol.name}</b><span>항상 휴대 · 탄약 무한 · 스킨 ${skinCnt('pistol')}/${skinsFor('pistol').length}</span></div><span class="pst">보조</span></div>
+        ${ownedGuns.map(gunRow).join('') || '<div class="dim" style="padding:14px 4px">상점에서 총을 사면 여기에 보입니다.</div>'}
+        <div class="phint">끌어서 오른쪽 슬롯에 놓으면 장착 · 슬롯의 총을 이 목록으로 끌어 놓으면 해제 · 누르면 빈 슬롯에 장착</div></section>
+      <section class="pcol pchar"><div class="ph3">장비</div>
+        <div class="pfig">
+          <svg viewBox="0 0 200 320" class="sil"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><circle cx="100" cy="42" r="24"/><path d="M62 82 Q100 70 138 82 L150 170 L132 172 L128 120 L124 196 L134 300 L110 300 L100 210 L90 300 L66 300 L76 196 L72 120 L68 172 L50 170 Z"/></g></svg>
+          ${eqBox('e-armor', '방어복', arm.name, `체력 ${arm.hp} · 피해 감소 ${Math.round(arm.dr * 100)}%`)}
+          ${eqBox('e-bag', '가방', BAGS[GS.save.bag || 0].name, `${BAGS[GS.save.bag || 0].cap}kg · 총 ${totKg}kg`)}
+          ${eqBox('e-salv', '회수 장비', sal.name, sal.bonus ? `회수 보너스 ${Math.round(sal.bonus * 100)}%` : '')}
+          ${eqBox('e-sk1', `스킬 ${SLOT_KEYS[0]}`, GS.save.slots[0] ? SKILLS[GS.save.slots[0]].name : '<span class="dim">비어 있음</span>')}
+          ${eqBox('e-sk2', `스킬 ${SLOT_KEYS[1]}`, GS.save.slots[1] ? SKILLS[GS.save.slots[1]].name : '<span class="dim">비어 있음</span>')}
+        </div>
+        <div class="putil">${Object.values(UTILS).map(u => `<div class="${GS.save.utils[u.id] ? 'on' : ''}" title="${u.desc}">${u.name}</div>`).join('')}</div>
+        <div class="pcons">${Object.values(CONSUMABLES).map(c => `<div><span>${c.name}</span><b class="mono">${GS.save.inv[c.id] || 0}<i>/${c.max}</i></b></div>`).join('')}</div>
+        <div class="pskins"><span>획득한 스킨</span><b class="mono acc">${gotSk.length} / ${allSk.length}</b><div class="pskb">${gotSk.map(sid => `<i class="sw th-${SKINS[sid].theme}" title="${SKIN_THEMES[SKINS[sid].theme].name}"></i>`).join('') || '<span class="dim">보스 업적을 달성하면 스킨을 받습니다</span>'}</div></div>
       </section>
-    </div>`;
+      <section class="pcol pslots"><div class="ph3">무기 슬롯 <span class="dim">${L.filter(Boolean).length + 1} / 4</span></div>
+        ${slotCard(0, '주무기')}${slotCard(1, '휴대')}${slotCard(2, '휴대')}${slotCard(3, '보조 권총')}
+      </section>
+    </div>${picker}`;
   const shopView = `<div class="shopview">${shopHtml}</div>`;
   let modal = '';
   if (GS.hubModal === 'rec') {
@@ -327,6 +371,30 @@ function renderHub() {
   H.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { GS.hubModal = ''; rebindA = ''; renderHub(); });
   if ($('hmodal')) $('hmodal').onclick = e => { if (e.target.id === 'hmodal') { GS.hubModal = ''; rebindA = ''; renderHub(); } };
   if ($('deploy')) $('deploy').onclick = () => startMission(GS.selectedMission);
+  // 인벤토리: 끌어 놓기 · 누르기 · 스킨
+  if (GS.hubView === 'inv') {
+    let dragG = '';
+    H.querySelectorAll('[data-ig][draggable]').forEach(el => {
+      el.addEventListener('dragstart', e => { dragG = el.dataset.ig; el.classList.add('drag'); try { e.dataTransfer.setData('text/plain', dragG); e.dataTransfer.effectAllowed = 'move'; } catch (_) { } });
+      el.addEventListener('dragend', () => { el.classList.remove('drag'); H.querySelectorAll('.over').forEach(x => x.classList.remove('over')); });
+    });
+    const getG = e => { try { return e.dataTransfer.getData('text/plain') || dragG; } catch (_) { return dragG; } };
+    H.querySelectorAll('[data-islot]').forEach(el => { const k = +el.dataset.islot; if (k > 2) return;
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+      el.addEventListener('dragleave', () => el.classList.remove('over'));
+      el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); invPut(getG(e), k); });
+      el.addEventListener('contextmenu', e => { e.preventDefault(); const g = invSlots()[k]; if (g) invRemove(g); });
+    });
+    const li = H.querySelector('[data-idrop="list"]');
+    if (li) { li.addEventListener('dragover', e => { e.preventDefault(); li.classList.add('over'); }); li.addEventListener('dragleave', e => { if (e.target === li) li.classList.remove('over'); });
+      li.addEventListener('drop', e => { e.preventDefault(); li.classList.remove('over'); const g = getG(e); if (invSlots().includes(g)) invRemove(g); }); }
+    H.querySelectorAll('.prow[data-ig]').forEach(el => el.addEventListener('click', () => invPut(el.dataset.ig)));
+    H.querySelectorAll('.prow.fixedrow').forEach(el => el.addEventListener('click', () => { invSkinGun = 'pistol'; SFX.ui(); renderHub(); }));
+    H.querySelectorAll('[data-skinpick]').forEach(b => b.onclick = e => { e.stopPropagation(); invSkinGun = b.dataset.skinpick; SFX.ui(); renderHub(); });
+    H.querySelectorAll('[data-skinset]').forEach(b => b.onclick = () => { GS.save.skinSel = GS.save.skinSel || {}; const sid = b.dataset.skinset; if (sid) GS.save.skinSel[invSkinGun] = sid; else delete GS.save.skinSel[invSkinGun]; writeSave(); SFX.ui(); renderHub(); });
+    H.querySelectorAll('[data-skinclose]').forEach(b => b.onclick = () => { invSkinGun = ''; renderHub(); });
+    if ($('skinov')) $('skinov').onclick = e => { if (e.target.id === 'skinov') { invSkinGun = ''; renderHub(); } };
+  } else invSkinGun = '';
   if ($('goalbox')) $('goalbox').onclick = () => { const cg = curGoal(); if (!cg) return; SFX.ui(); cg.g.go(); if (GS.state === 'hub') renderHub(); };
   H.querySelectorAll('[data-gotut]').forEach(b => b.onclick = () => { GS.save.seenIntro = true; writeSave(); GS.hubModal = ''; startMission('T'); });
   if (GS.hubModal === 'intro') H.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { GS.save.seenIntro = true; writeSave(); }));
@@ -334,7 +402,7 @@ function renderHub() {
   H.querySelectorAll('[data-demo]').forEach(b => b.onclick = e => { if (e.target.closest('button')) return; demoSkill = b.dataset.demo; renderHub(); });
   updateSkillDemo();
   H.querySelectorAll('[data-tut]').forEach(b => b.onclick = () => { SFX.ui(); startMission('T'); });
-  H.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { GS.save.hardSel = b.dataset.diff === '1'; writeSave(); SFX.ui(); renderHub(); });
+  H.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { GS.save.hardSel = b.dataset.diff === '1'; GS.save.chaosSel = b.dataset.diff === '2'; writeSave(); SFX.ui(); renderHub(); });
   if ($('hsens')) $('hsens').oninput = e => { GS.save.sens = +e.target.value; setText($('hsensv'), GS.save.sens.toFixed(2)); $('sens').value = GS.save.sens; setText($('sensv'), GS.save.sens.toFixed(2)); writeSave(); };
   if ($('reset')) $('reset').onclick = () => { if (confirm('저장 데이터를 모두 삭제하고 새 게임을 시작할까요?')) { GS.save = defaultSave(); writeSave(); GS.selectedMission = 'A'; GS.hubModal = ''; GS.hubView = 'main'; renderHub(); } };
 }
@@ -351,20 +419,22 @@ addEventListener('keydown', e => {
 }, true);
 // 총기 그림: 1인칭 총기 모델을 옆에서 찍어 이미지로 보관
 const GUN_IMG = {}; let thumbR = null;
-function gunThumb(id) {
-  if (GUN_IMG[id]) return GUN_IMG[id];
+function gunThumb(id, sid = skinSel(id)) {
+  const key = id + '|' + (sid || '');
+  if (GUN_IMG[key]) return GUN_IMG[key];
   try {
     if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(360, 140); thumbR.setClearColor(0x000000, 0); }
     const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xfff4e0, 0x3a3630, 2.2)); const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(2, 3, 1); sc.add(sun);
     const g = GUNS[id].clone(true); g.visible = true; g.position.set(0, 0, 0); g.rotation.set(0, 0, 0);
-    g.traverse(o => { if (o.material && o.material.blending === THREE.AdditiveBlending) o.visible = false; });
+    g.traverse(o => { if (o.material) o.material = o.material.clone(); if (o.material && o.material.blending === THREE.AdditiveBlending) o.visible = false; });
+    applySkin(g, id, sid);
     sc.add(g); g.updateMatrixWorld(true);
     const bb = new THREE.Box3().setFromObject(g), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
     const cam = new THREE.PerspectiveCamera(22, 360 / 140, 0.01, 50), dist = Math.max(sz.z * 1.05, sz.y * 2.7) / (2 * Math.tan(11 * Math.PI / 180)) * 0.44;
     cam.position.set(c.x + dist, c.y + dist * 0.12, c.z + dist * 0.05); cam.lookAt(c);
-    thumbR.render(sc, cam); GUN_IMG[id] = thumbR.domElement.toDataURL('image/png');
-  } catch (e) { GUN_IMG[id] = ''; }
-  return GUN_IMG[id];
+    thumbR.render(sc, cam); GUN_IMG[key] = thumbR.domElement.toDataURL('image/png');
+  } catch (e) { GUN_IMG[key] = ''; }
+  return GUN_IMG[key];
 }
 // 스킬 시연: 오른쪽 아래에서 반복 재생되는 짧은 그림
 let demoRaf = 0;
@@ -443,4 +513,4 @@ function buy(id, quiet) {
   return true;
 }
 
-export { WLV_MAX, buy, carryList, itemName, itemOwned, itemPrice, itemReqOk, renderHub };
+export { WLV_MAX, buy, carryList, gunThumb, itemName, itemOwned, itemPrice, itemReqOk, renderHub };
