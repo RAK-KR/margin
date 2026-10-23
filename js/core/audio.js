@@ -1,9 +1,11 @@
-import { clamp } from './utils.js?v=32';
+import { GS } from './state.js?v=34';
+import { clamp } from './utils.js?v=34';
 
 // =====================================================================
 //  오디오 (Web Audio 합성)
 // =====================================================================
 let actx = null, master = null, noiseBuf = null, revIn = null, sfxOff = 0, shaperCurve = null;
+let aOut = null, busS = null, busE = null, revS = null, revE = null;
 // 출력 사슬: 각 소리 → master → 압축기 → 스피커, 잔향은 revIn → 컨볼버 → master
 function audioGraph(ctx) {
   const m = ctx.createGain(); m.gain.value = 0.34;
@@ -33,13 +35,27 @@ function initAudio() {
   if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
   try {
     actx = new (window.AudioContext || window.webkitAudioContext)();
-    const g = audioGraph(actx); master = g.m; noiseBuf = g.nb; revIn = g.ri;
+    const g = audioGraph(actx); noiseBuf = g.nb; aOut = g.m;
+    // 효과음 · 기계 소리 버스 (잔향으로 보내는 양도 같은 비율로)
+    busS = actx.createGain(); busE = actx.createGain(); revS = actx.createGain(); revE = actx.createGain();
+    busS.connect(g.m); busE.connect(g.m); revS.connect(g.ri); revE.connect(g.ri);
+    master = busS; revIn = revS; applyVolume();
   } catch (e) { actx = null; }
 }
 function shaperNode() {
   const sh = actx.createWaveShaper();
   if (!shaperCurve) { const n = 1024, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = Math.tanh(x * 2.8) / Math.tanh(2.8); } shaperCurve = c; }
   sh.curve = shaperCurve; return sh;
+}
+// 소리 크기 (0~1): 저장값이 없으면 전체 100 · 효과음 100 · 기계 소리 60
+const VOL_DEF = { all: 1, sfx: 1, enemy: 0.6 };
+function vol(k) { const v = GS.save.vol && GS.save.vol[k]; return v == null ? VOL_DEF[k] : v; }
+function applyVolume() {
+  if (!actx || !aOut) return;
+  const t = actx.currentTime;
+  aOut.gain.setTargetAtTime(0.34 * vol('all'), t, 0.02);
+  busS.gain.setTargetAtTime(vol('sfx'), t, 0.02); revS.gain.setTargetAtTime(vol('sfx'), t, 0.02);
+  busE.gain.setTargetAtTime(vol('enemy'), t, 0.02); revE.gain.setTargetAtTime(vol('enemy'), t, 0.02);
 }
 // 잡음 폭발: 필터 주파수를 f0 → f1로 훑으며 빠르게 사라짐 (총성의 몸통 · 균열음 · 폭발)
 function gBurst(o) {
@@ -294,5 +310,14 @@ Object.assign(SFX, {
   },
   chargeSet(k) { if (!chgOsc || !actx) return; const t = actx.currentTime + sfxOff; chgFilt.frequency.setTargetAtTime(180 + 1300 * k * k, t, 0.05); chgGain.gain.setTargetAtTime(0.22 + 0.2 * k, t, 0.05); },
 });
+// 기계(적) 소리는 기계 소리 버스로 보냄
+for (const k of ['eshot', 'roar', 'dragonRoar', 'breath', 'spider', 'missile', 'shock', 'laser', 'laserCharge', 'thunder']) {
+  const f = SFX[k]; if (!f) continue;
+  SFX[k] = function (...a) {
+    if (!busE || !actx || busE.context !== actx) return f.apply(this, a);
+    const m0 = master, r0 = revIn; master = busE; revIn = revE;
+    try { return f.apply(this, a); } finally { master = m0; revIn = r0; }
+  };
+}
 
-export { SFX, initAudio, sfxRender };
+export { SFX, aOut, actx, applyVolume, busE, busS, initAudio, master, sfxRender, vol };

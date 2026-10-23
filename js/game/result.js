@@ -1,19 +1,19 @@
-import { GS } from '../core/state.js?v=32';
-import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=32';
-import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=32';
-import { writeSave } from '../core/save.js?v=32';
-import { SFX } from '../core/audio.js?v=32';
-import { camera, controls } from '../core/renderer.js?v=32';
-import { GUNS } from '../player/viewmodel.js?v=32';
-import { player } from '../player/playerState.js?v=32';
-import { clearWorld } from '../world/missions.js?v=32';
-import { coreExposed } from '../bosses/core.js?v=32';
-import { endTutorial } from '../modes/tutorial.js?v=32';
-import { partAlive } from '../combat/damage.js?v=32';
-import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=32';
-import { HARD_MUL, barBoss } from '../modes/difficulty.js?v=32';
-import { achEvent, achUnlock } from '../meta/achievements.js?v=32';
-import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { $, _v1, fmt, setHTML, setText } from '../core/utils.js?v=34';
+import { ENDING, ETYPES, LORE, MISSIONS, SALVAGES, SHOP, STATE_KO, utilOn } from '../data/data.js?v=34';
+import { writeSave } from '../core/save.js?v=34';
+import { SFX } from '../core/audio.js?v=34';
+import { camera, controls } from '../core/renderer.js?v=34';
+import { GUNS } from '../player/viewmodel.js?v=34';
+import { player } from '../player/playerState.js?v=34';
+import { clearWorld } from '../world/missions.js?v=34';
+import { coreExposed } from '../bosses/core.js?v=34';
+import { endTutorial } from '../modes/tutorial.js?v=34';
+import { partAlive } from '../combat/damage.js?v=34';
+import { NET, coopEv, coopFlush, coopGuestSend, coopOn, coopOut, isHost } from '../modes/coop.js?v=34';
+import { HARD_MUL, barBoss } from '../modes/difficulty.js?v=34';
+import { achEvent, achUnlock } from '../meta/achievements.js?v=34';
+import { itemName, itemOwned, itemPrice, itemReqOk, renderHub } from '../ui/hub.js?v=34';
 
 // =====================================================================
 //  임무 종료 / 정산

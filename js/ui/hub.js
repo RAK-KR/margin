@@ -1,16 +1,17 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=32';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=32';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STORY, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=32';
-import { defaultSave, writeSave } from '../core/save.js?v=32';
-import { SFX, initAudio } from '../core/audio.js?v=32';
-import { GUNS } from '../player/viewmodel.js?v=32';
-import { startMission } from '../world/missions.js?v=32';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=32';
-import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=32';
-import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=32';
-import { nextGoal } from '../game/result.js?v=32';
-import { hubShow } from './hub3d.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=34';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, STORY, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=34';
+import { defaultSave, writeSave } from '../core/save.js?v=34';
+import { SFX, initAudio, vol } from '../core/audio.js?v=34';
+import { GUNS } from '../player/viewmodel.js?v=34';
+import { startMission } from '../world/missions.js?v=34';
+import { bindVolume } from '../player/input.js?v=34';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=34';
+import { extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=34';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=34';
+import { nextGoal } from '../game/result.js?v=34';
+import { hubShow } from './hub3d.js?v=34';
 
 // =====================================================================
 //  거점 / 상점
@@ -232,7 +233,8 @@ function renderHub() {
     const kb = KEYDEF.map(([a, nm]) => `<span>${nm}</span><button data-rebind="${a}" class="${rebindA === a ? 'wait' : ''}">${rebindA === a ? '키를 누르세요' : keyLabel(bind(a))}</button>`).join('');
     modal = `<div class="overlay" id="hmodal"><div class="sheet" style="width:min(680px,94vw)"><header><h2>설정 · 조작법</h2></header><div class="body">
       <div class="sens" style="margin-top:0"><span>마우스 감도</span><input type="range" id="hsens" min="0.3" max="2.5" step="0.05" value="${GS.save.sens}"><span class="mono" id="hsensv">${(+GS.save.sens).toFixed(2)}</span></div>
-      <div class="sens"><span>UI 크기</span><input type="range" id="huiz" min="0.8" max="1.8" step="0.05" value="${GS.save.uiScale || 1.3}"><span class="mono" id="huizv">${Math.round((GS.save.uiScale || 1.3) * 100)}%</span></div>
+      <div class="sens"><span>UI 크기</span><input type="range" id="huiz" min="0.75" max="1.8" step="0.05" value="${uiScaleNow()}"><span class="mono" id="huizv">${Math.round(uiScaleNow() * 100)}%${GS.save.uiScale ? '' : ' 자동'}</span><button class="btn" id="huizauto" style="margin-left:10px;padding:4px 10px">자동</button></div>
+      ${[['all', '전체 소리'], ['sfx', '효과음 · 내 총'], ['enemy', '기계 소리 (적)']].map(([k, n]) => `<div class="sens"><span>${n}</span><input type="range" data-vol="${k}" min="0" max="1" step="0.05" value="${vol(k)}"><span class="mono" data-volv="${k}">${Math.round(vol(k) * 100)}%</span></div>`).join('')}
       <div class="lbl" style="margin:18px 0 10px">키 설정 · 버튼을 누른 뒤 원하는 키를 누르세요 (Esc 취소 · 겹치는 키는 서로 바뀜)</div>
       <div class="kbind">${kb}</div>
       <div class="dim" style="font-size:15px;margin-top:14px;line-height:1.6">마우스: 좌클릭 사격 · 우클릭 정조준 · 휠 무기 전환. 부품은 밟으면 가방 여유만큼 자동으로 줍고, 무거운 부품은 상호작용 키로 직접 줍습니다.</div>
@@ -265,7 +267,9 @@ function renderHub() {
     if (ci >= 0) GS.save.carry.splice(ci, 1); else if (carryList().length < MAX_CARRY) GS.save.carry.push(id);
     writeSave(); SFX.ui(); renderHub(); });
   H.querySelectorAll('[data-rebind]').forEach(b => b.onclick = () => { rebindA = rebindA === b.dataset.rebind ? '' : b.dataset.rebind; SFX.ui(); renderHub(); });
+  bindVolume(H);
   if ($('huiz')) $('huiz').onchange = e => { GS.save.uiScale = +e.target.value; writeSave(); applyUiScale(); renderHub(); };
+  if ($('huizauto')) $('huizauto').onclick = () => { delete GS.save.uiScale; writeSave(); applyUiScale(); renderHub(); };
   if ($('huiz')) $('huiz').oninput = e => setText($('huizv'), Math.round(e.target.value * 100) + '%');
   if ($('kbreset')) $('kbreset').onclick = () => { GS.save.binds = {}; rebindA = ''; writeSave(); SFX.ui(); renderHub(); };
   H.querySelectorAll('[data-mis]').forEach(b => b.onclick = () => { GS.selectedMission = b.dataset.mis; SFX.ui(); renderHub(); });
@@ -366,7 +370,10 @@ function drawSkillDemo(c, id, T) {
     txt(on ? '적과 탄환이 40% 속도로 느려짐' : '평소 속도', W / 2, 40, on ? '#8ab8ff' : '#e8a33d');
   }
 }
-function applyUiScale() { const k = GS.save.uiScale || 1.3; document.documentElement.style.setProperty('--uiz', k); document.documentElement.style.setProperty('--uizh', (1 + (k - 1) * 0.5).toFixed(3)); }
+// UI 배율: 직접 정한 값이 없으면 브라우저 창 크기에 맞춰 자동 (1480x830 기준 1배)
+function uiScaleNow() { if (GS.save.uiScale) return GS.save.uiScale; const k = Math.min(innerWidth / 1480, innerHeight / 830); return Math.round(clamp(k, 0.75, 1.25) * 20) / 20; }
+addEventListener('resize', () => { if (!GS.save.uiScale) applyUiScale(); });
+function applyUiScale() { const k = uiScaleNow(); document.documentElement.style.setProperty('--uiz', k); document.documentElement.style.setProperty('--uizh', (k < 1 ? k : 1 + (k - 1) * 0.5).toFixed(3)); }
 applyUiScale();
 function buy(id, quiet) {
   const it = SHOP.find(s => s.id === id); if (!it) return false;

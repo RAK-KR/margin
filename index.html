@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=32">
+<link rel="stylesheet" href="css/style.css?v=34">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -68,10 +68,11 @@
 
 <!-- PAUSE -->
 <div id="pause" class="overlay hidden">
-  <div class="sheet" style="width:min(520px,94vw)">
+  <div class="sheet" style="width:min(600px,94vw)">
     <header><h2 id="pausetitle">일시정지</h2><span class="lbl" id="pausesub"></span></header>
     <div class="body">
-      <div class="keys">
+      <div id="bagui"></div>
+      <details id="keyhelp"><summary>조작법</summary><div class="keys">
         <b>W A S D</b><span>이동</span><b>마우스</b><span>시점 회전 / 조준</span>
         <b>좌클릭</b><span>사격</span><b>우클릭</b><span>정조준 (정밀 소총은 조준경)</span>
         <b>R</b><span>재장전</span><b>1 / 2 / Q</b><span>주 무기 / 보조 권총 전환</span>
@@ -79,8 +80,9 @@
         <b>C (누르고 있기)</b><span>앉기 · 낮은 엄폐물 뒤에 숨기, 탄퍼짐 감소</span>
         <b>E</b><span>탄약 보급 · 탈출 (부품은 밟으면 자동 회수)</span><b>F / V</b><span>스킬 1 / 2 (상점에서 구매 · 장착)</span>
         <b>G / T</b><span>투척물 던지기 / 종류 전환</span><b>H</b><span>응급 키트 · 회복 주사기</span><b>Esc</b><span>일시정지</span>
-      </div>
+      </div></details>
       <div class="sens"><span>마우스 감도</span><input type="range" id="sens" min="0.3" max="2.5" step="0.05"><span class="mono" id="sensv"></span></div>
+      <div id="pausevol"></div>
       <div class="dim" id="pausemsg" style="font-size:14.5px;margin-top:10px"></div>
     </div>
     <div class="foot">
@@ -97,9 +99,9 @@
 <script>
   // CDN 로딩 실패 감지 (모듈 스크립트가 실행되지 않으면 안내)
   setTimeout(function(){ if(!window.__marginReady){ var m=document.getElementById('loadmsg');
-    if(m) m.innerHTML='Three.js를 불러오지 못했습니다. 인터넷 연결을 확인하거나, 이 폴더에서<br><span class="mono acc">python -m http.server 8000</span> 실행 후 <span class="mono acc">http://localhost:8000</span> 으로 접속해 주세요.'; } }, 9000);
+    if(m) m.innerHTML='게임을 불러오지 못했습니다.<br><span class="mono acc">Ctrl + Shift + R</span> 로 새로고침해 보세요. 이전 버전 파일이 브라우저에 남아 있으면 이렇게 멈출 수 있습니다.<br>그래도 안 되면 인터넷 연결을 확인하거나, 내려받은 파일이라면 <span class="mono acc">python -m http.server 8000</span> 실행 후 <span class="mono acc">http://localhost:8000</span> 으로 접속해 주세요.'; } }, 9000);
 </script>
 
-<script type="module" src="js/main.js?v=32"></script>
+<script type="module" src="js/main.js?v=34"></script>
 </body>
 </html>

@@ -1,62 +1,62 @@
 import * as THREE from 'three';
-import { GS } from './core/state.js?v=32';
+import { GS } from './core/state.js?v=34';
 // 원래 단일 파일과 같은 순서로 모듈을 실행
-import './core/utils.js?v=32';
-import './data/data.js?v=32';
-import './core/save.js?v=32';
-import './core/audio.js?v=32';
-import './core/renderer.js?v=32';
-import './world/world.js?v=32';
-import './fx/effects.js?v=32';
-import './player/viewmodel.js?v=32';
-import './enemies/robot.js?v=32';
-import './player/playerState.js?v=32';
-import './player/player.js?v=32';
-import './world/missions.js?v=32';
-import './bosses/core.js?v=32';
-import './modes/tutorial.js?v=32';
-import './player/input.js?v=32';
-import './combat/shooting.js?v=32';
-import './combat/damage.js?v=32';
-import './enemies/ai.js?v=32';
-import './bosses/rex.js?v=32';
-import './bosses/dragon.js?v=32';
-import './enemies/extra.js?v=32';
-import './bosses/spider.js?v=32';
-import './modes/coop.js?v=32';
-import './modes/difficulty.js?v=32';
-import './meta/achievements.js?v=32';
-import './game/loot.js?v=32';
-import './ui/hud.js?v=32';
-import './game/result.js?v=32';
-import './ui/hub.js?v=32';
-import './ui/hub3d.js?v=32';
-import { $, TEST } from './core/utils.js?v=32';
-import { ETYPES, WEAPONS, bind, effW } from './data/data.js?v=32';
-import { SFX, sfxRender } from './core/audio.js?v=32';
-import { camera, renderer, scene, vmCam, vmScene } from './core/renderer.js?v=32';
-import { FX, spawnBeam, updateBeams, updateFX } from './fx/effects.js?v=32';
-import { keys, player, recoil } from './player/playerState.js?v=32';
-import { damagePlayer, updateLootVisuals, updatePlayer, updateViewmodel } from './player/player.js?v=32';
-import { capZones, startMission, updateZones } from './world/missions.js?v=32';
-import { coreExposed } from './bosses/core.js?v=32';
-import { TUT_STEPS, tutNext, updateTutorial } from './modes/tutorial.js?v=32';
-import { active } from './player/input.js?v=32';
-import { empAt, fireRay, switchWeapon, tryFire, updateFadeRings, updateThrowables } from './combat/shooting.js?v=32';
-import { damagePart, handlePartEvent } from './combat/damage.js?v=32';
-import { updateEnemy, updateProjectiles } from './enemies/ai.js?v=32';
-import { updateMissiles } from './bosses/rex.js?v=32';
-import { applyDragonPose, dragonNodesOpen, updateBolts } from './bosses/dragon.js?v=32';
-import { spawnDrone } from './enemies/extra.js?v=32';
-import { spawnMite, spiderBrood, spiderExposed } from './bosses/spider.js?v=32';
-import { NET, coopHost, coopJoin, coopLaunch, coopLeave, coopOn, coopTick, isGuest, isHost } from './modes/coop.js?v=32';
-import { extremeProgress, extremeUnlocked, hardUnlocked } from './modes/difficulty.js?v=32';
-import { ACH, achEvent, achTick, achUnlock, killEnemy } from './meta/achievements.js?v=32';
-import { autoPickup, bagCap, carryKg, createLoot, dropWorst, interact, loadMult, nearestLoot, updateFallers } from './game/loot.js?v=32';
-import { updateHUD } from './ui/hud.js?v=32';
-import { endMission, goHub, showEnding } from './game/result.js?v=32';
-import { buy, carryList, renderHub } from './ui/hub.js?v=32';
-import { hubCam, hubScene, updateHub3D } from './ui/hub3d.js?v=32';
+import './core/utils.js?v=34';
+import './data/data.js?v=34';
+import './core/save.js?v=34';
+import './core/audio.js?v=34';
+import './core/renderer.js?v=34';
+import './world/world.js?v=34';
+import './fx/effects.js?v=34';
+import './player/viewmodel.js?v=34';
+import './enemies/robot.js?v=34';
+import './player/playerState.js?v=34';
+import './player/player.js?v=34';
+import './world/missions.js?v=34';
+import './bosses/core.js?v=34';
+import './modes/tutorial.js?v=34';
+import './player/input.js?v=34';
+import './combat/shooting.js?v=34';
+import './combat/damage.js?v=34';
+import './enemies/ai.js?v=34';
+import './bosses/rex.js?v=34';
+import './bosses/dragon.js?v=34';
+import './enemies/extra.js?v=34';
+import './bosses/spider.js?v=34';
+import './modes/coop.js?v=34';
+import './modes/difficulty.js?v=34';
+import './meta/achievements.js?v=34';
+import './game/loot.js?v=34';
+import './ui/hud.js?v=34';
+import './game/result.js?v=34';
+import './ui/hub.js?v=34';
+import './ui/hub3d.js?v=34';
+import { $, TEST } from './core/utils.js?v=34';
+import { ETYPES, WEAPONS, bind, effW } from './data/data.js?v=34';
+import { SFX, aOut, actx, busE, busS, initAudio, master, sfxRender } from './core/audio.js?v=34';
+import { camera, renderer, scene, vmCam, vmScene } from './core/renderer.js?v=34';
+import { FX, spawnBeam, updateBeams, updateFX } from './fx/effects.js?v=34';
+import { keys, player, recoil } from './player/playerState.js?v=34';
+import { damagePlayer, updateLootVisuals, updatePlayer, updateViewmodel } from './player/player.js?v=34';
+import { capZones, startMission, updateZones } from './world/missions.js?v=34';
+import { coreExposed } from './bosses/core.js?v=34';
+import { TUT_STEPS, tutNext, updateTutorial } from './modes/tutorial.js?v=34';
+import { active, renderBagUI, showPause } from './player/input.js?v=34';
+import { empAt, fireRay, switchWeapon, tryFire, updateFadeRings, updateThrowables } from './combat/shooting.js?v=34';
+import { damagePart, handlePartEvent } from './combat/damage.js?v=34';
+import { updateEnemy, updateProjectiles } from './enemies/ai.js?v=34';
+import { updateMissiles } from './bosses/rex.js?v=34';
+import { applyDragonPose, dragonNodesOpen, updateBolts } from './bosses/dragon.js?v=34';
+import { spawnDrone } from './enemies/extra.js?v=34';
+import { spawnMite, spiderBrood, spiderExposed } from './bosses/spider.js?v=34';
+import { NET, coopHost, coopJoin, coopLaunch, coopLeave, coopOn, coopTick, isGuest, isHost } from './modes/coop.js?v=34';
+import { extremeProgress, extremeUnlocked, hardUnlocked } from './modes/difficulty.js?v=34';
+import { ACH, achEvent, achTick, achUnlock, killEnemy } from './meta/achievements.js?v=34';
+import { autoPickup, bagCap, carryKg, createLoot, dropLootAt, dropWorst, interact, loadMult, nearestLoot, updateFallers } from './game/loot.js?v=34';
+import { updateHUD } from './ui/hud.js?v=34';
+import { endMission, goHub, showEnding } from './game/result.js?v=34';
+import { buy, carryList, renderHub } from './ui/hub.js?v=34';
+import { hubCam, hubScene, updateHub3D } from './ui/hub3d.js?v=34';
 
 // =====================================================================
 //  루프
@@ -122,6 +122,6 @@ if (TEST) {
     setMouse(v) { GS.mouseDown = v; GS.firedThisPress = false; }, setGod(v) { GS.godMode = v; }, setAds(v) { GS.rightDown = v; }, keys,
     aimAt(v) { camera.position.set(player.pos.x, player.pos.y + player.eye, player.pos.z); camera.lookAt(v); camera.updateMatrixWorld(); recoil.cur = recoil.target = 0; },
     tick(sec, step = 1 / 60) { for (let t = 0; t < sec; t += step) update(step); render(); },
-    WEAPONS, ETYPES, SFX, sfxRender, coreExposed, showEnding, damagePart, handlePartEvent, get TUT_STEPS() { return TUT_STEPS; }, tutNext, spawnMite, spiderBrood, get capZones() { return capZones; }, updateZones, carryKg, bagCap, loadMult, dropWorst, bind, carryList, nearestLoot, spawnBeam, get FXB() { return FX.beams; },
+    WEAPONS, ETYPES, SFX, sfxRender, coreExposed, showEnding, damagePart, handlePartEvent, get TUT_STEPS() { return TUT_STEPS; }, tutNext, spawnMite, spiderBrood, get capZones() { return capZones; }, updateZones, carryKg, bagCap, loadMult, dropWorst, dropLootAt, renderBagUI, showPause, initAudio, get audioBus() { return { busE, busS, master, actx, aOut }; }, bind, carryList, nearestLoot, spawnBeam, get FXB() { return FX.beams; },
   };
 }

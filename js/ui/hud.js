@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=32';
-import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=32';
-import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=32';
-import { camera } from '../core/renderer.js?v=32';
-import { curWeapon, player, raycaster } from '../player/playerState.js?v=32';
-import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=32';
-import { TUT_STEPS } from '../modes/tutorial.js?v=32';
-import { currentSpread } from '../combat/shooting.js?v=32';
-import { partAlive } from '../combat/damage.js?v=32';
-import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=32';
-import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=32';
-import { drawRadar, updateBossBar } from '../game/result.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { $, _v1, _v2, _v4, fmt, setHTML, setText } from '../core/utils.js?v=34';
+import { CONSUMABLES, GRENADES, SKILLS, SLOT_KEYS, STATE_KO, UK, W, WEAPONS, bind, keyLabel, utilOn } from '../data/data.js?v=34';
+import { camera } from '../core/renderer.js?v=34';
+import { curWeapon, player, raycaster } from '../player/playerState.js?v=34';
+import { capZones, zonePrompt, zoneText } from '../world/missions.js?v=34';
+import { TUT_STEPS } from '../modes/tutorial.js?v=34';
+import { currentSpread } from '../combat/shooting.js?v=34';
+import { partAlive } from '../combat/damage.js?v=34';
+import { NET, coopEv, coopHud, coopOn, coopPrompt, isHost } from '../modes/coop.js?v=34';
+import { bagCap, bagRoom, carryKg, inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=34';
+import { drawRadar, updateBossBar } from '../game/result.js?v=34';
 
 // =====================================================================
 //  HUD
@@ -34,8 +34,9 @@ function updateWaypoint(x, z, d) {
   let rot = 0;
   if (off) {
     let dx = sx - W / 2, dy = sy - H / 2; if (behind) { dx = -dx; dy = -dy; if (Math.abs(dy) < 1) dy = 1; }
-    const k = Math.min((W / 2 - m) / Math.max(1e-3, Math.abs(dx)), (H / 2 - m) / Math.max(1e-3, Math.abs(dy)));
-    sx = W / 2 + dx * k; sy = H / 2 + dy * k; rot = Math.atan2(dy, dx) + Math.PI / 2;
+    // 화면 밖이면 조준점 둘레의 원 위에 표시 (모서리의 정보 칸과 겹치지 않게)
+    const r = Math.min(W, H) * 0.3, ang = Math.atan2(dy, dx);
+    sx = W / 2 + Math.cos(ang) * r * 1.35; sy = H / 2 + Math.sin(ang) * r; rot = ang + Math.PI / 2;
   }
   el.classList.toggle('edge', off); el.classList.toggle('wait', !GS.run.objDone);
   el.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
@@ -119,13 +120,13 @@ function updateHUD(dt) {
   }
   const lv = GS.run.loot.reduce((a, l) => a + l.val, 0);
   setText($('lootval'), fmt(lv * (1 + GS.run.salvageBonus)) + ' CR'); setText($('lootcnt'), `(${GS.run.loot.length}개)`);
-  { const kg = carryKg(), cap = bagCap(), lm = loadMult(); setHTML($('bagtxt'), `${kg.toFixed(1)} / ${cap} kg${lm < 0.999 ? `<span class="${lm < 0.1 ? 'bad' : 'acc'}">${lm < 0.1 ? '과적 · 이동 -95%' : '이동 -' + Math.round((1 - lm) * 100) + '%'}</span>` : ''}`); }
+  { const kg = carryKg(), cap = bagCap(), lm = loadMult(); setHTML($('bagtxt'), `${kg.toFixed(1)} / ${cap} kg${lm < 0.999 ? ` <span class="${kg > cap ? 'bad' : 'acc'}">${kg > cap ? '초과 · ' : ''}이동 -${Math.round((1 - lm) * 100)}%</span>` : ''}`); }
   // 상호작용 안내
   const pr = $('prompt'); let msg = '';
   const cp = coopPrompt();
   const nl = player.downed ? null : nearestLoot();
   if (cp) msg = cp;
-  else if (nl) msg = `<b>[${UK()}]</b><span class="${(nl.kg || 0) > bagRoom() ? 'bad' : ''}">무게 초과 · 그래도 줍기</span> <span class="dim">${nl.name} ${(nl.kg || 0).toFixed(1)}kg · 가방 ${carryKg().toFixed(1)} / ${bagCap()}kg · ${keyLabel(bind('drop'))} 버리기</span>`;
+  else if (nl) msg = `<b>[${UK()}]</b><span class="${(nl.kg || 0) > bagRoom() ? 'bad' : ''}">${(nl.kg || 0) > bagRoom() ? '무게 초과 · 그래도 줍기' : '줍기'}</span> <span class="dim">${nl.name} ${(nl.kg || 0).toFixed(1)}kg · 가방 ${carryKg().toFixed(1)} / ${bagCap()}kg · ${keyLabel(bind('bag'))} 가방</span>`;
   else if (nearestCrate()) msg = `<b>[${UK()}]</b>탄약 보급 · ${WEAPONS[(curWeapon().id !== 'pistol' ? curWeapon() : GS.run.ws[0]).id].name}`;
   else if (inExtraction()) {
     if (GS.run.objDone) msg = `<b>[${UK()}]</b>탈출 및 정산`;

@@ -129,8 +129,9 @@ button.wide{width:100%;margin-top:22px;padding:11px}
 .item{border:1px solid var(--line);background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .item.owned{border-color:#33402c}
 .item.equipped{border:2px solid var(--acc);padding:11px 13px;background:rgba(232,163,61,.08);box-shadow:0 0 0 1px rgba(232,163,61,.25),0 0 18px rgba(232,163,61,.18)}
-.item .eqtag{margin-left:8px;font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#14110c;background:var(--acc);padding:2px 6px;vertical-align:2px}
+.item .eqtag{display:inline-block;white-space:nowrap;margin-left:8px;font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#14110c;background:var(--acc);padding:2px 6px;vertical-align:2px}
 .item .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.item .hd .nm{min-width:0}
 .item .nm{font-weight:700}
 .item .pr{font-family:'JetBrains Mono',monospace;color:var(--acc);font-weight:700;white-space:nowrap}
 .item .ds{font-size:14.5px;color:var(--dim)}
@@ -139,6 +140,18 @@ button.wide{width:100%;margin-top:22px;padding:11px}
 .cmp .ar{color:var(--faint)}
 .item .act{display:flex;gap:8px;align-items:center;margin-top:auto}
 .item .act .note{font-size:14.5px;color:var(--dim)}
+#keyhelp{margin-top:14px}#keyhelp summary{cursor:pointer;color:var(--dim);font-size:14px;letter-spacing:.06em}
+#bagui .bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+#bagui .bh b{font-family:'JetBrains Mono',monospace}
+#bagui .bl{display:flex;flex-direction:column;gap:4px;max-height:38vh;overflow:auto}
+#bagui .bi{display:grid;grid-template-columns:18px 1fr auto auto;gap:10px;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border:1px solid var(--line);cursor:grab;user-select:none;font-size:14.5px}
+#bagui .bi:hover{border-color:var(--acc)}#bagui .bi.drag{opacity:.4}
+#bagui .bi i{color:var(--dim);font-style:normal;letter-spacing:-2px}
+#bagui .bi .k,#bagui .bi .v{font-family:'JetBrains Mono',monospace;font-size:13.5px;text-align:right}
+#bagui .bi .v{color:var(--acc);min-width:76px}
+#bagui .gun{cursor:default;opacity:.65}
+#bagui .bdrop{margin-top:10px;border:2px dashed rgba(255,255,255,.18);padding:14px;text-align:center;color:var(--dim);font-size:14px}
+#bagui .bdrop.over{border-color:var(--bad, #e05a4a);color:#fff;background:rgba(224,90,74,.12)}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14.5px;margin-top:6px}
 .keys b{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--acc);font-size:14px}
 #deploy{width:100%;padding:14px;font-size:18px}
@@ -209,8 +222,9 @@ button.wide{width:100%;margin-top:22px;padding:11px}
 #shbar{height:4px;background:#14202c;margin-top:4px}
 #shbar>i{display:block;height:100%;background:#6ac8ff;width:0}
 #skillbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:8px}
-:root{--uiz:1.3;--uizh:1.15}
-#hud .hpanel,#skillbar,#feed,#prompt,#bossbar,#aiminfo,#popup,#reloadtxt,#tut,#wp,#radar{zoom:var(--uiz)}
+:root{--uiz:1.15;--uizh:1.075}
+#hud .hpanel,#skillbar,#feed,#prompt,#bossbar,#aiminfo,#popup,#reloadtxt,#tut,#radar{zoom:var(--uiz)}
+#wp{font-size:calc(13px * var(--uiz))}
 #hub .hubbody,#hub .top,.overlay .sheet,#skilldemo,#toasts{zoom:var(--uizh)}
 #skillbar .sk{position:relative;min-width:132px;background:rgba(10,11,12,.78);border:1px solid rgba(255,255,255,.14);padding:8px 12px 10px;font-size:15.5px;font-weight:600;overflow:hidden}
 #skillbar .sk b{font-family:'JetBrains Mono',monospace;color:#111;background:var(--acc);padding:1px 6px;margin-right:8px;border-radius:2px}

@@ -1,4 +1,4 @@
-import { GS } from '../core/state.js?v=32';
+import { GS } from '../core/state.js?v=34';
 
 // =====================================================================
 //  데이터: 무기 / 장비 / 적 / 임무
@@ -75,7 +75,7 @@ function partKg(v) { return Math.round((0.5 + 0.03 * Math.min(v, 200) + 0.012 * 
 const KEYDEF = [
   ['fwd', '앞으로', 'KeyW'], ['back', '뒤로', 'KeyS'], ['left', '왼쪽', 'KeyA'], ['right', '오른쪽', 'KeyD'],
   ['sprint', '달리기', 'ShiftLeft'], ['jump', '점프', 'Space'], ['crouch', '앉기', 'KeyC'], ['reload', '재장전', 'KeyR'],
-  ['use', '상호작용 · 무거운 부품 줍기', 'KeyE'], ['drop', '부품 버리기', 'KeyX'], ['swap', '이전 무기', 'KeyQ'], ['heal', '회복', 'KeyH'],
+  ['use', '상호작용 · 무거운 부품 줍기', 'KeyE'], ['drop', '부품 버리기', 'KeyX'], ['bag', '가방 열기', 'Tab'], ['swap', '이전 무기', 'KeyQ'], ['heal', '회복', 'KeyH'],
   ['w1', '무기 1', 'Digit1'], ['w2', '무기 2', 'Digit2'], ['w3', '무기 3', 'Digit3'], ['w4', '무기 4', 'Digit4'],
   ['sk1', '스킬 1', 'KeyF'], ['sk2', '스킬 2', 'KeyV'], ['nade', '투척', 'KeyG'], ['nadeSel', '투척물 전환', 'KeyT'], ['skip', '훈련 단계 건너뛰기', 'KeyN'],
 ];

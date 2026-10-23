@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=32';
-import { $, V3, clamp, lerp, setHTML } from '../core/utils.js?v=32';
-import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=32';
-import { writeSave } from '../core/save.js?v=32';
-import { SFX } from '../core/audio.js?v=32';
-import { controls } from '../core/renderer.js?v=32';
-import { addBox, crate, removeHittables } from '../world/world.js?v=32';
-import { player } from '../player/playerState.js?v=32';
-import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=32';
-import { animateLegs } from '../enemies/ai.js?v=32';
-import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=32';
-import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=32';
-import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=32';
-import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=32';
-import { spiderPose } from './coop.js?v=32';
-import { achUnlock } from '../meta/achievements.js?v=32';
-import { addFeed, popup } from '../ui/hud.js?v=32';
-import { goHub } from '../game/result.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { $, V3, clamp, lerp, setHTML } from '../core/utils.js?v=34';
+import { WEAPONS, bind, effW, keyLabel, maxReserve } from '../data/data.js?v=34';
+import { writeSave } from '../core/save.js?v=34';
+import { SFX } from '../core/audio.js?v=34';
+import { controls } from '../core/renderer.js?v=34';
+import { addBox, crate, removeHittables } from '../world/world.js?v=34';
+import { player } from '../player/playerState.js?v=34';
+import { addExtraction, setEnv, showGun, spawnEnemy } from '../world/missions.js?v=34';
+import { animateLegs } from '../enemies/ai.js?v=34';
+import { animateRex, partTick, spawnBoss } from '../bosses/rex.js?v=34';
+import { dragonCoilPose, spawnDragon } from '../bosses/dragon.js?v=34';
+import { ROTORS, rotorsWorking, spawnDrone, updateDrone } from '../enemies/extra.js?v=34';
+import { SPI, spawnMite, spawnSpider } from '../bosses/spider.js?v=34';
+import { spiderPose } from './coop.js?v=34';
+import { achUnlock } from '../meta/achievements.js?v=34';
+import { addFeed, popup } from '../ui/hud.js?v=34';
+import { goHub } from '../game/result.js?v=34';
 
 // =====================================================================
 //  훈련장 (튜토리얼)
@@ -59,7 +59,7 @@ const TUT_STEPS = [
     빛나는 <b>보조 팔</b>을 쏴서 <b>무력화</b>시키세요. 무력화된 부품을 계속 쏘면 파괴되니 떨어지면 사격을 멈추세요. 조준선 아래에 부위 이름과 상태가 표시됩니다.`,
     setup: () => { tutRobot('combat', 0, -2, 0).tutTarget = true; }, hl: () => [tutE().parts.arm], goal: () => partGone(tutE().parts.arm) },
   { t: '부품 줍기와 가방', d: () => `떨어진 부품 위에 주황색 원이 생겼습니다. <b>밟고 지나가면 자동으로 줍습니다.</b><br>
-    부품에는 무게가 있습니다. 가방이 절반을 넘으면 느려지고, 가득 차면 자동으로 줍지 않습니다. 무거운 부품은 ${tutK('use')} 로 직접 줍고, ${tutK('drop')} 로 값어치가 낮은 부품을 버릴 수 있습니다.<br>떨어진 부품을 주우세요.`,
+    부품에는 무게가 있습니다. 가방이 절반을 넘으면 느려지고, 가득 차면 자동으로 줍지 않습니다. 가방이 넘치면 넘친 만큼 점점 더 느려집니다. 무거운 부품은 ${tutK('use')} 로 직접 줍고, ${tutK('drop')} 로 값어치가 낮은 부품을 버리거나 ${tutK('bag')} 가방 창에서 원하는 부품을 끌어서 버릴 수 있습니다. 버린 부품은 다시 주울 수 있습니다.<br>떨어진 부품을 주우세요.`,
     keep: true, goal: () => GS.run.loot.length > 0 },
   { t: '등 뒤 동력 장치', d: '로봇 등 뒤의 초록빛 <b>후면 동력 장치</b>를 맞히면 과부하로 바로 쓰러집니다. 정면보다 뒤를 노리는 것이 빠릅니다.<br>등을 돌린 전투형의 빛나는 동력 장치를 쏘세요. 쓰러진 로봇의 남은 부품도 떨어집니다.',
     setup: () => { tutRobot('combat', 0, -4, Math.PI).tutTarget = true; }, hl: () => [tutE().parts.power], goal: () => tutE().dead },

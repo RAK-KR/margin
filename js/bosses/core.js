@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=32';
-import { V3, clamp, lerp, rand } from '../core/utils.js?v=32';
-import { ETYPES } from '../data/data.js?v=32';
-import { SFX } from '../core/audio.js?v=32';
-import { addBox } from '../world/world.js?v=32';
-import { UPY, burstSparks, projGeo, spawnFlash } from '../fx/effects.js?v=32';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=32';
-import { alertEnemy } from '../enemies/ai.js?v=32';
-import { markerGeo, partTick, spawnShock } from './rex.js?v=32';
-import { dragonStrike, spawnBossProj } from './dragon.js?v=32';
-import { _box3, dummyGlow, partKit, spawnDrone } from '../enemies/extra.js?v=32';
-import { spawnMite } from './spider.js?v=32';
-import { dmgTargets, hurtTarget, knockTarget } from '../modes/coop.js?v=32';
-import { addFeed, popup } from '../ui/hud.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { V3, clamp, lerp, rand } from '../core/utils.js?v=34';
+import { ETYPES } from '../data/data.js?v=34';
+import { SFX } from '../core/audio.js?v=34';
+import { addBox } from '../world/world.js?v=34';
+import { UPY, burstSparks, projGeo, spawnFlash } from '../fx/effects.js?v=34';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=34';
+import { alertEnemy } from '../enemies/ai.js?v=34';
+import { markerGeo, partTick, spawnShock } from './rex.js?v=34';
+import { dragonStrike, spawnBossProj } from './dragon.js?v=34';
+import { _box3, dummyGlow, partKit, spawnDrone } from '../enemies/extra.js?v=34';
+import { spawnMite } from './spider.js?v=34';
+import { dmgTargets, hurtTarget, knockTarget } from '../modes/coop.js?v=34';
+import { addFeed, popup } from '../ui/hud.js?v=34';
 
 // =====================================================================
 //  최종 작전: 근원지 · 생산 코어

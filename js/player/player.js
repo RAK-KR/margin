@@ -1,21 +1,21 @@
-import { GS } from '../core/state.js?v=32';
-import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=32';
-import { W, maxReserve, utilOn } from '../data/data.js?v=32';
-import { writeSave } from '../core/save.js?v=32';
-import { SFX } from '../core/audio.js?v=32';
-import { BASE_FOV, camera, controls } from '../core/renderer.js?v=32';
-import { groundAt, moveWithCollision } from '../world/world.js?v=32';
-import { UPY, spawnSpark } from '../fx/effects.js?v=32';
-import { GUNS, HIP_POS } from './viewmodel.js?v=32';
-import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=32';
-import { kd } from './input.js?v=32';
-import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=32';
-import { coopDown, coopOn } from '../modes/coop.js?v=32';
-import { HARD_MUL } from '../modes/difficulty.js?v=32';
-import { achEvent } from '../meta/achievements.js?v=32';
-import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=32';
-import { addFeed } from '../ui/hud.js?v=32';
-import { endMission } from '../game/result.js?v=32';
+import { GS } from '../core/state.js?v=34';
+import { $, V3, _v1, _v2, _v3, clamp, lerp } from '../core/utils.js?v=34';
+import { W, maxReserve, utilOn } from '../data/data.js?v=34';
+import { writeSave } from '../core/save.js?v=34';
+import { SFX } from '../core/audio.js?v=34';
+import { BASE_FOV, camera, controls } from '../core/renderer.js?v=34';
+import { groundAt, moveWithCollision } from '../world/world.js?v=34';
+import { UPY, spawnSpark } from '../fx/effects.js?v=34';
+import { GUNS, HIP_POS } from './viewmodel.js?v=34';
+import { EYE, GRAV, P_HEIGHT, P_RADIUS, STEP, curW, curWeapon, player, recoil } from './playerState.js?v=34';
+import { kd } from './input.js?v=34';
+import { applyLook, finishReload, shootOnce, startReload, tryFire, updateCharge } from '../combat/shooting.js?v=34';
+import { coopDown, coopOn } from '../modes/coop.js?v=34';
+import { HARD_MUL } from '../modes/difficulty.js?v=34';
+import { achEvent } from '../meta/achievements.js?v=34';
+import { inExtraction, loadMult, nearestCrate, nearestLoot } from '../game/loot.js?v=34';
+import { addFeed } from '../ui/hud.js?v=34';
+import { endMission } from '../game/result.js?v=34';
 
 // =====================================================================
 //  플레이어 피해
@@ -60,7 +60,7 @@ function updatePlayer(dt) {
   player.crouch = clamp(player.crouch + (wantCrouch ? 1 : -1) * dt * 7, 0, 1);
   player.eye = lerp(EYE, 1.02, player.crouch); player.height = lerp(P_HEIGHT, 1.22, player.crouch);
   const lm = loadMult();
-  const sprint = kd('sprint') && player.crouch < 0.3 && lm > 0.1;
+  const sprint = kd('sprint') && player.crouch < 0.3 && lm > 0.5;
   const spd = 5.2 * (sprint && f > 0 && GS.ads < 0.2 ? 1.55 : 1) * (1 - 0.45 * GS.ads) * (1 - 0.5 * player.crouch) * w.moveMult * lm;
   const acc = player.onGround ? 14 : 3;
   if (GS.run.dashT > 0) { GS.run.dashT -= dt; if (Math.random() < 0.5) spawnSpark(camera.position.clone().add(V3(0, -1, 0)), UPY, 0x8ad8ff, 2, 0.2); }
