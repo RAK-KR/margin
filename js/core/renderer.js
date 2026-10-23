@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { GS } from './state.js?v=36';
-import { $ } from './utils.js?v=36';
+import { GS } from './state.js?v=37';
+import { $ } from './utils.js?v=37';
 
 // =====================================================================
 //  렌더러 / 씬

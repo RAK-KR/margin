@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=36';
-import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=36';
-import { ETYPES } from '../data/data.js?v=36';
-import { SFX } from '../core/audio.js?v=36';
-import { addBox, crate, groundAt, hitsBoxXZ, moveWithCollision, segBlocked } from '../world/world.js?v=36';
-import { UPY, blastLight, burstSparks, projGeo, spawnDebris, spawnFlash } from '../fx/effects.js?v=36';
-import { player } from '../player/playerState.js?v=36';
-import { addAmmoCrate, addExtraction, setEnv } from '../world/missions.js?v=36';
-import { sensorMult } from '../combat/damage.js?v=36';
-import { markerGeo, partTick, spawnShock } from './rex.js?v=36';
-import { _box3, dummyGlow, partKit, spawnDrone } from '../enemies/extra.js?v=36';
-import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget, spiderPose, v3a } from '../modes/coop.js?v=36';
-import { killEnemy } from '../meta/achievements.js?v=36';
-import { addFeed, popup } from '../ui/hud.js?v=36';
+import { GS } from '../core/state.js?v=37';
+import { V3, _v1, _v2, angDiff, clamp, lerp, rand } from '../core/utils.js?v=37';
+import { ETYPES } from '../data/data.js?v=37';
+import { SFX } from '../core/audio.js?v=37';
+import { addBox, crate, groundAt, hitsBoxXZ, moveWithCollision, segBlocked } from '../world/world.js?v=37';
+import { UPY, blastLight, burstSparks, projGeo, spawnDebris, spawnFlash } from '../fx/effects.js?v=37';
+import { player } from '../player/playerState.js?v=37';
+import { addAmmoCrate, addExtraction, setEnv } from '../world/missions.js?v=37';
+import { sensorMult } from '../combat/damage.js?v=37';
+import { markerGeo, partTick, spawnShock } from './rex.js?v=37';
+import { _box3, dummyGlow, partKit, spawnDrone } from '../enemies/extra.js?v=37';
+import { coopEv, dmgTargets, hurtTarget, isHost, knockTarget, spiderPose, v3a } from '../modes/coop.js?v=37';
+import { killEnemy } from '../meta/achievements.js?v=37';
+import { addFeed, popup } from '../ui/hud.js?v=37';
 
 // =====================================================================
 //  최종 보스 III: ARACHNE 거미 전차

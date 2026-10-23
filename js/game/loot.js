@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=36';
-import { $, V3, _box, _v1, fmt } from '../core/utils.js?v=36';
-import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, bind, keyLabel, maxReserve, partKg } from '../data/data.js?v=36';
-import { SFX } from '../core/audio.js?v=36';
-import { camera } from '../core/renderer.js?v=36';
-import { groundAt, hitsBoxXZ } from '../world/world.js?v=36';
-import { updatePartVisual } from '../enemies/robot.js?v=36';
-import { GRAV, curWeapon, player } from '../player/playerState.js?v=36';
-import { TUT_STEPS, tutConfirm } from '../modes/tutorial.js?v=36';
-import { renderBagUI } from '../player/input.js?v=36';
-import { conditionOf, partValue } from '../combat/damage.js?v=36';
-import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=36';
-import { HARD_MUL } from '../modes/difficulty.js?v=36';
-import { achEvent } from '../meta/achievements.js?v=36';
-import { addFeed, popup } from '../ui/hud.js?v=36';
-import { endMission } from './result.js?v=36';
+import { GS } from '../core/state.js?v=37';
+import { $, V3, _box, _v1, fmt } from '../core/utils.js?v=37';
+import { BAGS, GUN_KG, STATE_KO, UK, WEAPONS, bind, keyLabel, maxReserve, partKg } from '../data/data.js?v=37';
+import { SFX } from '../core/audio.js?v=37';
+import { camera } from '../core/renderer.js?v=37';
+import { groundAt, hitsBoxXZ } from '../world/world.js?v=37';
+import { updatePartVisual } from '../enemies/robot.js?v=37';
+import { GRAV, curWeapon, player } from '../player/playerState.js?v=37';
+import { TUT_STEPS, tutConfirm } from '../modes/tutorial.js?v=37';
+import { renderBagUI } from '../player/input.js?v=37';
+import { conditionOf, partValue } from '../combat/damage.js?v=37';
+import { NET, coopEv, coopOn, coopOut, coopTryExtract, eIdx, isGuest, isHost, v3a } from '../modes/coop.js?v=37';
+import { HARD_MUL } from '../modes/difficulty.js?v=37';
+import { achEvent } from '../meta/achievements.js?v=37';
+import { addFeed, popup } from '../ui/hud.js?v=37';
+import { endMission } from './result.js?v=37';
 
 // =====================================================================
 //  부품 낙하 / 회수

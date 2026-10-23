@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=36';
-import { $, clamp, fmt, setText } from '../core/utils.js?v=36';
-import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=36';
-import { defaultSave, writeSave } from '../core/save.js?v=36';
-import { SFX, initAudio, vol } from '../core/audio.js?v=36';
-import { ALL_GUNS, GUNS, SKINS, SKIN_THEMES, applySkin, skinAch, skinOwned, skinSel, skinsFor } from '../player/viewmodel.js?v=36';
-import { startMission } from '../world/missions.js?v=36';
-import { bindVolume } from '../player/input.js?v=36';
-import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=36';
-import { CHAOS_IDS, chaosUnlocked, extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=36';
-import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=36';
-import { popup } from './hud.js?v=36';
-import { nextGoal } from '../game/result.js?v=36';
-import { hubShow } from './hub3d.js?v=36';
+import { GS } from '../core/state.js?v=37';
+import { $, clamp, fmt, setText } from '../core/utils.js?v=37';
+import { ARMORS, BAGS, CONSUMABLES, GRENADES, GUN_KG, KEYDEF, LORE, MAX_CARRY, MISSIONS, MODS, SALVAGES, SHOP, SHOP_CATS, SKILLS, SLOT_KEYS, UTILS, WEAPONS, bind, keyLabel } from '../data/data.js?v=37';
+import { defaultSave, writeSave } from '../core/save.js?v=37';
+import { SFX, initAudio, vol } from '../core/audio.js?v=37';
+import { ALL_GUNS, GUNS, SKINS, SKIN_THEMES, applySkin, skinAch, skinOwned, skinSel, skinsFor } from '../player/viewmodel.js?v=37';
+import { startMission } from '../world/missions.js?v=37';
+import { bindVolume } from '../player/input.js?v=37';
+import { NET, coopBindModal, coopModalHtml } from '../modes/coop.js?v=37';
+import { CHAOS_IDS, chaosUnlocked, extremeProgress, extremeUnlocked, hardUnlocked } from '../modes/difficulty.js?v=37';
+import { ACH, ACH_BY, ACH_CHAINS, ACH_GROUPS, achCheckGrowth, achCount, achGot, achUnlock } from '../meta/achievements.js?v=37';
+import { popup } from './hud.js?v=37';
+import { nextGoal } from '../game/result.js?v=37';
+import { hubShow } from './hub3d.js?v=37';
 
 // =====================================================================
 //  거점 / 상점

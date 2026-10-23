@@ -1,18 +1,18 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=36';
-import { V3, _v1, _v2, _v3, _v4, angDiff, clamp, lerp, rand } from '../core/utils.js?v=36';
-import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=36';
-import { SFX } from '../core/audio.js?v=36';
-import { camera } from '../core/renderer.js?v=36';
-import { addBox, hitsBoxXZ, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=36';
-import { UPY, burstSparks, projGeo, spawnDebris, spawnFlash, spawnSpark } from '../fx/effects.js?v=36';
-import { updatePartVisual } from '../enemies/robot.js?v=36';
-import { player } from '../player/playerState.js?v=36';
-import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=36';
-import { legFactor, sensorMult } from '../combat/damage.js?v=36';
-import { coopEv, dmgTargets, hurtTarget, hurtTg, isGuest, knockTarget, knockTg, v3a } from '../modes/coop.js?v=36';
-import { achEvent } from '../meta/achievements.js?v=36';
-import { addFeed, popup } from '../ui/hud.js?v=36';
+import { GS } from '../core/state.js?v=37';
+import { V3, _v1, _v2, _v3, _v4, angDiff, clamp, lerp, rand } from '../core/utils.js?v=37';
+import { ETYPES, PART_MULT, PART_NAMES, PART_TYPE, PRECISE } from '../data/data.js?v=37';
+import { SFX } from '../core/audio.js?v=37';
+import { camera } from '../core/renderer.js?v=37';
+import { addBox, hitsBoxXZ, moveWithCollision, segBlocked, segFirstHit } from '../world/world.js?v=37';
+import { UPY, burstSparks, projGeo, spawnDebris, spawnFlash, spawnSpark } from '../fx/effects.js?v=37';
+import { updatePartVisual } from '../enemies/robot.js?v=37';
+import { player } from '../player/playerState.js?v=37';
+import { addAmmoCrate, addExtraction, setEnv, spawnEnemy } from '../world/missions.js?v=37';
+import { legFactor, sensorMult } from '../combat/damage.js?v=37';
+import { coopEv, dmgTargets, hurtTarget, hurtTg, isGuest, knockTarget, knockTg, v3a } from '../modes/coop.js?v=37';
+import { achEvent } from '../meta/achievements.js?v=37';
+import { addFeed, popup } from '../ui/hud.js?v=37';
 
 // =====================================================================
 //  최종 보스: REX-09 기계 티라노

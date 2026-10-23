@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { GS } from '../core/state.js?v=36';
-import { V3, clamp } from '../core/utils.js?v=36';
-import { WEAPONS } from '../data/data.js?v=36';
-import { GLOW, vmRoot } from '../core/renderer.js?v=36';
-import { curWeapon } from './playerState.js?v=36';
-import { ACH, achGot } from '../meta/achievements.js?v=36';
+import { GS } from '../core/state.js?v=37';
+import { V3, clamp } from '../core/utils.js?v=37';
+import { WEAPONS } from '../data/data.js?v=37';
+import { GLOW, vmRoot } from '../core/renderer.js?v=37';
+import { curWeapon } from './playerState.js?v=37';
+import { ACH, achGot } from '../meta/achievements.js?v=37';
 
 // =====================================================================
 //  1인칭 총기 모델

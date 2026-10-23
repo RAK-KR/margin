@@ -1,10 +1,10 @@
-import { GS } from '../core/state.js?v=36';
+import { GS } from '../core/state.js?v=37';
 
 // =====================================================================
 //  데이터: 무기 / 장비 / 적 / 임무
 // =====================================================================
 const WEAPONS = {
-  pistol: { id: 'pistol', name: 'P-9 기본 권총', price: 0, dmg: 20, interval: 0.2, auto: false, mag: 12, reserve: Infinity,
+  pistol: { id: 'pistol', name: 'P-9 기본 권총', price: 0, dmg: 20, interval: 0.2, auto: false, hold: true, mag: 12, reserve: Infinity,
     reload: 1.1, hipSpread: 0.0045, adsSpread: 0.0008, moveSpread: 0.008, bloom: 0.002, bloomMax: 0.01,
     recoil: 0.022, recoilYaw: 0.004, kick: 1, adsFov: 58, armorMult: 0.6, precisionMult: 1.2, range: 110, moveMult: 1,
     desc: '시작 지급품. 탄약 걱정이 없고 정확하다. 장갑에는 약하다.' },
